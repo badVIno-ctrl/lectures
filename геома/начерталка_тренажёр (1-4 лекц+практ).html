@@ -1,0 +1,1326 @@
+<!DOCTYPE html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Начерталка: интерактивный тренажёр (Л2–Л4 + зачёт)</title><style>*{box-sizing:border-box}
+:root{
+ --bg:#f6f5f1;--card:#ffffff;--soft:#f1efe9;--soft2:#e9e6dd;--line:#e2ded3;--ink:#1c2230;--mut:#6b7280;
+ --p1:#1f6feb;--p2:#8b3fd9;--p3:#e8590c;--nv:#0b9e6b;--dd:#d4a106;--ang:#e03131;--aux:#9aa3b2;--obj:#1c2230;--teal:#0e9aa7;
+ --acc:#3b5bdb;--accs:#e8edff;--good:#0b9e6b;--goods:#e3f7ee;--bad:#e03131;--bads:#fdecec;--warn:#fff4d6;--why:#fdf0f6;--whyb:#e64980;
+ --grid:#ebe8e0;--grid2:#dcd8cd;--shadow:0 1px 2px rgba(20,20,20,.05),0 6px 20px rgba(20,20,20,.06);
+ --sans:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+}
+html.dark{
+ --bg:#0f1218;--card:#171b24;--soft:#1d2230;--soft2:#252b3a;--line:#2a3142;--ink:#e8ebf2;--mut:#98a0b3;
+ --p1:#4dabf7;--p2:#b197fc;--p3:#ff922b;--nv:#38d9a9;--dd:#ffd43b;--ang:#ff6b6b;--aux:#6c768a;--obj:#f1f3f8;--teal:#3bc9db;
+ --acc:#748ffc;--accs:#232a4d;--goods:#12352a;--bads:#3a1b1f;--warn:#3a3218;--why:#3a1d2c;--whyb:#f783ac;
+ --grid:#1c2230;--grid2:#262d3d;--shadow:0 1px 2px rgba(0,0,0,.4),0 6px 20px rgba(0,0,0,.35);
+}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer}
+b,strong{font-weight:650}
+.m{font-family:Georgia,"Times New Roman",serif;font-style:italic}
+.c1{color:var(--p1);font-weight:650}.c2{color:var(--p2);font-weight:650}.c3{color:var(--p3);font-weight:650}
+.cnv{color:var(--nv);font-weight:650}.cdd{color:var(--dd);font-weight:650}.cang{color:var(--ang);font-weight:650}.cmut{color:var(--mut)}
+/* header */
+header{position:sticky;top:0;z-index:50;height:56px;display:flex;align-items:center;gap:12px;padding:0 14px;background:var(--card);border-bottom:1px solid var(--line)}
+.brand{font-weight:800;font-size:17px;white-space:nowrap;display:flex;align-items:center;gap:8px}
+.brand .logo{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--p1),var(--p2));color:#fff;display:grid;place-items:center;font-size:15px}
+.sp{flex:1}
+.xp{display:flex;align-items:center;gap:8px;background:var(--soft);border:1px solid var(--line);border-radius:999px;padding:4px 12px 4px 6px;font-size:14px;white-space:nowrap}
+.xp .lv{background:var(--acc);color:#fff;border-radius:999px;padding:1px 9px;font-weight:700;font-size:12px}
+.xp .bar{width:80px;height:6px;background:var(--soft2);border-radius:9px;overflow:hidden}
+.xp .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--nv),var(--p1));width:0;transition:width .5s}
+.xp.pop{animation:pop .5s}
+@keyframes pop{40%{transform:scale(1.08)}}
+.iconbtn{border:1px solid var(--line);background:var(--card);border-radius:10px;height:36px;min-width:36px;padding:0 10px}
+.iconbtn:hover{background:var(--soft)}
+#menuBtn{display:none}
+/* layout */
+.layout{display:flex;align-items:flex-start}
+nav#side{position:sticky;top:56px;height:calc(100vh - 56px);overflow:auto;width:290px;flex:none;border-right:1px solid var(--line);background:var(--card);padding:12px 10px 40px}
+.mod{margin:10px 4px 4px;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);font-weight:700;display:flex;justify-content:space-between}
+.navi{display:flex;align-items:center;gap:9px;width:100%;text-align:left;border:0;background:none;border-radius:9px;padding:7px 9px;font-size:14.5px;line-height:1.3}
+.navi:hover{background:var(--soft)}
+.navi.on{background:var(--accs);color:var(--acc);font-weight:650}
+.navi .dot{width:20px;height:20px;border-radius:50%;flex:none;border:2px solid var(--line);display:grid;place-items:center;font-size:11px;color:#fff}
+.navi.seen .dot{border-color:var(--acc)}
+.navi.done .dot{background:var(--good);border-color:var(--good)}
+.navi.done .dot::after{content:"✓"}
+main{flex:1;min-width:0;padding:26px 26px 80px}
+.sec{max-width:1060px;margin:0 auto;display:none}
+.sec.on{display:block;animation:fadein .35s}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}}
+.kicker{font-size:13px;color:var(--acc);font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+h1{font-size:30px;line-height:1.2;margin:4px 0 6px;letter-spacing:-.01em}
+h2{font-size:21px;margin:30px 0 10px;letter-spacing:-.01em}
+h3{font-size:17px;margin:18px 0 6px}
+.lead{font-size:17px;color:var(--mut);margin:0 0 18px}
+p{margin:8px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 20px;box-shadow:var(--shadow);margin:14px 0}
+.hook{background:linear-gradient(135deg,var(--accs),transparent);border:1px solid var(--line);border-left:5px solid var(--acc);border-radius:14px;padding:14px 18px;margin:14px 0}
+.hook .t{font-weight:750;font-size:13px;color:var(--acc);text-transform:uppercase;letter-spacing:.05em}
+.why{background:var(--why);border-left:5px solid var(--whyb);border-radius:14px;padding:12px 18px;margin:14px 0}
+.why .t{font-weight:750;color:var(--whyb);font-size:13px;text-transform:uppercase;letter-spacing:.05em}
+.rule{background:var(--goods);border-left:5px solid var(--good);border-radius:14px;padding:12px 18px;margin:14px 0}
+.rule .t{font-weight:750;color:var(--good);font-size:13px;text-transform:uppercase;letter-spacing:.05em}
+.trap{background:var(--bads);border-left:5px solid var(--bad);border-radius:14px;padding:12px 18px;margin:14px 0}
+.trap .t{font-weight:750;color:var(--bad);font-size:13px;text-transform:uppercase;letter-spacing:.05em}
+.mem{background:var(--warn);border-left:5px solid var(--dd);border-radius:14px;padding:12px 18px;margin:14px 0}
+.mem .t{font-weight:750;color:var(--dd);font-size:13px;text-transform:uppercase;letter-spacing:.05em}
+html.dark .mem .t{color:var(--dd)}
+ul,ol{padding-left:22px;margin:6px 0}
+li{margin:3px 0}
+table.tb{border-collapse:collapse;width:100%;font-size:14.5px;margin:10px 0;background:var(--card);border-radius:12px;overflow:hidden}
+.tb th,.tb td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+.tb th{background:var(--soft);font-weight:650}
+.tb tr.hlrow td{background:var(--accs)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr}}
+.btn{border:0;background:var(--acc);color:#fff;border-radius:11px;padding:9px 16px;font-weight:650;transition:transform .08s,opacity .2s}
+.btn:hover{filter:brightness(1.07)}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.4;cursor:default}
+.btn.ghost{background:var(--soft);color:var(--ink);border:1px solid var(--line)}
+.btn.good{background:var(--good)}
+.btn.sm{padding:5px 11px;font-size:14px;border-radius:9px}
+.seg{display:inline-flex;flex-wrap:wrap;gap:4px;background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:4px}
+.seg button{border:0;background:none;border-radius:9px;padding:6px 11px;font-size:14px}
+.seg button.on{background:var(--card);box-shadow:var(--shadow);font-weight:650;color:var(--acc)}
+.ctrls{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin:10px 0}
+.sl{display:flex;align-items:center;gap:8px;font-size:14px}
+.sl input[type=range]{width:150px;accent-color:var(--acc)}
+.sl output{min-width:34px;font-weight:700;font-variant-numeric:tabular-nums}
+.reads{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:10px}
+.rd{background:var(--soft);border-radius:10px;padding:7px 10px;font-size:13px}
+.rd b{display:block;font-size:17px;font-variant-numeric:tabular-nums}
+/* 3D */
+.v3{position:relative;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.v3 canvas{display:block;width:100%;touch-action:none;cursor:grab}
+.v3 canvas:active{cursor:grabbing}
+.v3-bar{display:flex;flex-wrap:wrap;gap:5px;padding:8px;border-top:1px solid var(--line);background:var(--soft)}
+.v3-bar button{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:4px 9px;font-size:13px}
+.v3-bar button.on{border-color:var(--acc);color:var(--acc);font-weight:650}
+.v3-hint{position:absolute;top:8px;left:10px;font-size:12px;color:var(--mut);pointer-events:none;background:color-mix(in srgb,var(--card) 80%,transparent);border-radius:6px;padding:2px 6px}
+/* epure */
+.ep{background:var(--card);border:1px solid var(--line);border-radius:16px;display:flex;justify-content:center;align-items:center;padding:6px;overflow:hidden;touch-action:none}
+.ep svg{display:block;overflow:hidden}
+.ep text{font-family:var(--sans);paint-order:stroke;stroke:var(--card);stroke-linejoin:round}
+.s-c1{stroke:var(--p1)}.s-c2{stroke:var(--p2)}.s-c3{stroke:var(--p3)}.s-nv{stroke:var(--nv)}.s-dd{stroke:var(--dd)}.s-ang{stroke:var(--ang)}.s-aux{stroke:var(--aux)}.s-ink{stroke:var(--ink)}.s-teal{stroke:var(--teal)}.s-grid{stroke:var(--grid)}.s-grid2{stroke:var(--grid2)}.s-mut{stroke:var(--mut)}.s-bg{stroke:var(--card)}
+.f-c1{fill:var(--p1)}.f-c2{fill:var(--p2)}.f-c3{fill:var(--p3)}.f-nv{fill:var(--nv)}.f-dd{fill:var(--dd)}.f-ang{fill:var(--ang)}.f-aux{fill:var(--aux)}.f-ink{fill:var(--ink)}.f-teal{fill:var(--teal)}.f-mut{fill:var(--mut)}.f-acc{fill:var(--acc)}
+.hl{animation:glow 1.1s ease-in-out infinite}
+@keyframes glow{50%{opacity:.35}}
+.handle{cursor:grab}
+.hring{animation:ring 1.4s ease-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes ring{0%{opacity:.8;transform:scale(.6)}100%{opacity:0;transform:scale(1.6)}}
+/* MCQ */
+.mcq{margin:12px 0}
+.mcq .q{font-weight:650;margin-bottom:8px}
+.opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
+.opt{text-align:left;border:1.5px solid var(--line);background:var(--card);border-radius:12px;padding:10px 13px;font-size:15px;transition:border-color .15s,background .15s,transform .08s;line-height:1.35}
+.opt:hover{border-color:var(--acc)}
+.opt:active{transform:scale(.98)}
+.opt.ok{border-color:var(--good);background:var(--goods)}
+.opt.bad{border-color:var(--bad);background:var(--bads);animation:shake .35s}
+.opt.ghostok{border-color:var(--good);border-style:dashed}
+.opt.dis{pointer-events:none}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.fb{margin-top:10px;font-size:15px}
+.fb:empty{display:none}
+.fb .box{border-radius:12px;padding:10px 14px}
+.fb .ok{background:var(--goods)}
+.fb .bad{background:var(--bads)}
+.chk{display:flex;gap:10px;align-items:flex-start;border:1.5px solid var(--line);border-radius:12px;padding:9px 12px;margin:6px 0;cursor:pointer;background:var(--card)}
+.chk input{margin-top:4px;accent-color:var(--acc)}
+.chk.ok{border-color:var(--good);background:var(--goods)}
+.chk.bad{border-color:var(--bad);background:var(--bads)}
+.chk.miss{border-color:var(--good);border-style:dashed}
+/* trainer */
+.trainer{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);margin:16px 0;overflow:hidden}
+.tr-head{display:flex;align-items:center;gap:10px;padding:12px 16px;background:linear-gradient(90deg,var(--accs),transparent);border-bottom:1px solid var(--line)}
+.tr-title{font-weight:750}
+.tr-stats{margin-left:auto;display:flex;gap:10px;font-size:14px;align-items:center}
+.tr-stats .pill{background:var(--soft);border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-variant-numeric:tabular-nums}
+.tr-body{padding:14px 16px}
+.tr-kind{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);font-weight:700}
+.tr-task{font-size:16.5px;font-weight:600;margin:4px 0 10px}
+.tr-foot{display:flex;gap:8px;padding:10px 16px;border-top:1px solid var(--line);background:var(--soft);align-items:center}
+.tr-expl{margin-top:12px}
+.hintbox{background:var(--warn);border-radius:12px;padding:10px 14px;margin-top:10px;font-size:15px}
+.live{display:inline-flex;gap:8px;align-items:center;background:var(--soft);border-radius:10px;padding:5px 12px;font-variant-numeric:tabular-nums;font-size:15px;margin:6px 6px 0 0}
+.live b{font-size:17px}
+.inrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.inrow input{width:110px;font:inherit;padding:7px 10px;border-radius:10px;border:1.5px solid var(--line);background:var(--card);color:var(--ink)}
+.inrow input.ok{border-color:var(--good)}.inrow input.bad{border-color:var(--bad)}
+.taskgrid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:16px;align-items:start}
+@media(max-width:900px){.taskgrid{grid-template-columns:1fr}}
+/* stepper */
+.stepper{margin:14px 0}
+.st-side{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.st-count{font-size:12.5px;color:var(--mut);font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.st-text{font-size:16px;margin:6px 0 10px;min-height:70px}
+.st-list{font-size:13.5px;color:var(--mut);border-top:1px solid var(--line);padding-top:8px}
+.st-list div{padding:3px 6px;border-radius:7px;cursor:pointer}
+.st-list div.on{background:var(--accs);color:var(--acc);font-weight:650}
+.st-list div.past{color:var(--ink)}
+.st-ctrl{display:flex;gap:8px;margin-top:10px}
+.st-prog{height:5px;background:var(--soft2);border-radius:9px;overflow:hidden;margin-top:8px}
+.st-prog i{display:block;height:100%;background:var(--acc);transition:width .3s}
+/* misc */
+.pager{display:flex;justify-content:space-between;gap:10px;margin-top:34px;padding-top:18px;border-top:1px solid var(--line)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(30px);opacity:0;background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:12px;font-weight:600;z-index:99;transition:all .3s;pointer-events:none;max-width:90vw}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.mapg{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.mapc{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--card);cursor:pointer;transition:transform .12s,box-shadow .12s;text-align:left}
+.mapc:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.mapc .n{font-size:12px;color:var(--mut);font-weight:700;text-transform:uppercase}
+.mapc .h{font-weight:750;font-size:16px;margin:2px 0}
+.mapc .d{font-size:13.5px;color:var(--mut)}
+.tag{display:inline-block;font-size:12px;border-radius:999px;padding:1px 8px;background:var(--soft);border:1px solid var(--line);margin:2px 3px 2px 0}
+.flip{perspective:1000px;max-width:620px;margin:10px auto}
+.flip-in{position:relative;min-height:220px;transition:transform .5s;transform-style:preserve-3d;cursor:pointer}
+.flip.on .flip-in{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;border-radius:18px;border:1px solid var(--line);background:var(--card);box-shadow:var(--shadow);padding:24px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;font-size:19px}
+.face.back{transform:rotateY(180deg);background:var(--goods);font-size:17px}
+.face small{font-size:13px;color:var(--mut);margin-top:12px}
+.boxes{display:flex;gap:6px;justify-content:center;margin:10px 0}
+.boxes span{min-width:54px;text-align:center;border-radius:10px;background:var(--soft);border:1px solid var(--line);padding:4px 6px;font-size:13px}
+.kbd{display:inline-block;border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:0 6px;font-size:13px;background:var(--soft)}
+.tree{display:flex;flex-direction:column;gap:8px}
+.tnode{border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:var(--card)}
+.tnode .qq{font-weight:650;margin-bottom:8px}
+.tnode .res{font-size:17px;font-weight:700;color:var(--good)}
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:98}
+.big{font-size:44px;font-weight:800;line-height:1}
+@media(max-width:860px){
+ #menuBtn{display:inline-block}
+ nav#side{position:fixed;left:0;top:56px;z-index:45;transform:translateX(-100%);transition:transform .25s;box-shadow:var(--shadow)}
+ nav#side.open{transform:none}
+ main{padding:18px 14px 80px}
+ h1{font-size:25px}
+ .xp .bar{display:none}
+}
+#menuBtn{font-size:22px;font-weight:700;line-height:1}
+@media(max-width:860px){header{gap:8px;padding:0 8px}.brand>span:last-child{display:none}.xp>span:nth-child(2){display:none}.xp{padding:3px 8px 3px 4px}#resetBtn{padding:0 6px;font-size:12px}}
+</style></head><body>
+<header><button class="iconbtn" id="menuBtn" title="Меню">≡</button><div class="brand"><span class="logo">НГ</span><span>Начерталка <span class="cmut" style="font-weight:500">· тренажёр</span></span></div><span class="sp"></span><div class="xp" id="xp"></div><button class="iconbtn" id="themeBtn" title="Тема">🌓</button><button class="iconbtn" id="resetBtn" title="Сбросить прогресс">сброс</button></header>
+<div class="layout"><nav id="side"></nav><main></main></div><div class="toast" id="toast"></div>
+<script>'use strict';
+/* ===================== утилиты ===================== */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+function el(html){const t=document.createElement('template');t.innerHTML=html.trim();return t.content.firstElementChild;}
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const rndf=(a,b)=>a+Math.random()*(b-a);
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const deg=r=>r*180/Math.PI, rad=d=>d*Math.PI/180;
+const fmt=(n,d=1)=>{let s=(Math.round(n*10**d)/10**d).toFixed(d);if(s.includes('.'))s=s.replace(/0+$/,'').replace(/\.$/,'');return s.replace('.',',').replace('-','−')};
+const V={
+ add:(a,b)=>a.map((x,i)=>x+b[i]), sub:(a,b)=>a.map((x,i)=>x-b[i]), mul:(a,s)=>a.map(x=>x*s),
+ dot:(a,b)=>a.reduce((s,x,i)=>s+x*b[i],0), len:a=>Math.hypot(...a), norm:a=>{const l=Math.hypot(...a)||1;return a.map(x=>x/l)},
+ lerp:(a,b,t)=>a.map((x,i)=>x+(b[i]-x)*t), cross:(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],
+ perp:a=>[-a[1],a[0]], dist:(a,b)=>Math.hypot(...a.map((x,i)=>x-b[i]))
+};
+/* проекции: x — влево, y — к нам, z — вверх.  Эпюр: u вправо, v вверх */
+const P1=p=>[-p[0],-p[1]], P2=p=>[-p[0],p[2]], P3=p=>[p[1],p[2]];
+const PR={1:P1,2:P2,3:P3};
+const SUB=['₀','₁','₂','₃'];
+function lx(a,b,c,d){const r=V.sub(b,a),s=V.sub(d,c),den=r[0]*s[1]-r[1]*s[0];if(Math.abs(den)<1e-9)return null;const q=V.sub(c,a);const t=(q[0]*s[1]-q[1]*s[0])/den,u=(q[0]*r[1]-q[1]*r[0])/den;return{p:V.add(a,V.mul(r,t)),t,u};}
+function distPtLine(p,a,b){const d=V.sub(b,a),l=V.len(d);return Math.abs((p[0]-a[0])*d[1]-(p[1]-a[1])*d[0])/l;}
+function inR(p,lo=3,hi=57){return p.every(c=>c>=lo&&c<=hi)}
+
+/* ===================== хранилище, опыт ===================== */
+const Store=(()=>{let d={};try{d=JSON.parse(localStorage.getItem('ng_trainer_v1')||'{}')}catch(e){}
+ const save=()=>{try{localStorage.setItem('ng_trainer_v1',JSON.stringify(d))}catch(e){}};
+ return{get:(k,def)=>(k in d?d[k]:def),set:(k,v)=>{d[k]=v;save()},reset:()=>{d={};save()}};})();
+const LEVELS=[[0,'Новичок'],[60,'Видит тени'],[160,'Друг эпюра'],[320,'Мастер линий связи'],[520,'Укротитель прямых'],[800,'Повелитель треугольников'],[1150,'Знаток плоскостей'],[1600,'Гроза конкурирующих точек'],[2200,'Готов к зачёту'],[3000,'Монж одобряет']];
+function lvlOf(xp){let i=0;while(i<LEVELS.length-1&&xp>=LEVELS[i+1][0])i++;const lo=LEVELS[i][0],hi=(LEVELS[i+1]||[lo+1000])[0];return{i,name:LEVELS[i][1],p:(xp-lo)/(hi-lo)};}
+function updateXP(anim){const xp=Store.get('xp',0),L=lvlOf(xp),b=$('#xp');if(!b)return;
+ b.innerHTML=`<span class="lv">ур. ${L.i+1}</span><span>${L.name}</span><span class="bar"><i style="width:${Math.round(L.p*100)}%"></i></span><b>${xp} XP</b>`;
+ if(anim){b.classList.remove('pop');void b.offsetWidth;b.classList.add('pop');}}
+function addXP(n){const before=lvlOf(Store.get('xp',0)).i;Store.set('xp',Store.get('xp',0)+n);updateXP(true);const after=lvlOf(Store.get('xp',0));if(after.i>before){toast('🎉 Новый уровень: '+after.name);confetti();}}
+let toastT;function toast(t){const e=$('#toast');e.innerHTML=t;e.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>e.classList.remove('on'),2600);}
+function confetti(){const c=document.createElement('canvas');c.className='confetti';document.body.appendChild(c);const W=c.width=innerWidth,H=c.height=innerHeight,x=c.getContext('2d');const cols=['#1f6feb','#8b3fd9','#e8590c','#0b9e6b','#d4a106','#e03131'];const ps=[...Array(120)].map(()=>({x:W/2+rndf(-80,80),y:H*0.35,vx:rndf(-7,7),vy:rndf(-12,-3),c:pick(cols),r:rndf(3,6),a:rndf(0,6)}));let f=0;(function step(){x.clearRect(0,0,W,H);ps.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=0.35;p.a+=0.2;x.fillStyle=p.c;x.save();x.translate(p.x,p.y);x.rotate(p.a);x.fillRect(-p.r,-p.r/2,p.r*2,p.r);x.restore();});if(++f<110)requestAnimationFrame(step);else c.remove();})();}
+function cssv(n){return getComputedStyle(document.documentElement).getPropertyValue('--'+n).trim();}
+
+/* ===================== вопрос с вариантами ===================== */
+function mcq(host,o){
+ const box=el(`<div class="mcq"><div class="q">${o.q}</div><div class="opts"></div><div class="fb"></div></div>`);
+ if(o.cols)box.querySelector('.opts').style.gridTemplateColumns=`repeat(${o.cols},minmax(0,1fr))`;
+ const list=o.noShuffle?o.opts:shuffle(o.opts);let done=false;const btns=[];
+ list.forEach(op=>{const b=el(`<button class="opt">${op.t}</button>`);btns.push([b,op]);
+  b.onclick=()=>{if(done)return;done=true;b.classList.add(op.ok?'ok':'bad');
+   btns.forEach(([bb,oo])=>{bb.classList.add('dis');if(!op.ok&&oo.ok)bb.classList.add('ghostok');});
+   const right=list.find(x=>x.ok);
+   let h=`<div class="box ${op.ok?'ok':'bad'}">${op.ok?'<b>✅ Верно!</b> ':'<b>❌ Не совсем.</b> '}${op.why||''}`;
+   if(!op.ok&&right)h+=`<div style="margin-top:6px">Правильно: <b>${right.t}</b>${right.why?' — '+right.why:''}</div>`;
+   h+='</div>';box.querySelector('.fb').innerHTML=h;
+   o.onAnswer&&o.onAnswer(op.ok,op);};
+  box.querySelector('.opts').appendChild(b);});
+ host.appendChild(box);return box;
+}
+/* «предскажи → посмотри» */
+function predict(host,o){
+ const w=el(`<div class="hook"><div class="t">🤔 Сначала предскажи</div></div>`);host.appendChild(w);
+ mcq(w,{q:o.q,opts:o.opts,noShuffle:o.noShuffle,onAnswer:(ok)=>{if(o.reveal){const r=el(`<div style="margin-top:10px">${o.reveal}</div>`);w.appendChild(r);}o.onAnswer&&o.onAnswer(ok);}});
+ return w;
+}
+/* отметь все верные */
+function multi(host,o){
+ const box=el(`<div class="mcq"><div class="q">${o.q}</div><div class="ms"></div><button class="btn sm">Проверить</button><div class="fb"></div></div>`);
+ const items=shuffle(o.items);const rows=items.map(it=>{const r=el(`<label class="chk"><input type="checkbox"><span>${it.t}</span></label>`);box.querySelector('.ms').appendChild(r);return[r,it];});
+ box.querySelector('button').onclick=function(){this.disabled=true;let good=true;rows.forEach(([r,it])=>{const c=r.querySelector('input').checked;r.querySelector('input').disabled=true;
+  if(c&&it.ok)r.classList.add('ok');else if(c&&!it.ok){r.classList.add('bad');good=false}else if(!c&&it.ok){r.classList.add('miss');good=false}});
+  box.querySelector('.fb').innerHTML=`<div class="box ${good?'ok':'bad'}">${good?'<b>✅ Всё верно!</b>':'<b>❌ Есть ошибки.</b> Зелёные — верные, пунктир — верные, которые ты пропустил, красные — лишние.'} ${o.why||''}</div>`;
+  o.onAnswer&&o.onAnswer(good);};
+ host.appendChild(box);return box;
+}
+/* ввод числа */
+function numIn(host,o){
+ const r=el(`<div class="mcq"><div class="q">${o.q}</div><div class="inrow"><input type="text" inputmode="decimal" placeholder="${o.ph||'число'}"><span>${o.unit||''}</span><button class="btn sm">Проверить</button></div><div class="fb"></div></div>`);
+ const inp=r.querySelector('input'),b=r.querySelector('button');
+ const go=()=>{const v=parseFloat(inp.value.replace(',','.').replace('−','-'));if(isNaN(v)){inp.focus();return;}b.disabled=true;inp.disabled=true;const ok=Math.abs(v-o.ans)<=(o.tol??0.6);inp.classList.add(ok?'ok':'bad');
+  r.querySelector('.fb').innerHTML=`<div class="box ${ok?'ok':'bad'}">${ok?'<b>✅ Верно!</b> ':'<b>❌ Мимо.</b> Правильно: <b>'+fmt(o.ans,o.dp??1)+(o.unit||'')+'</b>. '}${o.why||''}</div>`;o.onAnswer&&o.onAnswer(ok);};
+ b.onclick=go;inp.onkeydown=e=>{if(e.key==='Enter')go()};host.appendChild(r);return r;
+}
+
+/* ===================== ЭПЮР (SVG) ===================== */
+class Ep{
+ constructor(host,o={}){
+  this.o=Object.assign({axes:'x',grid:true,maxH:440,box:[-60,-60,8,60]},o);this.box=this.o.box;
+  this.wrap=el('<div class="ep"><svg xmlns="http://www.w3.org/2000/svg"></svg></div>');host.appendChild(this.wrap);this.svg=this.wrap.firstChild;
+  this.draw=null;this.drag=null;this.onDrag=null;this.onDrop=null;this.k=6;
+  const sv=this.svg;
+  sv.addEventListener('pointerdown',e=>{const h=e.target.closest('[data-h]');if(!h)return;this.drag=h.getAttribute('data-h');try{sv.setPointerCapture(e.pointerId)}catch(_){ }e.preventDefault();});
+  sv.addEventListener('pointermove',e=>{if(!this.drag)return;const p=this.toW(e);this.onDrag&&this.onDrag(this.drag,p);this.render();});
+  const up=()=>{if(!this.drag)return;const d=this.drag;this.drag=null;this.onDrop&&this.onDrop(d);this.render();};
+  sv.addEventListener('pointerup',up);sv.addEventListener('pointercancel',up);
+  new ResizeObserver(()=>this.render()).observe(this.wrap);
+ }
+ toW(e){const pt=this.svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;const q=pt.matrixTransform(this.svg.getScreenCTM().inverse());return[q.x,-q.y];}
+ setBox(b){this.box=b;this.render();}
+ fit(pts,pad=9,withO=true){let a=1e9,b=1e9,c=-1e9,d=-1e9;const all=withO?pts.concat([[0,0]]):pts;all.forEach(p=>{a=Math.min(a,p[0]);b=Math.min(b,p[1]);c=Math.max(c,p[0]);d=Math.max(d,p[1]);});this.box=[a-pad,b-pad,c+pad,d+pad];return this;}
+ render(){
+  const [u0,v0,u1,v1]=this.box,W=u1-u0,H=v1-v0;const r=this.wrap.getBoundingClientRect();const cw=r.width-14;if(cw<40)return;
+  let k=cw/W;if(H*k>this.o.maxH)k=this.o.maxH/H;this.k=k;
+  this.svg.setAttribute('viewBox',`${u0} ${-v1} ${W} ${H}`);this.svg.style.width=(W*k)+'px';this.svg.style.height=(H*k)+'px';
+  const g=new G(this);g.base();if(this.draw)this.draw(g);this.svg.innerHTML=g.out.join('');
+ }
+}
+class G{
+ constructor(ep){this.ep=ep;this.k=ep.k;this.out=[];this.hl=false;this.box=ep.box;}
+ px(n){return n/this.k}
+ base(){const [u0,v0,u1,v1]=this.box,o=this.ep.o;
+  if(o.grid){const s=5;for(let u=Math.ceil(u0/s)*s;u<=u1;u+=s)this.out.push(`<line x1="${u}" y1="${-v0}" x2="${u}" y2="${-v1}" class="${u%10===0?'s-grid2':'s-grid'}" stroke-width="${this.px(1)}"/>`);
+   for(let v=Math.ceil(v0/s)*s;v<=v1;v+=s)this.out.push(`<line x1="${u0}" y1="${-v}" x2="${u1}" y2="${-v}" class="${v%10===0?'s-grid2':'s-grid'}" stroke-width="${this.px(1)}"/>`);}
+  if(o.axes==='x'||o.axes==='xyz'){this.out.push(`<line x1="${u0}" y1="0" x2="${u1}" y2="0" class="s-ink" stroke-width="${this.px(1.4)}"/>`);
+   this.text([u0+this.px(8),0],'x',{c:'ink',dy:-7,size:15,it:true});if(u1>2)this.text([0,0],'O',{c:'mut',dx:5,dy:15,size:12});}
+  if(o.axes==='xyz'){this.out.push(`<line x1="0" y1="${-v0}" x2="0" y2="${-v1}" class="s-ink" stroke-width="${this.px(1.4)}"/>`);
+   this.text([0,v1-this.px(10)],'z',{c:'ink',dx:8,size:15,it:true});this.text([0,v0+this.px(10)],'y',{c:'ink',dx:8,size:15,it:true});this.text([u1-this.px(12),0],'y′',{c:'ink',dy:-7,size:15,it:true});
+   if(o.k45!==false)this.out.push(`<line x1="0" y1="0" x2="${Math.min(u1,-v0)}" y2="${Math.min(u1,-v0)}" class="s-aux" stroke-width="${this.px(1)}" stroke-dasharray="${this.px(4)} ${this.px(4)}"/>`);}
+ }
+ cls(c){return (this.hl?' hl':'')}
+ line(a,b,o={}){const c=o.c||'ink',w=o.w||2;const da=o.dash?`stroke-dasharray="${this.px(o.dash===2?3:7)} ${this.px(o.dash===2?3:5)}"`:'';
+  this.out.push(`<line x1="${a[0]}" y1="${-a[1]}" x2="${b[0]}" y2="${-b[1]}" class="s-${c}${this.cls()}" stroke-width="${this.px(w)}" stroke-linecap="round" ${da} ${o.op?`opacity="${o.op}"`:''}/>`);}
+ inf(a,b,o={}){const d=V.sub(b,a);this.line(V.add(a,V.mul(d,-50)),V.add(a,V.mul(d,50)),o);}
+ link(a,b,o={}){this.line(a,b,Object.assign({c:'aux',w:1.1,dash:2},o));}
+ gap(a,b,o={}){this.line(a,b,{c:'bg',w:o.w||7});}
+ poly(pts,o={}){const c=o.c||'c1';this.out.push(`<polygon points="${pts.map(p=>p[0]+','+(-p[1])).join(' ')}" class="f-${c} s-${c}${this.cls()}" fill-opacity="${o.fo??0.12}" stroke-width="${this.px(o.w??1.6)}" stroke-linejoin="round"/>`);}
+ text(p,t,o={}){const sz=this.px(o.size||14);const x=p[0]+this.px(o.dx||0),y=-p[1]+this.px(o.dy||0);
+  this.out.push(`<text x="${x}" y="${y}" font-size="${sz}" class="f-${o.c||'ink'}${this.cls()}" text-anchor="${o.anchor||'start'}" dominant-baseline="middle" stroke-width="${this.px(3.5)}" font-weight="${o.bold===false?400:650}" ${o.it?'font-style="italic" font-family="Georgia,serif"':''}>${t}</text>`);}
+ pt(p,label,o={}){const c=o.c||'ink',r=this.px(o.r||3.6);
+  this.out.push(`<circle cx="${p[0]}" cy="${-p[1]}" r="${r}" class="f-${c} s-bg${this.cls()}" stroke-width="${this.px(1.5)}"/>`);
+  if(label){const l=o.lp||[7,-10];this.text(p,label,{c,dx:l[0],dy:l[1],size:o.size||14,anchor:o.anchor});}}
+ handle(id,p,o={}){const c=o.c||'acc';
+  this.out.push(`<g class="handle" data-h="${id}"><circle cx="${p[0]}" cy="${-p[1]}" r="${this.px(18)}" fill="transparent"/><circle class="hring f-${c}" cx="${p[0]}" cy="${-p[1]}" r="${this.px(11)}" fill-opacity=".35"/><circle cx="${p[0]}" cy="${-p[1]}" r="${this.px(6.5)}" class="f-${c} s-bg" stroke-width="${this.px(2)}"/></g>`);
+  if(o.label){const l=o.lp||[10,-12];this.text(p,o.label,{c,dx:l[0],dy:l[1]});}}
+ arc(cn,a,b,r,o={}){/* угол при вершине cn между направлениями на a и b */
+  const a1=Math.atan2(a[1]-cn[1],a[0]-cn[0]);let a2=Math.atan2(b[1]-cn[1],b[0]-cn[0]);let d=a2-a1;while(d>Math.PI)d-=2*Math.PI;while(d<-Math.PI)d+=2*Math.PI;
+  const R=this.px(r||26);const p=t=>[cn[0]+R*Math.cos(t),cn[1]+R*Math.sin(t)];const s=p(a1),e=p(a1+d);
+  this.out.push(`<path d="M ${s[0]} ${-s[1]} A ${R} ${R} 0 0 ${d>0?0:1} ${e[0]} ${-e[1]}" fill="none" class="s-${o.c||'ang'}${this.cls()}" stroke-width="${this.px(2)}"/>`);
+  if(o.label){const m=p(a1+d/2);const q=[cn[0]+(m[0]-cn[0])*1.55,cn[1]+(m[1]-cn[1])*1.55];this.text(q,o.label,{c:o.c||'ang',anchor:'middle',size:14});}}
+ rightAngle(cn,a,b,s=9){const u=V.mul(V.norm(V.sub(a,cn)),this.px(s)),w=V.mul(V.norm(V.sub(b,cn)),this.px(s));const p1=V.add(cn,u),p2=V.add(V.add(cn,u),w),p3=V.add(cn,w);
+  this.out.push(`<polyline points="${p1[0]},${-p1[1]} ${p2[0]},${-p2[1]} ${p3[0]},${-p3[1]}" fill="none" class="s-aux" stroke-width="${this.px(1.2)}"/>`);}
+ dim(a,b,t,o={}){/* размерная подпись у отрезка */const m=V.lerp(a,b,.5);this.text(m,t,Object.assign({anchor:'middle',size:13},o));}
+}
+/* нарисовать набор точек с учётом совпадений */
+function drawPts(g,list){/* list: [{p,label,c,lp}] */
+ const used=new Array(list.length).fill(false);
+ list.forEach((it,i)=>{if(used[i])return;const grp=[it];for(let j=i+1;j<list.length;j++)if(!used[j]&&V.dist(list[j].p,it.p)<0.6){grp.push(list[j]);used[j]=true;}
+  g.pt(it.p,grp.map(x=>x.label).join('≡'),{c:it.c,lp:it.lp});});
+}
+
+/* ===================== 3D-просмотр (canvas) ===================== */
+class View3D{
+ constructor(host,o={}){
+  this.o=Object.assign({L:60,h:360,unfold:true,iso:{th:0.78,ph:0.42}},o);
+  this.root=el(`<div class="v3"><canvas></canvas><div class="v3-hint">🖱 тяни — крутить</div><div class="v3-bar"></div></div>`);host.appendChild(this.root);
+  this.cv=this.root.querySelector('canvas');this.ctx=this.cv.getContext('2d');this.cam={th:this.o.iso.th,ph:this.o.iso.ph,zoom:1};this.t=0;this.build=o.build||(()=>[]);
+  const bar=this.root.querySelector('.v3-bar');
+  const btn=(t,f,cls)=>{const b=el(`<button ${cls?`class="${cls}"`:''}>${t}</button>`);b.onclick=f;bar.appendChild(b);return b;};
+  btn('🧊 3D',()=>this.go(this.o.iso,0));btn('👁 спереди → П₂',()=>this.go({th:0,ph:0},0));btn('👁 сверху → П₁',()=>this.go({th:0,ph:1.5697},0));btn('👁 слева → П₃',()=>this.go({th:Math.PI/2,ph:0},0));
+  if(this.o.unfold)this.ub=btn('🗂 разложить в эпюр',()=>this.go({th:0,ph:0},this.t>0.5?0:1));
+  btn('＋',()=>{this.cam.zoom=Math.min(3,this.cam.zoom*1.2);this.render()});btn('－',()=>{this.cam.zoom=Math.max(.5,this.cam.zoom/1.2);this.render()});
+  let dr=null;const cv=this.cv;
+  cv.addEventListener('pointerdown',e=>{dr={x:e.clientX,y:e.clientY};try{cv.setPointerCapture(e.pointerId)}catch(_){ }});
+  cv.addEventListener('pointermove',e=>{if(!dr)return;const dx=e.clientX-dr.x,dy=e.clientY-dr.y;dr={x:e.clientX,y:e.clientY};this.cam.th-=dx*0.009;this.cam.ph=clamp(this.cam.ph+dy*0.008,-0.6,1.5697);this.render();});
+  const up=()=>dr=null;cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
+  cv.addEventListener('dblclick',()=>this.go(this.o.iso,0));
+  cv.addEventListener('wheel',e=>{if(!e.ctrlKey&&!e.metaKey)return;e.preventDefault();this.cam.zoom=clamp(this.cam.zoom*Math.exp(-e.deltaY*0.0015),.5,3);this.render();},{passive:false});
+  new ResizeObserver(()=>this.render()).observe(this.root);
+ }
+ go(v,t){const f={th:this.cam.th,ph:this.cam.ph},t0=this.t,st=performance.now(),ms=700;let th=v.th;while(th-f.th>Math.PI)th-=2*Math.PI;while(f.th-th>Math.PI)th+=2*Math.PI;
+  const step=now=>{let k=clamp((now-st)/ms,0,1);k=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;this.cam.th=f.th+(th-f.th)*k;this.cam.ph=f.ph+(v.ph-f.ph)*k;this.t=t0+(t-t0)*k;this.render();if(k<1)requestAnimationFrame(step);};
+  requestAnimationFrame(step);if(this.ub)this.ub.classList.toggle('on',t>0.5);}
+ tf(p,tag){const a=this.t*Math.PI/2;if(!tag||!this.t)return p;if(tag==='p1')return[p[0],p[1]*Math.cos(a),p[2]-p[1]*Math.sin(a)];if(tag==='p3')return[p[0]-p[1]*Math.sin(a),p[1]*Math.cos(a),p[2]];return p;}
+ render(){
+  const r=this.root.getBoundingClientRect();if(r.width<40)return;const DPR=Math.min(2,devicePixelRatio||1);const W=r.width,H=this.o.h;
+  this.cv.width=W*DPR;this.cv.height=H*DPR;this.cv.style.height=H+'px';const c=this.ctx;c.setTransform(DPR,0,0,DPR,0,0);c.clearRect(0,0,W,H);
+  const L=this.o.L,th=this.cam.th,ph=this.cam.ph,d=[Math.sin(th)*Math.cos(ph),Math.cos(th)*Math.cos(ph),Math.sin(ph)],rr=V.norm([-Math.cos(th),Math.sin(th),0]),uu=V.cross(d,rr);
+  const tgt=V.lerp([L*.38,L*.38,L*.3],[0,0,0],this.t),s=Math.min(W,H)/(L*(1.75+this.t*0.55))*this.cam.zoom;
+  const pr=p=>{const q=V.sub(p,tgt);return[W/2+s*V.dot(q,rr),H/2-s*V.dot(q,uu),V.dot(q,d)];};
+  const col={};['p1','p2','p3','nv','dd','ang','aux','obj','ink','mut','teal','acc','card','line','soft'].forEach(n=>col[n]=cssv(n));const C=x=>col[x]||x;
+  const items=this.build(this);const polys=[],rest=[];
+  items.forEach(it=>{const al=(it.alpha??1)*(it.sp?Math.max(0,1-this.t*1.6):1);if(al<=0.01)return;
+   if(it.k==='poly'){const pts=it.pts.map(p=>pr(this.tf(p,it.tag)));polys.push({it,pts,al,z:pts.reduce((s,p)=>s+p[2],0)/pts.length});}else rest.push({it,al});});
+  polys.sort((a,b)=>a.z-b.z).forEach(({it,pts,al})=>{c.beginPath();pts.forEach((p,i)=>i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1]));c.closePath();c.globalAlpha=al*(it.fa??0.13);c.fillStyle=C(it.c||'aux');c.fill();if(it.stroke!==false){c.globalAlpha=al*(it.sa??0.55);c.strokeStyle=C(it.sc||it.c||'aux');c.lineWidth=it.w||1;c.stroke();}if(it.label){const m=pts[it.li||0];c.globalAlpha=al*.8;c.fillStyle=C(it.c||'mut');c.font='italic 600 14px Georgia,serif';c.fillText(it.label,m[0]+6,m[1]-6);}});
+  const labels=[];
+  rest.forEach(({it,al})=>{c.globalAlpha=al;
+   if(it.k==='seg'){const a=pr(this.tf(it.a,it.tag)),b=pr(this.tf(it.b,it.tag));c.beginPath();c.moveTo(a[0],a[1]);c.lineTo(b[0],b[1]);c.strokeStyle=C(it.c||'ink');c.lineWidth=it.w||2;c.setLineDash(it.dash?(it.dash===2?[3,4]:[7,5]):[]);c.lineCap='round';c.stroke();c.setLineDash([]);
+    if(it.label){const m=[(a[0]+b[0])/2,(a[1]+b[1])/2];labels.push({x:m[0]+(it.off?it.off[0]:6),y:m[1]+(it.off?it.off[1]:-8),t:it.label,c:C(it.lc||it.c||'ink'),al});}}
+   else if(it.k==='pt'){const p=pr(this.tf(it.p,it.tag));c.beginPath();c.arc(p[0],p[1],it.r||4,0,7);c.fillStyle=C(it.c||'ink');c.fill();c.lineWidth=1.5;c.strokeStyle=col.card;c.stroke();if(it.label)labels.push({x:p[0]+(it.off?it.off[0]:7),y:p[1]+(it.off?it.off[1]:-9),t:it.label,c:C(it.c||'ink'),al});}
+   else if(it.k==='txt'){const p=pr(this.tf(it.p,it.tag));labels.push({x:p[0]+(it.off?it.off[0]:0),y:p[1]+(it.off?it.off[1]:0),t:it.text,c:C(it.c||'mut'),al,f:it.f});}});
+  c.textBaseline='middle';labels.forEach(l=>{c.globalAlpha=l.al;c.font=l.f||'600 14px system-ui,sans-serif';c.lineWidth=4;c.strokeStyle=col.card;c.strokeText(l.t,l.x,l.y);c.fillStyle=l.c;c.fillText(l.t,l.x,l.y);});
+  c.globalAlpha=1;
+ }
+}
+/* комната: три плоскости и оси */
+function room(L=60,o={}){const it=[];
+ it.push({k:'poly',pts:[[0,0,0],[L,0,0],[L,L,0],[0,L,0]],c:'p1',tag:'p1',fa:.07,label:'П₁',li:2});
+ it.push({k:'poly',pts:[[0,0,0],[L,0,0],[L,0,L],[0,0,L]],c:'p2',fa:.07,label:'П₂',li:2});
+ if(o.p3!==false)it.push({k:'poly',pts:[[0,0,0],[0,L,0],[0,L,L],[0,0,L]],c:'p3',tag:'p3',fa:.07,label:'П₃',li:3});
+ it.push({k:'seg',a:[0,0,0],b:[L*1.08,0,0],c:'ink',w:1.4},{k:'txt',p:[L*1.1,0,0],text:'x',c:'ink',f:'italic 700 15px Georgia,serif'});
+ it.push({k:'seg',a:[0,0,0],b:[0,L*1.08,0],c:'ink',w:1.4,tag:'p1'},{k:'txt',p:[0,L*1.12,0],text:'y',c:'ink',tag:'p1',f:'italic 700 15px Georgia,serif'});
+ if(o.p3!==false){it.push({k:'seg',a:[0,0,0],b:[0,L*1.08,0],c:'ink',w:1.4,tag:'p3'},{k:'txt',p:[0,L*1.12,0],text:'y′',c:'ink',tag:'p3',f:'italic 700 15px Georgia,serif'});}
+ it.push({k:'seg',a:[0,0,0],b:[0,0,L*1.08],c:'ink',w:1.4},{k:'txt',p:[0,0,L*1.12],text:'z',c:'ink',f:'italic 700 15px Georgia,serif'});
+ return it;}
+/* точка со всеми проекциями */
+function ptb(P,n,o={}){const [x,y,z]=P,it=[];const A1=[x,y,0],A2=[x,0,z],A3=[0,y,z];
+ if(o.rays!==false){it.push({k:'seg',a:P,b:A1,c:'p1',w:1,dash:2,sp:true},{k:'seg',a:P,b:A2,c:'p2',w:1,dash:2,sp:true});if(o.p3)it.push({k:'seg',a:P,b:A3,c:'p3',w:1,dash:2,sp:true});}
+ if(o.links){it.push({k:'seg',a:A1,b:[x,0,0],c:'aux',w:1,dash:2,tag:'p1'},{k:'seg',a:A2,b:[x,0,0],c:'aux',w:1,dash:2});if(o.p3){it.push({k:'seg',a:A2,b:[0,0,z],c:'aux',w:1,dash:2},{k:'seg',a:A3,b:[0,0,z],c:'aux',w:1,dash:2,tag:'p3'},{k:'seg',a:A3,b:[0,y,0],c:'aux',w:1,dash:2,tag:'p3'},{k:'seg',a:A1,b:[0,y,0],c:'aux',w:1,dash:2,tag:'p1'});}}
+ if(o.space!==false)it.push({k:'pt',p:P,c:o.c||'obj',r:4.5,label:n,sp:true});
+ if(o.proj!==false){it.push({k:'pt',p:A1,c:'p1',label:o.nolab?'':n+'₁',tag:'p1',r:3.5,off:o.o1});it.push({k:'pt',p:A2,c:'p2',label:o.nolab?'':n+'₂',r:3.5,off:o.o2});if(o.p3)it.push({k:'pt',p:A3,c:'p3',label:o.nolab?'':n+'₃',tag:'p3',r:3.5,off:o.o3});}
+ return it;}
+function prj(P,k){return k===1?[P[0],P[1],0]:k===2?[P[0],0,P[2]]:[0,P[1],P[2]];}
+const TAG={1:'p1',2:null,3:'p3'};
+/* отрезок со всеми проекциями */
+function segb(A,B,o={}){const it=[];[1,2,3].forEach(k=>{if(k===3&&!o.p3)return;const nv=o.nv&&o.nv.includes(k);it.push({k:'seg',a:prj(A,k),b:prj(B,k),c:nv?'nv':'p'+k,w:nv?3.4:2.4,tag:TAG[k]});});
+ if(o.space!==false)it.push({k:'seg',a:A,b:B,c:o.c||'obj',w:3.2,sp:true,label:o.label});return it;}
+
+/* ===================== пошаговый разбор ===================== */
+function stepper(host,o){
+ const root=el(`<div class="stepper"><div class="taskgrid"><div class="st-ep"></div><div class="st-side"><div class="st-count"></div><div class="st-prog"><i></i></div><div class="st-text"></div><div class="st-ctrl"><button class="btn ghost sm st-p">← Назад</button><button class="btn sm st-n">Дальше →</button></div><div class="st-list" style="margin-top:12px"></div></div></div></div>`);
+ host.appendChild(root);const ep=new Ep(root.querySelector('.st-ep'),Object.assign({maxH:430},o.ep||{}));if(o.box)ep.box=o.box;let i=0;const N=o.steps.length;
+ const list=root.querySelector('.st-list');o.steps.forEach((s,j)=>{const d=el(`<div>${j+1}. ${s.s||''}</div>`);d.onclick=()=>{i=j;upd()};list.appendChild(d);});
+ ep.draw=g=>{o.base&&o.base(g,i);for(let j=0;j<=i;j++){g.hl=(j===i&&j>0);o.steps[j].d&&o.steps[j].d(g);g.hl=false;}};
+ function upd(){root.querySelector('.st-count').textContent=`Шаг ${i+1} из ${N}`;root.querySelector('.st-text').innerHTML=o.steps[i].t;root.querySelector('.st-prog i').style.width=((i+1)/N*100)+'%';
+  [...list.children].forEach((d,j)=>{d.className=j===i?'on':j<i?'past':''});root.querySelector('.st-p').disabled=i===0;root.querySelector('.st-n').textContent=i===N-1?'✓ Готово':'Дальше →';ep.render();if(i===N-1&&o.onEnd)o.onEnd();}
+ root.querySelector('.st-p').onclick=()=>{if(i>0){i--;upd()}};root.querySelector('.st-n').onclick=()=>{if(i<N-1){i++;upd()}else{i=0;upd()}};
+ upd();return{ep,root};
+}
+
+/* ===================== тренажёр-раннер ===================== */
+function trainer(host,o){
+ const root=el(`<div class="trainer"><div class="tr-head"><span style="font-size:20px">${o.icon||'🎯'}</span><div class="tr-title">${o.title}</div><div class="tr-stats"><span class="pill tr-sc">✓ 0 из 0</span><span class="pill tr-st">🔥 0</span></div></div><div class="tr-body"></div><div class="tr-foot"><button class="btn ghost sm tr-h">💡 Подсказка</button><span class="sp"></span><button class="btn sm tr-n">Начать →</button></div></div>`);
+ host.appendChild(root);const body=root.querySelector('.tr-body'),nb=root.querySelector('.tr-n'),hb=root.querySelector('.tr-h');
+ let n=0,ok=0,streak=0,done=true,hint='',started=false,res=[];let T0=Date.now();
+ body.innerHTML=`<div class="cmut">${o.intro||'Задачи генерируются случайно — их бесконечно много. Решай, пока не начнёт получаться на автомате (серия 🔥 из 5 подряд — хороший знак).'}</div>`;
+ hb.disabled=true;
+ const stat=Store.get('stats',{});
+ function choose(){if(o.seq){const s=o.seq[n%o.seq.length];return Array.isArray(s)?pick(s):s;}const gs=o.gens;if(gs.length===1)return gs[0];if(o.adaptive===false)return pick(gs);
+  const w=gs.map(g=>{const s=stat[g.id];if(!s||!s.n)return 3;return 1+3*(1-s.ok/s.n);});let t=Math.random()*w.reduce((a,b)=>a+b,0);for(let i=0;i<gs.length;i++){t-=w[i];if(t<=0)return gs[i];}return gs[gs.length-1];}
+ function upd(){root.querySelector('.tr-sc').textContent=`✓ ${ok} из ${n}`+(o.n?` · задача ${Math.min(n+(done?0:1),o.n)}/${o.n}`:'');root.querySelector('.tr-st').textContent='🔥 '+streak;}
+ function next(){if(o.n&&n>=o.n){finish();return;}if(!started)T0=Date.now();started=true;o.onStart&&n===0&&o.onStart();done=false;hint='';hb.disabled=true;nb.disabled=true;nb.textContent='Следующая →';body.innerHTML='';
+  const g=choose();body.appendChild(el(`<div class="tr-kind">${g.name}</div>`));const box=el('<div></div>');body.appendChild(box);
+  const api={done:(good,expl)=>{if(done)return;done=true;n++;res.push({name:g.name,good});if(good){ok++;streak++;addXP(o.xp??(10+Math.min(streak,10)));if(streak===5||streak===10||streak===20){toast(`🔥 Серия ${streak} подряд!`);confetti();}}else streak=0;
+    const s=stat[g.id]||{n:0,ok:0};s.n++;if(good)s.ok++;stat[g.id]=s;Store.set('stats',stat);
+    if(expl){box.appendChild(el(`<div class="why tr-expl"><div class="t">🧠 Разбор: почему так</div>${expl}</div>`));}
+    upd();nb.disabled=false;if(o.n&&n>=o.n)nb.textContent='Итог →';o.onResult&&o.onResult(good,ok,n);},
+   hint:h=>{hint=h;hb.disabled=!h;}};
+  g.make().render(box,api);upd();}
+ function finish(){const sec=Math.round((Date.now()-T0)/1000);const pc=Math.round(ok/n*100);body.innerHTML=`<div style="text-align:center;padding:10px"><div class="big">${pc}%</div><p>${ok} из ${n} верно · время ${Math.floor(sec/60)} мин ${sec%60} с</p><p>${pc>=85?'🏆 Отлично — уровень зачёта!':pc>=60?'👍 Неплохо. Перерешай темы, где ошибся.':'💪 Пока рано. Пройди разделы с ошибками и попробуй ещё раз.'}</p></div><table class="tb">${res.map((r,i)=>`<tr><td>${i+1}</td><td>${r.name}</td><td>${r.good?'✅':'❌'}</td></tr>`).join('')}</table>`;
+  if(pc>=85)confetti();nb.textContent='Ещё раз';n=0;ok=0;streak=0;res=[];nb.onclick=()=>{nb.onclick=go;T0=Date.now();next();};o.onFinish&&o.onFinish(pc);}
+ const go=()=>{if(!done)return;next();};nb.onclick=go;
+ hb.onclick=()=>{if(!hint)return;hb.disabled=true;body.appendChild(el(`<div class="hintbox">💡 ${hint}</div>`));};
+ return root;
+}
+
+'use strict';
+/* ===================== ПРЯМЫЕ: типы ===================== */
+const LT={
+ up:{n:'общего положения, восходящая',nv:[],why:'Ни одна проекция не горизонтальна, не вертикальна и не точка → прямая стоит <b>косо ко всем</b> плоскостям: <b>общего положения</b>. Обе проекции поднимаются к одному и тому же концу (наклонены <b>в одну сторону</b>) → <b>восходящая</b>: уходя от нас (y уменьшается), прямая поднимается. НВ нет нигде — нужен метод треугольника.'},
+ down:{n:'общего положения, нисходящая',nv:[],why:'Ни одна проекция не горизонтальна, не вертикальна и не точка → <b>общего положения</b>. Проекции наклонены <b>в разные стороны</b> → <b>нисходящая</b>: уходя от нас, прямая опускается. НВ нет нигде — нужен метод треугольника.'},
+ h:{n:'горизонталь h (∥ П₁)',nv:[1],why:'A₂B₂ <b>горизонтальна (∥ x)</b> → у A и B <b>одна высота z</b> → прямая не поднимается и не опускается, «лежит ровно» над полом → ∥ П₁ → <b>горизонталь</b>. Раз она ∥ П₁ — на П₁ она без искажений: <b>НВ = A₁B₁</b>.'},
+ f:{n:'фронталь f (∥ П₂)',nv:[2],why:'A₁B₁ <b>∥ x</b> → у концов <b>одна глубина y</b> → прямая идёт вдоль передней стены, ∥ П₂ → <b>фронталь</b>. НВ — на П₂: <b>A₂B₂</b>.'},
+ p:{n:'профильная прямая p (∥ П₃)',nv:[3],why:'A₁B₁ и A₂B₂ лежат <b>на одной вертикальной линии связи</b> → у концов <b>одинаковый x</b> → прямая лежит в плоскости, параллельной П₃ → <b>профильная</b>. НВ — на П₃ (её надо достроить).'},
+ hp:{n:'горизонтально-проецирующая (⊥ П₁)',nv:[2,3],why:'A₁ ≡ B₁ — сверху прямая видна <b>точкой</b> (смотрим ей «в торец») → она вертикальна, <b>⊥ П₁</b>. Вертикальная прямая ∥ П₂ и ∥ П₃ → НВ на <b>П₂ и П₃</b>, A₂B₂ ⊥ x.'},
+ fp:{n:'фронтально-проецирующая (⊥ П₂)',nv:[1,3],why:'A₂ ≡ B₂ — спереди прямая видна <b>точкой</b> → она идёт прямо «на нас», <b>⊥ П₂</b>. Она ∥ П₁ и ∥ П₃ → НВ на <b>П₁ и П₃</b>, A₁B₁ ⊥ x.'},
+ pp:{n:'профильно-проецирующая (⊥ П₃)',nv:[1,2],why:'<b>Обе</b> проекции ∥ x → у концов одинаковые и y, и z → прямая идёт вдоль оси x, <b>⊥ П₃</b> (сбоку видна точкой). НВ на <b>П₁ и П₂</b>.'}
+};
+const LTK=Object.keys(LT);
+const NVO=[['П₁',[1]],['П₂',[2]],['П₃',[3]],['П₁ и П₂',[1,2]],['П₁ и П₃',[1,3]],['П₂ и П₃',[2,3]],['ни на одной',[]]];
+const sameSet=(a,b)=>a.length===b.length&&a.every(x=>b.includes(x));
+function genLine(type){
+ for(let it=0;it<800;it++){const r=()=>rnd(8,52);let A=[r(),r(),r()],B=[r(),r(),r()];
+  if(type==='h')B[2]=A[2];if(type==='f')B[1]=A[1];if(type==='p')B[0]=A[0];
+  if(type==='hp'){B[0]=A[0];B[1]=A[1];}if(type==='fp'){B[0]=A[0];B[2]=A[2];}if(type==='pp'){B[1]=A[1];B[2]=A[2];}
+  const d=V.sub(B,A).map(Math.abs);const need={up:[12,8,8],down:[12,8,8],h:[12,8,0],f:[12,0,8],p:[0,10,10],hp:[0,0,12],fp:[0,12,0],pp:[14,0,0]}[type];
+  if(!d.every((x,i)=>need[i]===0?x===0:x>=need[i]))continue;
+  const dd=V.sub(B,A);if(type==='up'&&dd[1]*dd[2]>=0)continue;if(type==='down'&&dd[1]*dd[2]<=0)continue;
+  return[A,B];}
+ return[[40,10,10],[10,30,40]];
+}
+function lblDir(p,q,r=14){let d=V.sub(p,q);if(V.len(d)<0.5)d=[1,1];d=V.norm(d);return[d[0]*r,-d[1]*r];}
+function drawSeg2(g,A,B,o={}){
+ const n=o.n||['A','B'],ks=o.p3?[1,2,3]:[1,2];
+ g.link(P1(A),P2(A));g.link(P1(B),P2(B));
+ if(o.p3){[A,B].forEach(X=>{g.link(P2(X),P3(X));g.link(P1(X),[X[1],-X[1]]);g.link([X[1],-X[1]],P3(X));});}
+ ks.forEach(k=>{const nv=o.nv&&o.nv.includes(k);g.line(PR[k](A),PR[k](B),{c:nv?'nv':'c'+k,w:nv?3.4:2.6});});
+ const pts=[];ks.forEach(k=>{const a=PR[k](A),b=PR[k](B);pts.push({p:a,label:n[0]+SUB[k],c:'c'+k,lp:lblDir(a,b)},{p:b,label:n[1]+SUB[k],c:'c'+k,lp:lblDir(b,a)});});
+ pts.forEach(p=>{p.lp=[p.lp[0]-4,p.lp[1]+1];});drawPts(g,pts);
+}
+function segPts(A,B,p3){const r=[P1(A),P1(B),P2(A),P2(B)];if(p3)r.push(P3(A),P3(B),[A[1],-A[1]],[B[1],-B[1]]);return r;}
+function twoCol(box){const gr=el('<div class="taskgrid"><div></div><div></div></div>');box.appendChild(gr);return[gr.children[0],gr.children[1]];}
+
+const GEN={};
+GEN.ltype={id:'ltype',name:'Тип прямой по эпюру',make(){const type=pick(LTK);const[A,B]=genLine(type);return{render(box,api){
+ box.appendChild(el(`<div class="tr-task">Определи положение прямой AB по комплексному чертежу.</div>`));
+ const[L,R]=twoCol(box);const ep=new Ep(L,{maxH:380});ep.fit(segPts(A,B));let nv=null;ep.draw=g=>drawSeg2(g,A,B,{nv});ep.render();
+ api.hint('Алгоритм «5 секунд»: 1) есть проекция-<b>точка</b>? → проецирующая. 2) одна проекция <b>∥ оси x</b>? → прямая уровня (НВ — на другой проекции). Обе ∥ x → профильно-проецирующая. 3) обе проекции на <b>одной вертикали</b>? → профильная. 4) иначе — общего положения: наклонены в одну сторону → восходящая, в разные → нисходящая.');
+ mcq(R,{q:'1) Какая это прямая?',noShuffle:true,cols:1,opts:LTK.map(k=>({t:LT[k].n,ok:k===type})),onAnswer:ok1=>{
+  mcq(R,{q:'2) Где отрезок виден в натуральную величину?',noShuffle:true,opts:NVO.map(o=>({t:o[0],ok:sameSet(o[1],LT[type].nv)})),onAnswer:ok2=>{nv=LT[type].nv;ep.render();api.done(ok1&&ok2,LT[type].why+(LT[type].nv.length?' <span class="cnv">Зелёным</span> подсвечено, где НВ.':''));}});}});
+}}}};
+const STM=[
+ ['Ни одна проекция не параллельна и не перпендикулярна оси x',['up','down']],
+ ['Проекции наклонены в одну сторону → восходящая',['up']],['Проекции наклонены в разные стороны → нисходящая',['down']],
+ ['Для НВ нужен метод прямоугольного треугольника',['up','down']],
+ ['A₂B₂ ∥ Ox',['h','pp']],['A₁B₁ ∥ Ox',['f','pp']],['A₁B₁ ⊥ Ox',['p','fp']],['A₂B₂ ⊥ Ox',['p','hp']],
+ ['|A₁B₁| = |AB| — НВ на П₁',['h','fp','pp']],['|A₂B₂| = |AB| — НВ на П₂',['f','hp','pp']],['|A₃B₃| = |AB| — НВ на П₃',['p','hp','fp']],
+ ['A₁ ≡ B₁ — горизонтальная проекция вырождена в точку',['hp']],['A₂ ≡ B₂ — фронтальная проекция вырождена в точку',['fp']],['A₃ ≡ B₃ — профильная проекция вырождена в точку',['pp']],
+ ['α = 0° (прямая ∥ П₁)',['h','fp','pp']],['β = 0° (прямая ∥ П₂)',['f','hp','pp']],['γ = 0° (прямая ∥ П₃)',['p','hp','fp']],
+ ['α = 90° (прямая ⊥ П₁)',['hp']],['β = 90° (прямая ⊥ П₂)',['fp']],['γ = 90° (прямая ⊥ П₃)',['pp']],
+ ['Угол β виден на П₁ — между A₁B₁ и осью x',['h']],['Угол α виден на П₂ — между A₂B₂ и осью x',['f']],['Углы α и β видны на П₃',['p']]
+];
+GEN.lprops={id:'lprops',name:'Зачёт · задача 1: положение и свойства прямой',make(){const type=pick(LTK);const[A,B]=genLine(type);return{render(box,api){
+ box.appendChild(el(`<div class="tr-task">Определи положение прямой и отметь <u>все</u> её свойства.</div>`));
+ const[L,R]=twoCol(box);const ep=new Ep(L,{maxH:380});ep.fit(segPts(A,B));let nv=null;ep.draw=g=>drawSeg2(g,A,B,{nv});ep.render();
+ api.hint('Свойства вытекают из типа. ∥ плоскости → на ней НВ, угол к ней 0°. ⊥ плоскости → на ней точка, угол 90°, а к двум другим плоскостям прямая параллельна (там НВ).');
+ const tr=shuffle(STM.filter(s=>s[1].includes(type))).slice(0,3),fl=shuffle(STM.filter(s=>!s[1].includes(type))).slice(0,6-tr.length);
+ mcq(R,{q:'1) Положение прямой:',noShuffle:true,cols:1,opts:LTK.map(k=>({t:LT[k].n,ok:k===type})),onAnswer:ok1=>{
+  multi(R,{q:'2) Отметь все верные свойства:',items:tr.map(s=>({t:s[0],ok:true})).concat(fl.map(s=>({t:s[0],ok:false}))),onAnswer:ok2=>{nv=LT[type].nv;ep.render();api.done(ok1&&ok2,LT[type].why);}});}});
+}}}};
+
+/* ===================== МЕТОД ТРЕУГОЛЬНИКА ===================== */
+function genGeneral(minD=10){for(let i=0;i<800;i++){const A=[rnd(8,52),rnd(6,50),rnd(6,50)],B=[rnd(8,52),rnd(6,50),rnd(6,50)];const d=V.sub(B,A).map(Math.abs);if(d[0]>=minD+4&&d[1]>=minD&&d[2]>=minD)return[A,B];}return[[45,10,12],[12,35,40]];}
+const DN={1:'z',2:'y',3:'x'},GR={1:'α',2:'β',3:'γ'};
+GEN.tri={id:'tri',name:'Метод прямоугольного треугольника (строим сами)',make(){const[A,B]=genGeneral(10);const k=pick([1,2]);return{render(box,api){
+ const D=Math.abs(k===1?A[2]-B[2]:A[1]-B[1]),pl=PR[k],ak=pl(A),bk=pl(B);const proj=V.dist(ak,bk),NVv=V.dist(A,B),ang=deg(Math.atan2(D,proj));const s=SUB[k],o=3-k;
+ box.appendChild(el(`<div class="tr-task">Дано: A(${A.join('; ')}), B(${B.join('; ')}). Найди <b class="cnv">НВ</b> отрезка AB и угол <b class="cang">${GR[k]}</b> (наклон к П${s}).</div>`));
+ const[Lc,side]=twoCol(box);
+ let n=V.norm(V.perp(V.sub(bk,ak)));if((k===1&&n[1]>0)||(k===2&&n[1]<0))n=V.mul(n,-1);
+ let st=0,cur=4,showD=false,good=true;const B0=()=>V.add(bk,V.mul(n,cur));
+ const ep=new Ep(Lc,{maxH:420});ep.fit(segPts(A,B).concat([V.add(bk,V.mul(n,D+4))]),10);
+ ep.draw=g=>{drawSeg2(g,A,B);
+  if(showD){const ao=PR[o](A),bo=PR[o](B),F=[bo[0],ao[1]];g.link(ao,F,{c:'dd',w:1.2});g.line(F,bo,{c:'dd',w:3.4});g.text(V.lerp(F,bo,.5),'Δ'+DN[k]+' = '+D,{c:'dd',dx:8,size:13});}
+  if(st>=2){g.inf(bk,V.add(bk,n),{c:'aux',w:1,dash:1});g.rightAngle(bk,ak,V.add(bk,n));const b0=B0();g.line(bk,b0,{c:'dd',w:3.4});
+   if(st===2)g.handle('h',b0,{c:'dd',label:'тяни',lp:[14,0]});else{g.line(ak,b0,{c:'nv',w:3.2});g.pt(b0,'B₀',{c:'nv',lp:lblDir(b0,bk)});g.dim(ak,b0,'НВ',{c:'nv',dy:-10});}}
+  if(st>=4)g.arc(ak,bk,B0(),30,{label:GR[k]});
+ };
+ const live=el('<div class="live">второй катет сейчас: <b>4</b> мм</div>');
+ ep.onDrag=(id,p)=>{cur=clamp(Math.round(V.dot(V.sub(p,bk),n)*2)/2,-60,60);live.innerHTML=`второй катет сейчас: <b>${fmt(Math.abs(cur))}</b> мм`;};ep.render();
+ api.hint(`Угол ${GR[k]} — наклон к П${s}. Треугольник строят на проекции на эту же плоскость: I катет — A${s}B${s}, II катет — Δ той координаты, которой у этой проекции <b>нет</b>. У A${s} нет ${DN[k]} → Δ${DN[k]} = |${DN[k]}<sub>A</sub> − ${DN[k]}<sub>B</sub>|.`);
+ mcq(side,{q:`Шаг 1. Какой треугольник строим для угла ${GR[k]}?`,cols:1,opts:[
+  {t:`катеты A${s}B${s} и Δ${DN[k]}`,ok:true,why:`Ищем наклон к П${s} → берём проекцию на П${s}; у неё потеряна координата ${DN[k]} → второй катет Δ${DN[k]}.`},
+  {t:`катеты A${s}B${s} и Δ${DN[o]}`,ok:false,why:`Δ${DN[o]} у A${s}B${s} не потеряна — она и так видна на этой проекции.`},
+  {t:`катеты A${SUB[o]}B${SUB[o]} и Δ${DN[o]}`,ok:false,why:`Это треугольник для угла ${GR[o]}, а не ${GR[k]}.`},
+  {t:`катеты A${SUB[o]}B${SUB[o]} и Δ${DN[k]}`,ok:false,why:'Смешаны катеты из двух разных треугольников.'}],onAnswer:ok=>{good=good&&ok;showD=true;st=2;ep.render();
+  const s2=el(`<div class="mcq"><div class="q">Шаг 2. Из B${s} перпендикулярно A${s}B${s} отложи второй катет Δ${DN[k]} — тяни жёлтую точку. (Жёлтым на П${SUB[o]} показано, где Δ${DN[k]} видна.)</div></div>`);s2.appendChild(live);const cb=el('<div class="inrow"><button class="btn sm">Проверить катет</button></div>');s2.appendChild(cb);side.appendChild(s2);
+  cb.querySelector('button').onclick=function(){const ok=Math.abs(Math.abs(cur)-D)<=0.75;if(!ok){good=false;cur=D*(Math.sign(cur)||1);}this.disabled=true;st=3;ep.render();
+   s2.appendChild(el(`<div class="fb"><div class="box ${ok?'ok':'bad'}">${ok?'✅ Точно! ':'❌ Нужно было Δ'+DN[k]+' = '+D+' мм — я поправил. '}Гипотенуза A${s}B₀ — это и есть <b class="cnv">НВ</b>.</div></div>`));
+   mcq(side,{q:`Шаг 3. Где на этом треугольнике угол ${GR[k]}?`,cols:1,opts:[{t:`между проекцией A${s}B${s} и гипотенузой`,ok:true,why:'Угол наклона прямой к плоскости — угол между прямой (гипотенуза = прямая в НВ) и её проекцией на эту плоскость.'},{t:'между катетом Δ и гипотенузой',ok:false,why:'Это угол с перпендикуляром к плоскости, а не с плоскостью.'},{t:`между A${s}B${s} и осью x`,ok:false,why:'Так угол читают только у прямых уровня.'}],onAnswer:ok3=>{good=good&&ok3;st=4;ep.render();
+    numIn(side,{q:'Шаг 4. Чему равна НВ |AB|? (до целых, мм)',ans:NVv,tol:1,dp:1,why:`|AB| = √(${fmt(proj)}² + ${D}²) ≈ ${fmt(NVv)} мм. На листе её меряют линейкой по гипотенузе.`,onAnswer:ok4=>{api.done(good&&ok4,`Катеты <b>A${s}B${s} = ${fmt(proj)}</b> и <b class="cdd">Δ${DN[k]} = ${D}</b> → гипотенуза <b class="cnv">НВ ≈ ${fmt(NVv)} мм</b>, угол <b class="cang">${GR[k]} ≈ ${fmt(ang)}°</b>. Проверка: НВ длиннее любой проекции ✓.`);}});}});};
+ }});
+}}}};
+GEN.trimini={id:'trimini',name:'Какой треугольник строить?',make(){const k=pick([1,2,3]);return{render(box,api){
+ if(Math.random()<.5){box.appendChild(el(`<div class="tr-task">Нужно найти угол <span class="cang">${GR[k]}</span> — наклон прямой AB к П${SUB[k]}. Какие катеты?</div>`));
+  api.hint('Δ — это та координата, которой у проекции нет: A₁(x;y) — нет z; A₂(x;z) — нет y; A₃(y;z) — нет x.');
+  const all=[];[1,2,3].forEach(p=>[1,2,3].forEach(d=>all.push({t:`A${SUB[p]}B${SUB[p]} и Δ${DN[d]}`,ok:p===k&&d===k})));
+  const opts=[all.find(o=>o.ok)].concat(shuffle(all.filter(o=>!o.ok)).slice(0,3));
+  mcq(box,{q:'Выбери:',opts,onAnswer:ok=>api.done(ok,`Угол к П${SUB[k]} → проекция на П${SUB[k]}. У неё потеряна координата <b>${DN[k]}</b> → второй катет <b class="cdd">Δ${DN[k]}</b>. Мнемоника: <i>«индекс проекции = индекс плоскости угла, Δ = то, что потеряно»</i>.`)});}
+ else{box.appendChild(el(`<div class="tr-task">Строим треугольник для угла ${GR[k]}. Где на чертеже взять второй катет Δ${DN[k]}?</div>`));
+  const W={1:'на П₂ — разность высот A₂ и B₂ (по вертикали)',2:'на П₁ — разность расстояний A₁ и B₁ до оси x (по вертикали)',3:'на П₁ или П₂ — расстояние между линиями связи A и B (по горизонтали)'};
+  mcq(box,{q:'Выбери:',cols:1,opts:[1,2,3].map(j=>({t:W[j],ok:j===k})),onAnswer:ok=>api.done(ok,`Δ${DN[k]} ищем там, где координата ${DN[k]} <b>видна</b>. ${k===1?'Высоту z видно спереди (П₂).':k===2?'Глубину y видно сверху (П₁): это расстояние от оси x.':'x видно и на П₁, и на П₂ — это расстояние вдоль оси x между линиями связи.'}`)});}
+}}}};
+GEN.trinum={id:'trinum',name:'Угол по координатам (проверка расчётом)',make(){const[A,B]=genGeneral(8);const k=pick([1,2]);return{render(box,api){
+ const D=Math.abs(k===1?A[2]-B[2]:A[1]-B[1]),o2=Math.abs(k===1?A[1]-B[1]:A[2]-B[2]),pr=Math.hypot(A[0]-B[0],o2),ang=deg(Math.atan2(D,pr));
+ box.appendChild(el(`<div class="tr-task">A(${A.join('; ')}), B(${B.join('; ')}). Найди угол <span class="cang">${GR[k]}</span> (к П${SUB[k]}) с точностью до 1°.</div>`));
+ api.hint(`tg ${GR[k]} = Δ${DN[k]} / |A${SUB[k]}B${SUB[k]}|, а |A${SUB[k]}B${SUB[k]}| = √(Δx² + Δ${k===1?'y':'z'}²).`);
+ numIn(box,{q:`${GR[k]} = ?`,unit:'°',ans:ang,tol:1.1,dp:1,onAnswer:ok=>api.done(ok,`|A${SUB[k]}B${SUB[k]}| = √(${Math.abs(A[0]-B[0])}² + ${o2}²) ≈ ${fmt(pr)}; Δ${DN[k]} = ${D}. tg ${GR[k]} = ${D}/${fmt(pr)} → <b class="cang">${GR[k]} ≈ ${fmt(ang)}°</b>. На листе то же делают транспортиром.`)});
+}}}};
+/* обратные задачи */
+GEN.inv1={id:'inv1',name:'Обратная задача · тип 1',make(){let A,xB,yB,al,p,Dz;for(let i=0;i<800;i++){A=[rnd(10,50),rnd(8,45),rnd(10,50)];xB=rnd(8,52);yB=rnd(8,48);p=Math.hypot(A[0]-xB,A[1]-yB);al=rnd(20,55);Dz=p*Math.tan(rad(al));if(Math.abs(A[0]-xB)>=12&&p>=16&&Dz<=26&&A[2]-Dz>=4&&A[2]+Dz<=56)break;}
+ return{render(box,api){let zc=A[2]+3,st=0,good=true;const ub=-xB;
+ box.appendChild(el(`<div class="tr-task">Даны A₁, A₂ и B₁. Прямая AB наклонена к П₁ под углом <span class="cang">α = ${al}°</span>. Найди B₂ — тяни точку по линии связи. |A₁B₁| = ${fmt(p)} мм.</div>`));
+ const[Lc,R]=twoCol(box);const ep=new Ep(Lc,{maxH:420});const a1=P1(A),b1=[ub,-yB],a2=P2(A);let n=V.norm(V.perp(V.sub(b1,a1)));if(n[1]>0)n=V.mul(n,-1);
+ ep.fit([a1,a2,b1,[ub,A[2]+Dz],[ub,A[2]-Dz],V.add(b1,V.mul(n,Dz))],10);
+ ep.draw=g=>{g.link(a1,a2);g.inf([ub,0],[ub,1],{c:'aux',w:1,dash:2});g.line(a1,b1,{c:'c1',w:2.6});drawPts(g,[{p:a1,label:'A₁',c:'c1',lp:lblDir(a1,b1)},{p:b1,label:'B₁',c:'c1',lp:lblDir(b1,a1)},{p:a2,label:'A₂',c:'c2',lp:[-22,-8]}]);
+  g.link(a2,[ub,A[2]],{c:'dd'});const b2=[ub,zc];g.line(a2,b2,{c:'c2',w:2.6});
+  if(st===0)g.handle('b',b2,{c:'c2',label:'B₂'});else{const sg=Math.sign(zc-A[2])||1;g.pt(b2,'B₂',{c:'c2'});const o=[ub,A[2]-sg*Dz];g.line(a2,o,{c:'c2',w:2,dash:1,op:.75});g.pt(o,'B₂′',{c:'c2',lp:[8,10]});
+   const b0=V.add(b1,V.mul(n,Dz));g.line(b1,b0,{c:'dd',w:3});g.line(a1,b0,{c:'nv',w:3});g.rightAngle(b1,a1,b0);g.arc(a1,b1,b0,28,{label:'α'});g.line([ub,A[2]],[ub,A[2]+Dz],{c:'dd',w:3,op:.5});g.line([ub,A[2]],[ub,A[2]-Dz],{c:'dd',w:3,op:.5});}};
+ const live=el('<div class="live">Δz сейчас: <b>3</b> мм</div>');
+ ep.onDrag=(id,pp)=>{zc=clamp(Math.round(pp[1]*2)/2,-5,64);live.innerHTML=`Δz сейчас: <b>${fmt(Math.abs(zc-A[2]))}</b> мм`;};ep.render();
+ api.hint('α живёт в треугольнике на П₁: I катет — A₁B₁, II катет — Δz, угол α при A₁B₁. Значит <b>Δz = |A₁B₁| · tg α</b>. Отложи Δz по линии связи B от уровня A₂ (жёлтая пунктирная горизонталь).');
+ R.appendChild(el(`<p>1) Посчитай Δz = |A₁B₁|·tg α (или построй треугольник на П₁).<br>2) Поставь B₂ на линии связи на Δz выше или ниже уровня A₂.</p>`));R.appendChild(live);
+ const cb=el('<div class="inrow"><button class="btn sm">Проверить B₂</button></div>');R.appendChild(cb);
+ cb.querySelector('button').onclick=function(){const cur=deg(Math.atan2(Math.abs(zc-A[2]),p));const ok=Math.abs(cur-al)<=1.3;good=ok;if(!ok)zc=A[2]+Dz*(zc>=A[2]?1:-1);this.disabled=true;st=1;ep.render();
+  R.appendChild(el(`<div class="fb"><div class="box ${ok?'ok':'bad'}">${ok?'✅ Попал! ':'❌ У тебя выходил α ≈ '+fmt(cur)+'°. Я поставил B₂ правильно. '}Нужно Δz = ${fmt(p)}·tg ${al}° ≈ <b>${fmt(Dz)}</b> мм.</div></div>`));
+  mcq(R,{q:'Сколько всего решений у задачи?',noShuffle:true,opts:[{t:'0',ok:false},{t:'1',ok:false},{t:'2',ok:true},{t:'бесконечно много',ok:false}],onAnswer:ok2=>api.done(good&&ok2,'Треугольник даёт только <b>величину</b> Δz, но не знак: B может быть на Δz <b>выше</b> A или на Δz <b>ниже</b>. Оба отрезка имеют одну и ту же A₁B₁ и один и тот же угол α → <b>2 решения</b> (B₂ и B₂′).')});};
+}}}};
+GEN.inv2={id:'inv2',name:'Обратная задача · тип 2 (с окружностью)',make(){let A,B,be,Dx,Dy,R,Dz,imp=Math.random()<.2;
+ for(let i=0;i<1500;i++){A=[rnd(10,50),rnd(8,45),rnd(15,45)];B=[rnd(8,52),rnd(8,48),0];Dx=Math.abs(A[0]-B[0]);Dy=Math.abs(A[1]-B[1]);if(Dx<10||Dy<8)continue;const bmax=deg(Math.atan2(Dy,Dx));
+  if(imp){be=Math.round(bmax+rnd(7,14));if(be>78)continue;R=Dy/Math.tan(rad(be));Dz=NaN;break;}
+  if(bmax<20)continue;be=rnd(12,Math.floor(bmax)-6);R=Dy/Math.tan(rad(be));Dz=Math.sqrt(R*R-Dx*Dx);if(Dz>=6&&Dz<=24&&A[2]-Dz>=4&&A[2]+Dz<=56)break;}
+ return{render(box,api){const ub=-B[0],a1=P1(A),a2=P2(A),b1=[ub,-B[1]];let zc=A[2]+4,st=0;
+ box.appendChild(el(`<div class="tr-task">Даны A₁, A₂ и B₁. Угол наклона AB к <b>П₂</b>: <span class="cang">β = ${be}°</span>. Найди B₂ (или докажи, что решений нет).</div>`));
+ const[Lc,Rc]=twoCol(box);const ep=new Ep(Lc,{maxH:420});ep.fit([a1,a2,b1,[ub,A[2]+(Dz||R)],[ub,A[2]-(Dz||R)],[a2[0]-R,a2[1]],[a2[0]+R,a2[1]],[a2[0],a2[1]+R+4]],10);
+ ep.draw=g=>{g.link(a1,a2);g.inf([ub,0],[ub,1],{c:'aux',w:1,dash:2});g.line(a1,b1,{c:'c1',w:2.6});
+  const F=[ub,a1[1]];g.link(a1,F,{c:'dd'});g.line(F,b1,{c:'dd',w:3});g.text(V.lerp(F,b1,.5),'Δy = '+Dy,{c:'dd',dx:8,size:13});
+  drawPts(g,[{p:a1,label:'A₁',c:'c1',lp:lblDir(a1,b1)},{p:b1,label:'B₁',c:'c1',lp:[10,10]},{p:a2,label:'A₂',c:'c2',lp:[-22,-8]}]);
+  if(st===0){const b2=[ub,zc];g.line(a2,b2,{c:'c2',w:2.6});g.handle('b',b2,{c:'c2',label:'B₂'});}
+  else{const N=72,pts=[];for(let i=0;i<=N;i++){const t=i/N*2*Math.PI;pts.push([a2[0]+R*Math.cos(t),a2[1]+R*Math.sin(t)]);}for(let i=0;i<N;i++)g.line(pts[i],pts[i+1],{c:'nv',w:1.4});g.text([a2[0],a2[1]+R],'R = Δy / tg β = '+fmt(R),{c:'nv',anchor:'middle',dy:-10,size:13});
+   if(!isNaN(Dz))[1,-1].forEach(s=>{const q=[ub,A[2]+s*Dz];g.line(a2,q,{c:'c2',w:2.6});g.pt(q,s>0?'B₂':'B₂′',{c:'c2',lp:[8,s>0?-10:12]});});}};
+ const live=el('<div class="live"></div>');const updL=()=>live.innerHTML=`|A₂B₂| сейчас: <b>${fmt(Math.hypot(Dx,zc-A[2]))}</b> мм`;updL();
+ ep.onDrag=(id,pp)=>{zc=clamp(Math.round(pp[1]*2)/2,-5,64);updL();};ep.render();
+ api.hint('β — угол к П₂, а дана только A₁B₁. Значит: Δy берём с П₁ (жёлтый), строим треугольник с катетом Δy и углом β напротив него → второй катет = <b>|A₂B₂| = Δy / tg β</b>. Потом циркулем из A₂ радиусом |A₂B₂| — до линии связи B. Окружность может пересечь её в 2 точках, коснуться (1) или не достать (0).');
+ Rc.appendChild(el(`<p>Δx = ${Dx} мм (между линиями связи), Δy = ${Dy} мм.<br>1) Найди нужную длину |A₂B₂| = Δy / tg β.<br>2) Тяни B₂, пока |A₂B₂| не станет такой. Если так нельзя — «Решений нет».</p>`));Rc.appendChild(live);
+ const cb=el('<div class="inrow"><button class="btn sm">Проверить B₂</button><button class="btn ghost sm">Решений нет</button></div>');Rc.appendChild(cb);
+ const fin=(ok,msg)=>{cb.querySelectorAll('button').forEach(b=>b.disabled=true);st=1;ep.render();Rc.appendChild(el(`<div class="fb"><div class="box ${ok?'ok':'bad'}">${ok?'✅ ':'❌ '}${msg}</div></div>`));
+  api.done(ok,`Нужная длина |A₂B₂| = Δy / tg β = ${Dy} / tg ${be}° ≈ <b>${fmt(R)}</b> мм. Самая короткая возможная A₂B₂ — когда B₂ на уровне A₂: тогда |A₂B₂| = Δx = ${Dx}. ${isNaN(Dz)?`${fmt(R)} &lt; ${Dx} → окружность <b>не достаёт</b> до линии связи → <b>решений нет</b>.`:`${fmt(R)} &gt; ${Dx} → окружность пересекает линию связи в <b>двух</b> точках → 2 решения (B₂ и B₂′), Δz ≈ ${fmt(Dz)}.`}`);};
+ cb.children[0].onclick=()=>{if(isNaN(Dz)){fin(false,'Тут решений нет — ни одно положение B₂ не даёт нужный угол.');return;}const L=Math.hypot(Dx,zc-A[2]);fin(Math.abs(L-R)<=1,Math.abs(L-R)<=1?'Попал в одно из двух решений!':`|A₂B₂| = ${fmt(L)}, а нужно ${fmt(R)}.`);};
+ cb.children[1].onclick=()=>fin(isNaN(Dz),isNaN(Dz)?'Верно: решений нет!':'Решения есть — окружность пересекает линию связи.');
+}}}};
+
+'use strict';
+/* ===================== ПЛОСКОСТИ: тип ===================== */
+const PT={
+ gen:{n:'общего положения',why:'Все три проекции — <b>треугольники</b> (ни одна не схлопнулась в линию) → плоскость не ∥ и не ⊥ ни одной П → <b>общего положения</b>. НВ фигуры нет нигде.'},
+ hp:{n:'горизонтально-проецирующая (⊥ П₁)',why:'На <b>П₁</b> треугольник схлопнулся в <b>наклонную</b> линию → сверху плоскость видна «торцом» → <b>⊥ П₁</b>. Линия наклонная (не ∥ x) → это не плоскость уровня. Все точки плоскости «падают» на эту линию — собирательное свойство.'},
+ fp:{n:'фронтально-проецирующая (⊥ П₂)',why:'На <b>П₂</b> треугольник — <b>наклонная</b> линия → плоскость ⊥ П₂ (как открытая крышка ноутбука, если смотреть спереди).'},
+ pp:{n:'профильно-проецирующая (⊥ П₃)',why:'На П₁ и П₂ — треугольники, а на <b>П₃</b> — <b>наклонная</b> линия → ⊥ П₃ (скат крыши, конёк которой вдоль x). Без третьей проекции её легко принять за общего положения!'},
+ hl:{n:'горизонтальная (уровня, ∥ П₁)',why:'На П₂ — линия <b>∥ оси x</b> (и на П₃ — ∥ y′) → у всех точек <b>одинаковая высота z</b> → плоскость ∥ П₁. На П₁ фигура в <b>НВ</b>.'},
+ fl:{n:'фронтальная (уровня, ∥ П₂)',why:'На П₁ — линия <b>∥ оси x</b> → у всех точек одинаковая глубина y → ∥ П₂. На П₂ фигура в <b>НВ</b>.'},
+ pl:{n:'профильная (уровня, ∥ П₃)',why:'На П₁ и П₂ — <b>вертикальные</b> линии на одной линии связи → у всех точек одинаковый x → ∥ П₃. На П₃ — <b>НВ</b>.'}
+};
+const PTK=Object.keys(PT);
+function triArea3(A,B,C){return V.len(V.cross(V.sub(B,A),V.sub(C,A)))/2;}
+function ar2(T,k){const q=T.map(PR[k]);return Math.abs((q[1][0]-q[0][0])*(q[2][1]-q[0][1])-(q[2][0]-q[0][0])*(q[1][1]-q[0][1]))/2;}
+function genPlaneTri(t){for(let it=0;it<1500;it++){const r=()=>rnd(6,52);let T;
+ if(t==='gen'){T=[[r(),r(),r()],[r(),r(),r()],[r(),r(),r()]];const n=V.norm(V.cross(V.sub(T[1],T[0]),V.sub(T[2],T[0])));if(n.some(c=>Math.abs(c)<0.3))continue;}
+ else if(['hp','fp','pp'].includes(t)){const ang=rad(Math.random()<.5?rndf(28,62):rndf(118,152)),c=Math.cos(ang),s=Math.sin(ang),p0=[rnd(22,36),rnd(22,36)];const ts=[rndf(-20,-9),rndf(-4,4),rndf(9,20)];
+  T=ts.map(tt=>{const a=p0[0]+tt*c,b=p0[1]+tt*s,o=r();return t==='hp'?[a,b,o]:t==='fp'?[a,o,b]:[o,a,b];}).map(p=>p.map(x=>Math.round(x*2)/2));}
+ else{const v=r();T=[0,1,2].map(()=>{const p=[r(),r(),r()];p[{hl:2,fl:1,pl:0}[t]]=v;return p;});}
+ if(!T.every(p=>inR(p,5,55)))continue;if(triArea3(...T)<180)continue;
+ const need={gen:[1,2,3],hp:[2,3],fp:[1,3],pp:[1,2],hl:[1],fl:[2],pl:[3]}[t];if(!need.every(k=>ar2(T,k)>120))continue;
+ return T;}return null;}
+function drawTri(g,T,o={}){const n=o.n||['A','B','C'],ks=o.ks||[1,2,3];
+ if(o.links!==false)T.forEach(X=>{g.link(P1(X),P2(X));if(ks.includes(3)){g.link(P2(X),P3(X));g.link(P1(X),[X[1],-X[1]]);g.link([X[1],-X[1]],P3(X));}});
+ ks.forEach(k=>{const q=T.map(PR[k]);const nv=o.nv&&o.nv.includes(k);g.poly(q,{c:nv?'nv':'c'+k,fo:nv?.2:.1,w:nv?2.6:1.8});});
+ const pts=[];ks.forEach(k=>{const q=T.map(PR[k]),cen=V.mul(q.reduce((a,b)=>V.add(a,b),[0,0]),1/3);q.forEach((p,i)=>pts.push({p,label:n[i]+SUB[k],c:'c'+k,lp:lblDir(p,cen,13)}));});drawPts(g,pts);}
+function triPts(T,p3=true){const r=[];T.forEach(X=>{r.push(P1(X),P2(X));if(p3)r.push(P3(X),[X[1],-X[1]]);});return r;}
+GEN.ptype={id:'ptype',name:'Положение плоскости по эпюру',make(){const t=pick(PTK);const T=genPlaneTri(t);return{render(box,api){
+ box.appendChild(el(`<div class="tr-task">Плоскость задана треугольником ABC (три проекции). Как она расположена?</div>`));
+ const[L,R]=twoCol(box);const ep=new Ep(L,{axes:'xyz',maxH:420});ep.fit(triPts(T),8);let nv=null;ep.draw=g=>drawTri(g,T,{nv});ep.render();
+ api.hint('Ищи проекцию, которая схлопнулась в <b>линию</b>. Нет такой → общего положения. Линия <b>наклонная</b> → проецирующая (⊥ той П, где линия). Линия <b>∥ оси</b> → плоскость уровня, а НВ — на другой проекции.');
+ mcq(R,{q:'Положение плоскости:',noShuffle:true,cols:1,opts:PTK.map(k=>({t:PT[k].n,ok:k===t})),onAnswer:ok=>{nv={hl:[1],fl:[2],pl:[3]}[t]||null;ep.render();api.done(ok,PT[t].why);}});
+}}}};
+
+/* ===================== ВЗАИМНОЕ ПОЛОЖЕНИЕ ===================== */
+GEN.pol={id:'pol',name:'Лежит ли точка на прямой?',make(){const prof=Math.random()<.25;let A,B,M,yes=Math.random()<.5;
+ for(let i=0;i<500;i++){if(prof){const x=rnd(18,42);A=[x,rnd(6,22),rnd(36,52)];B=[x,rnd(32,50),rnd(6,22)];}else[A,B]=genGeneral(10);
+  const t1=rndf(.25,.75);M=V.lerp(A,B,t1);if(!yes){if(prof){const t2=t1+(Math.random()<.5?-1:1)*rndf(.18,.3);if(t2<.12||t2>.88)continue;M=[A[0],A[1]+(B[1]-A[1])*t1,A[2]+(B[2]-A[2])*t2];}else{const w=pick([1,2]);M=M.slice();M[w]+=(Math.random()<.5?-1:1)*rnd(6,10);}}
+  M=M.map(c=>Math.round(c*2)/2);if(inR(M,3,57))break;}
+ return{render(box,api){box.appendChild(el(`<div class="tr-task">Принадлежит ли точка M прямой AB?</div>`));const[L,R]=twoCol(box);
+ const ep=new Ep(L,{maxH:400,axes:prof?'xyz':'x'});let show=false;
+ ep.fit(prof?segPts(A,B,true).concat([P1(M),P2(M),P3(M)]):segPts(A,B).concat([P1(M),P2(M)]),8);
+ ep.draw=g=>{drawSeg2(g,A,B,{p3:prof&&show});g.link(P1(M),P2(M),{c:'ang'});g.pt(P1(M),'M₁',{c:'ang',lp:[-26,0]});g.pt(P2(M),'M₂',{c:'ang',lp:[-26,0]});
+  if(prof&&show){g.link(P2(M),P3(M),{c:'ang'});g.link(P1(M),[M[1],-M[1]],{c:'ang'});g.link([M[1],-M[1]],P3(M),{c:'ang'});g.pt(P3(M),'M₃',{c:'ang'});}};
+ ep.render();
+ api.hint(prof?'Осторожно: AB — <b>профильная</b> прямая (обе проекции на одной вертикали). Любая точка этой вертикали «попадает» на проекции! Проверь <b>отношение</b>: A₁M₁ : M₁B₁ = A₂M₂ : M₂B₂? (свойство 7) — или построй третью проекцию.':'Свойство 6: если M на прямой, то M₁ лежит на A₁B₁ <b>и</b> M₂ лежит на A₂B₂. Проверь обе проекции.');
+ mcq(R,{q:'Ответ:',noShuffle:true,opts:[{t:'Да, лежит',ok:yes},{t:'Нет, не лежит',ok:!yes}],onAnswer:ok=>{show=true;ep.render();let ex;
+  if(prof){const r1=Math.abs(M[1]-A[1])/Math.abs(B[1]-M[1]),r2=Math.abs(M[2]-A[2])/Math.abs(B[2]-M[2]);ex=`Прямая профильная — проекции «вертикальные», и попадание M₁, M₂ на них ничего не доказывает. Сравниваем отношения: A₁M₁ : M₁B₁ ≈ ${fmt(r1,2)}, A₂M₂ : M₂B₂ ≈ ${fmt(r2,2)} → ${yes?'равны → <b>лежит</b>':'не равны → <b>не лежит</b>'}. Третья проекция (теперь показана) это подтверждает: M₃ ${yes?'на':'не на'} A₃B₃.`;}
+  else ex=yes?'M₁ лежит на A₁B₁ <b>и</b> M₂ лежит на A₂B₂ → точка на прямой (свойство 6).':'Одна из проекций M не попала на одноимённую проекцию прямой → <b>не лежит</b>. Достаточно одного «промаха».';
+  api.done(ok,ex);}});}}}};
+function crossOK(a,b,c,d){const r=lx(a,b,c,d);return r&&r.t>0.12&&r.t<0.88&&r.u>0.12&&r.u<0.88?r:null;}
+function drawNamedLine(g,X,Y,c,nm,k){g.line(PR[k](X),PR[k](Y),{c,w:2.6});const lp=lblDir(PR[k](Y),PR[k](X));g.text(PR[k](Y),nm+SUB[k],{c,dx:lp[0],dy:lp[1],anchor:'middle'});}
+GEN.rel={id:'rel',name:'Две прямые: ∥, пересекаются или скрещиваются?',make(){const kind=pick(['par','int','skew','skew']);let A,B,C,D;
+ for(let i=0;i<3000;i++){[A,B]=genGeneral(10);
+  if(kind==='par'){const off=[rnd(-16,16),rnd(-16,16),rnd(-16,16)];if(V.len(off)<12)continue;C=V.add(A,off);D=V.add(C,V.mul(V.sub(B,A),rndf(.6,1.1))).map(Math.round);
+   if(distPtLine(P1(C),P1(A),P1(B))<6||distPtLine(P2(C),P2(A),P2(B))<6)continue;}
+  else if(kind==='int'){const K=V.lerp(A,B,rndf(.3,.7)).map(Math.round);const dir=[rnd(-20,20),rnd(-20,20),rnd(-20,20)];if(Math.abs(dir[0])<8||Math.abs(dir[1])<5||Math.abs(dir[2])<5)continue;const s=rnd(6,10)/10,t=rnd(6,10)/10;C=V.sub(K,V.mul(dir,s)).map(Math.round);D=V.add(K,V.mul(dir,t)).map(Math.round);
+   const r1=crossOK(P1(A),P1(B),P1(C),P1(D)),r2=crossOK(P2(A),P2(B),P2(C),P2(D));if(!r1||!r2||Math.abs(r1.p[0]-r2.p[0])>0.5)continue;}
+  else{const Q1=V.lerp(A,B,rndf(.25,.45)),Q2=V.lerp(A,B,rndf(.55,.75));const q1=Q1.slice(),q2=Q2.slice();q1[2]+=(Math.random()<.5?-1:1)*rnd(8,16);q2[1]+=(Math.random()<.5?-1:1)*rnd(8,16);
+   const X=Math.random()<.5?[q2,q1]:[q1,q2];const dd=V.sub(X[1],X[0]);C=V.sub(X[0],V.mul(dd,rndf(.4,.9))).map(Math.round);D=V.add(X[1],V.mul(dd,rndf(.4,.9))).map(Math.round);
+   const r1=crossOK(P1(A),P1(B),P1(C),P1(D)),r2=crossOK(P2(A),P2(B),P2(C),P2(D));if(!r1||!r2||Math.abs(r1.p[0]-r2.p[0])<6)continue;}
+  if(inR(C,3,57)&&inR(D,3,57)&&Math.abs(C[0]-D[0])>=8)break;}
+ return{render(box,api){box.appendChild(el(`<div class="tr-task">Как расположены прямые a (AB) и b (CD)?</div>`));const[L,R]=twoCol(box);
+ const ep=new Ep(L,{maxH:400});let show=false;ep.fit([A,B,C,D].flatMap(X=>[P1(X),P2(X)]));
+ ep.draw=g=>{[[A,B,'ink','a'],[C,D,'teal','b']].forEach(([X,Y,c,nm])=>{g.link(P1(X),P2(X));g.link(P1(Y),P2(Y));[1,2].forEach(k=>drawNamedLine(g,X,Y,c,nm,k));});
+  if(show&&kind!=='par'){const r1=lx(P1(A),P1(B),P1(C),P1(D)),r2=lx(P2(A),P2(B),P2(C),P2(D));const same=Math.abs(r1.p[0]-r2.p[0])<1;g.inf(r1.p,[r1.p[0],r1.p[1]+1],{c:same?'nv':'ang',w:1.3,dash:1});if(!same)g.inf(r2.p,[r2.p[0],r2.p[1]+1],{c:'ang',w:1.3,dash:1});g.pt(r1.p,'',{c:same?'nv':'ang',r:5});g.pt(r2.p,'',{c:same?'nv':'ang',r:5});}};
+ ep.render();api.hint('Главная проверка: точки пересечения проекций (a₁∩b₁ и a₂∩b₂) лежат на <b>одной вертикальной линии связи</b>? Да → пересекаются. Нет → скрещиваются. Если a₁∥b₁ и a₂∥b₂ → параллельны.');
+ mcq(R,{q:'Прямые:',noShuffle:true,cols:1,opts:[{t:'параллельны',ok:kind==='par'},{t:'пересекаются',ok:kind==='int'},{t:'скрещиваются',ok:kind==='skew'}],onAnswer:ok=>{show=true;ep.render();
+  api.done(ok,{par:'a₁ ∥ b₁ и a₂ ∥ b₂ → прямые <b>параллельны</b> (свойство 9: параллельность сохраняется).',int:'Точки пересечения проекций лежат <b>на одной линии связи</b> (зелёная) → это две проекции <b>одной</b> точки K, общей для обеих прямых → <b>пересекаются</b>.',skew:'Проекции пересекаются, но точки пересечения <b>не на одной линии связи</b> (красные) → это проекции <b>разных</b> точек → общей точки нет, и не параллельны → <b>скрещиваются</b>. Самая частая ловушка!'}[kind]);}});}}}};
+GEN.comp={id:'comp',name:'Конкурирующие точки: что видно?',make(){const pl=pick([1,2]);let A,B,C,D,ka,kb;
+ for(let i=0;i<3000;i++){const x0=rnd(18,42),q0=rnd(14,40),h1=rnd(8,50),h2=rnd(8,50);if(Math.abs(h1-h2)<10)continue;
+  ka=pl===1?[x0,q0,h1]:[x0,h1,q0];kb=pl===1?[x0,q0,h2]:[x0,h2,q0];const da=[rnd(-18,18),rnd(-18,18),rnd(-18,18)],db=[rnd(-18,18),rnd(-18,18),rnd(-18,18)];
+  if(Math.abs(da[0])<8||Math.abs(db[0])<8)continue;const pa=PR[pl](da),pb=PR[pl](db);if(Math.abs(pa[0]*pb[1]-pa[1]*pb[0])/(V.len(pa)*V.len(pb)+1e-9)<0.45)continue;
+  A=V.sub(ka,da);B=V.add(ka,da);const s=rndf(.7,1.2),t=rndf(.7,1.2);C=V.sub(kb,V.mul(db,s));D=V.add(kb,V.mul(db,t));
+  /* другая проекция не должна давать «ложное» пересечение на той же линии связи */
+  if([A,B,C,D].every(p=>inR(p,3,57)))break;}
+ const ans=pl===1?(ka[2]>kb[2]?'a':'b'):(ka[1]>kb[1]?'a':'b');const o=3-pl;
+ return{render(box,api){box.appendChild(el(`<div class="tr-task">Прямые a и b скрещиваются. Какая из них <b>видна</b> на <span class="c${pl}">П${SUB[pl]}</span> там, где пересекаются их ${pl===1?'горизонтальные':'фронтальные'} проекции (точка «?»)?</div>`));
+ const[L,R]=twoCol(box);const ep=new Ep(L,{maxH:400});let show=false;ep.fit([A,B,C,D].flatMap(X=>[P1(X),P2(X)]));
+ ep.draw=g=>{const kp=PR[pl](ka);[[A,B],[C,D]].forEach(([X,Y])=>{g.link(P1(X),P2(X));g.link(P1(Y),P2(Y));});
+  drawNamedLine(g,A,B,'ink','a',o);drawNamedLine(g,C,D,'teal','b',o);
+  const vis=ans==='a'?[A,B,'ink','a']:[C,D,'teal','b'],hid=ans==='a'?[C,D,'teal','b']:[A,B,'ink','a'];
+  if(show){drawNamedLine(g,hid[0],hid[1],hid[2],hid[3],pl);const dir=V.norm(V.sub(PR[pl](hid[1]),PR[pl](hid[0])));g.gap(V.add(kp,V.mul(dir,-4)),V.add(kp,V.mul(dir,4)),{w:9});drawNamedLine(g,vis[0],vis[1],vis[2],vis[3],pl);
+   const qa=PR[o](ka),qb=PR[o](kb);g.inf(kp,[kp[0],kp[1]+1],{c:'ang',w:1.2,dash:1});g.pt(qa,'1'+SUB[o],{c:'ink',lp:[12,-6]});g.pt(qb,'2'+SUB[o],{c:'teal',lp:[12,6]});g.pt(kp,'1'+SUB[pl]+'≡2'+SUB[pl],{c:'ang',lp:[10,pl===1?14:-14]});}
+  else{drawNamedLine(g,A,B,'ink','a',pl);drawNamedLine(g,C,D,'teal','b',pl);g.pt(kp,'?',{c:'ang',lp:[9,-11]});}};
+ ep.render();api.hint(pl===1?'В точке «?» на одном вертикальном луче лежат две точки: 1 на a и 2 на b. Сверху видна та, что <b>выше</b>. Высоту видно на П₂ — проведи линию связи вверх.':'В точке «?» на одном луче «на нас» две точки: 1 на a и 2 на b. Спереди видна та, что <b>ближе к нам</b> (больше y). Глубину видно на П₁: дальше от оси x = ближе к нам.');
+ mcq(R,{q:'Видна прямая:',noShuffle:true,opts:[{t:'a',ok:ans==='a'},{t:'b',ok:ans==='b'}],onAnswer:ok=>{show=true;ep.render();
+  api.done(ok,pl===1?`Линия связи вверх на П₂: у точки 1 (на a) z = ${fmt(ka[2])}, у точки 2 (на b) z = ${fmt(kb[2])}. Сверху видна <b>верхняя</b> → видна <b>${ans}</b>, другая в этом месте уходит под неё (разрыв). Правило: <i>горизонтально-конкурирующие — видна та, что выше</i>.`:`Линия связи вниз на П₁: у точки 1 (на a) y = ${fmt(ka[1])}, у точки 2 (на b) y = ${fmt(kb[1])}. Спереди видна <b>ближняя</b> (больше y, дальше от оси x) → видна <b>${ans}</b>. Правило: <i>фронтально-конкурирующие — видна та, что ближе к нам</i>.`);}});}}}};
+
+function genGenTri(){for(let i=0;i<300;i++){const T=genPlaneTri('gen');if(!T)continue;if(ar2(T,1)>260&&ar2(T,2)>260&&T.every(p=>p[2]>=8&&p[1]>=8))return T;}return[[50,10,15],[30,45,45],[10,20,25]];}
+GEN.pip={id:'pip',name:'Точка в плоскости треугольника',make(){const T=genGenTri();const mode=Math.random()<.65?'find':'check';let w=[rndf(.2,.55),rndf(.2,.55)];w.push(1-w[0]-w[1]);if(w[2]<.15)w=[.35,.35,.3];
+ const D=T[0].map((_,i)=>w[0]*T[0][i]+w[1]*T[1][i]+w[2]*T[2][i]);const K=T[1].map((_,i)=>(w[1]*T[1][i]+w[2]*T[2][i])/(w[1]+w[2]));
+ const yes=Math.random()<.5;const E=yes?D:[D[0],D[1]+(Math.random()<.5?-1:1)*rnd(6,10),D[2]];
+ return{render(box,api){const ud=-D[0];let vc=-3,st=0;
+ box.appendChild(el(mode==='find'?`<div class="tr-task">Точка D лежит в плоскости треугольника ABC. Дана D₂. Найди D₁ — тяни точку по линии связи.</div>`:`<div class="tr-task">Лежит ли точка E в плоскости треугольника ABC?</div>`));
+ const[L,R]=twoCol(box);const ep=new Ep(L,{maxH:420});ep.fit(triPts(T,false).concat([P1(E)]),8);
+ ep.draw=g=>{drawTri(g,T,{ks:[1,2]});
+  if(st>=1){const a2=P2(T[0]),k2=P2(K),a1=P1(T[0]),k1=P1(K);g.line(a2,k2,{c:'nv',w:2});g.pt(k2,'1₂',{c:'nv',lp:lblDir(k2,a2)});g.link(k2,k1,{c:'nv'});g.pt(k1,'1₁',{c:'nv',lp:lblDir(k1,a1)});g.line(a1,k1,{c:'nv',w:2});g.pt(P1(D),'',{c:'nv',r:5.5});}
+  if(mode==='find'){g.inf([ud,0],[ud,1],{c:'aux',w:1,dash:2});g.pt(P2(D),'D₂',{c:'ang',lp:[9,-10]});if(st===0)g.handle('d',[ud,vc],{c:'ang',label:'D₁'});else g.pt([ud,vc],'D₁',{c:'ang',lp:[9,10]});}
+  else{g.link(P1(E),P2(E),{c:'ang'});g.pt(P2(E),'E₂',{c:'ang',lp:[9,-10]});g.pt(P1(E),'E₁',{c:'ang',lp:[9,10]});}};
+ ep.onDrag=(id,p)=>{vc=clamp(Math.round(p[1]*2)/2,-60,5);};ep.render();
+ api.hint('Точка лежит в плоскости, если лежит на <b>прямой</b> этой плоскости. Проведи через D₂ вспомогательную прямую: из вершины A₂ через D₂ до стороны B₂C₂ (точка 1₂). Перенеси 1 по линии связи на B₁C₁, соедини A₁ с 1₁ — D₁ на этой прямой.');
+ const done=ok=>{st=1;ep.render();api.done(ok,`Вспомогательная прямая A–1 лежит в плоскости (A и 1 ∈ BC принадлежат плоскости). ${mode==='find'?'D лежит на ней → D₁ на A₁1₁, на линии связи D (зелёная точка).':(yes?'E₁ попала на A₁1₁ → <b>E лежит</b> в плоскости.':'E₁ <b>не попала</b> на A₁1₁ (там зелёная точка) → E <b>не лежит</b>: она висит перед или за плоскостью.')} Этот приём — «вспомогательная прямая» — основа почти всех задач на плоскость.`);};
+ if(mode==='find'){const cb=el('<div><p class="cmut">Сама по себе D₂ «не знает» глубину. Глубину подскажет прямая плоскости, на которой лежит D.</p><button class="btn sm">Проверить D₁</button></div>');R.appendChild(cb);
+  cb.querySelector('button').onclick=function(){this.disabled=true;const ok=Math.abs(vc+D[1])<=1.3;R.appendChild(el(`<div class="fb"><div class="box ${ok?'ok':'bad'}">${ok?'✅ Точно в плоскости!':'❌ Мимо: D₁ должна быть в зелёной точке.'}</div></div>`));done(ok);};}
+ else mcq(R,{q:'Ответ:',noShuffle:true,opts:[{t:'Да, лежит',ok:yes},{t:'Нет',ok:!yes}],onAnswer:done});
+}}}};
+GEN.hf={id:'hf',name:'Горизонталь / фронталь плоскости',make(){const kind=pick(['h','f']);const c=kind==='h'?2:1;let T;for(let i=0;i<300;i++){T=genGenTri();const v=T.map(p=>p[c]).sort((a,b)=>a-b);if(v[1]-v[0]>=7&&v[2]-v[1]>=7)break;}
+ const idx=[0,1,2].sort((i,j)=>T[i][c]-T[j][c]);const U=T[idx[0]],Vv=T[idx[1]],W=T[idx[2]];const K=V.lerp(U,W,(Vv[c]-U[c])/(W[c]-U[c]));const vn='ABC'[idx[1]];
+ const first=kind==='h'?2:1,second=3-first;
+ return{render(box,api){let st=0,vc=first===2?-3:3;const uk=-K[0];
+ box.appendChild(el(`<div class="tr-task">Построй ${kind==='h'?'<b>горизонталь h</b>':'<b>фронталь f</b>'} плоскости ABC через вершину ${vn}.</div>`));
+ const[L,R]=twoCol(box);const ep=new Ep(L,{maxH:420});ep.fit(triPts(T,false),8);
+ ep.draw=g=>{drawTri(g,T,{ks:[1,2]});if(st>=1){const a=PR[first](Vv),b=PR[first](K);const d=V.norm(V.sub(b,a));g.line(V.add(a,V.mul(d,-8)),V.add(b,V.mul(d,8)),{c:'nv',w:2.6});g.pt(b,'1'+SUB[first],{c:'nv',lp:[6,first===2?-12:12]});g.text(V.add(b,V.mul(d,8)),kind+SUB[first],{c:'nv',dx:6,dy:-10});
+   g.inf([uk,0],[uk,1],{c:'aux',w:1,dash:2});const q=[uk,vc];if(st===1)g.handle('k',q,{c:'nv',label:'1'+SUB[second]});else{g.pt(q,'1'+SUB[second],{c:'nv',lp:[8,10]});const a2=PR[second](Vv),d2=V.norm(V.sub(q,a2));g.line(V.add(a2,V.mul(d2,-8)),V.add(q,V.mul(d2,8)),{c:'nv',w:2.6});g.text(V.add(q,V.mul(d2,8)),kind+SUB[second],{c:'nv',dx:6,dy:10});}}};
+ ep.onDrag=(id,p)=>{vc=clamp(Math.round(p[1]*2)/2,-60,60);};ep.render();
+ api.hint(kind==='h'?'Горизонталь ∥ П₁ → все её точки на одной высоте → на П₂ она <b>горизонтальна: h₂ ∥ x</b>. Её строят первой. Точку 1 (где h₂ пересекла сторону) переносят по линии связи вниз на ту же сторону на П₁.':'Фронталь ∥ П₂ → все её точки на одной глубине → на П₁ она <b>∥ x</b>. Строим f₁ первой, точку 1 переносим вверх на ту же сторону на П₂.');
+ mcq(R,{q:'Шаг 1. С какой проекции начинаем?',cols:1,opts:[{t:`${kind}${SUB[first]} — через ${vn}${SUB[first]} параллельно оси x`,ok:true,why:kind==='h'?'h ∥ П₁ → одинаковая высота → на П₂ это горизонтальная линия. Её положение известно сразу!':'f ∥ П₂ → одинаковая глубина → на П₁ это линия ∥ x. Её знаем сразу.'},{t:`${kind}${SUB[second]} — через ${vn}${SUB[second]} параллельно оси x`,ok:false,why:`${kind}${SUB[second]} в общем случае НЕ параллельна x — её направление ещё неизвестно.`},{t:'неважно, с любой',ok:false,why:'«Бесплатно» известна только одна проекция — та, что ∥ x.'}],onAnswer:ok1=>{st=1;ep.render();
+  const s2=el(`<div class="mcq"><div class="q">Шаг 2. ${kind}${SUB[first]} пересекла сторону в точке 1${SUB[first]}. Перенеси 1 по линии связи на <b>ту же сторону</b> на П${SUB[second]} (тяни точку).</div><button class="btn sm">Проверить</button></div>`);R.appendChild(s2);
+  s2.querySelector('button').onclick=function(){this.disabled=true;const target=PR[second](K)[1];const ok2=Math.abs(vc-target)<=1.3;if(!ok2)vc=target;st=2;ep.render();
+   R.appendChild(el(`<div class="fb"><div class="box ${ok2?'ok':'bad'}">${ok2?'✅ Есть!':'❌ Точка 1 должна лечь на ту же сторону, что и на другой проекции. Поправил.'}</div></div>`));
+   mcq(R,{q:`Шаг 3. Что показывает ${kind}${SUB[second]}?`,cols:1,opts:[{t:kind==='h'?'натуральную величину отрезков горизонтали (h ∥ П₁)':'натуральную величину отрезков фронтали (f ∥ П₂)',ok:true,why:'Прямая уровня проецируется на «свою» плоскость без искажений.'},{t:'высоту плоскости над П₁',ok:false},{t:'линию пересечения плоскости с П₁',ok:false,why:'Это след. Он тоже горизонталь, но на нулевой высоте.'}],onAnswer:ok3=>api.done(ok1&&ok2&&ok3,`Порядок для ${kind==='h'?'горизонтали: <b>h₂ ∥ x → 1₂ → 1₁ → h₁</b>':'фронтали: <b>f₁ ∥ x → 1₁ → 1₂ → f₂</b>'}. Почему работает: две точки (${vn} и 1) лежат в плоскости → прямая через них в плоскости. Все ${kind==='h'?'горизонтали':'фронтали'} плоскости параллельны друг другу.`)});};}});
+}}}};
+GEN.cut={id:'cut',name:'Прямая в плоскости / пересечение с проецирующей',make(){const v=pick(['line','line','cut1','cut2']);const T=genGenTri();let P,Q,k,s1,s2;
+ for(let i=0;i<500;i++){const S=[[0,1],[0,2],[1,2]];const ii=shuffle([0,1,2]);s1=S[ii[0]];s2=S[ii[1]];P=V.lerp(T[s1[0]],T[s1[1]],rndf(.25,.75));Q=V.lerp(T[s2[0]],T[s2[1]],rndf(.25,.75));k=v==='cut1'?1:v==='cut2'?2:pick([1,2]);if(V.dist(P1(P),P1(Q))>=12&&V.dist(P2(P),P2(Q))>=12&&Math.abs(P[0]-Q[0])>=6)break;}
+ const o=3-k,sn=s=>'ABC'[s[0]]+'ABC'[s[1]];
+ return{render(box,api){let st=v==='line'?1:0,c1=k===1?3:-3,c2=k===1?3:-3,good=true;const tp=PR[o](P)[1],tq=PR[o](Q)[1];
+ box.appendChild(el(`<div class="tr-task">${v==='line'?`Прямая l лежит в плоскости треугольника ABC. Дана l${SUB[k]}. Построй l${SUB[o]}.`:`Плоскость Σ ⊥ П${SUB[k]} задана следом Σ${SUB[k]}. Построй линию пересечения l плоскостей Σ и ABC.`}</div>`));
+ const[L,R]=twoCol(box);const ep=new Ep(L,{maxH:420});ep.fit(triPts(T,false),8);
+ ep.draw=g=>{drawTri(g,T,{ks:[1,2]});const pk=PR[k](P),qk=PR[k](Q),d=V.norm(V.sub(qk,pk));
+  if(v==='line'){g.line(V.add(pk,V.mul(d,-10)),V.add(qk,V.mul(d,10)),{c:'ang',w:2.6});g.text(V.add(pk,V.mul(d,-10)),'l'+SUB[k],{c:'ang',dx:-12,dy:-8});}
+  else{g.inf(pk,qk,{c:'teal',w:2.2});g.text(V.add(qk,V.mul(d,14)),'Σ'+SUB[k],{c:'teal',dx:6,dy:-8});}
+  if(st>=1){g.pt(pk,'1'+SUB[k],{c:'ang',lp:[7,-11]});g.pt(qk,'2'+SUB[k],{c:'ang',lp:[7,-11]});[P,Q].forEach(X=>g.inf([-X[0],0],[-X[0],1],{c:'aux',w:1,dash:2}));
+   const p=[-P[0],c1],q=[-Q[0],c2];if(st===1){g.handle('p',p,{c:'ang',label:'1'+SUB[o]});g.handle('q',q,{c:'ang',label:'2'+SUB[o]});}
+   else{const dd=V.norm(V.sub(q,p));g.line(V.add(p,V.mul(dd,-10)),V.add(q,V.mul(dd,10)),{c:'ang',w:2.6});g.pt(p,'1'+SUB[o],{c:'ang',lp:[7,-11]});g.pt(q,'2'+SUB[o],{c:'ang',lp:[7,-11]});
+    if(v!=='line'){g.line(p,q,{c:'nv',w:4.5});g.line(pk,qk,{c:'nv',w:4.5});}}}};
+ ep.onDrag=(id,pp)=>{const vv=clamp(Math.round(pp[1]*2)/2,-60,60);if(id==='p')c1=vv;else c2=vv;};ep.render();
+ api.hint(`l${SUB[k]} пересекает стороны ${sn(s1)} и ${sn(s2)} в точках 1 и 2. Эти точки лежат и на l, и на сторонах → переносим их по линиям связи на <b>те же стороны</b> на П${SUB[o]}. Две точки → прямая l${SUB[o]}.`);
+ const dragStep=()=>{const s=el(`<div class="mcq"><div class="q">${v==='line'?'':'Шаг 2. '}Точки 1 и 2 — где l${SUB[k]} пересекает стороны ${sn(s1)} и ${sn(s2)}. Перенеси их по линиям связи на П${SUB[o]} на те же стороны (тяни обе).</div><button class="btn sm">Проверить</button></div>`);R.appendChild(s);
+  s.querySelector('button').onclick=function(){this.disabled=true;const ok=Math.abs(c1-tp)<=1.3&&Math.abs(c2-tq)<=1.3;c1=tp;c2=tq;st=2;ep.render();
+   R.appendChild(el(`<div class="fb"><div class="box ${ok?'ok':'bad'}">${ok?'✅ Готово!':'❌ Точки должны лечь на те же стороны — поправил.'}</div></div>`));
+   api.done(ok&&good,v==='line'?`Прямая лежит в плоскости, если проходит через <b>две точки</b> плоскости. 1 ∈ ${sn(s1)}, 2 ∈ ${sn(s2)} → обе в плоскости → l в плоскости. Та же логика, что у горизонтали и у точки в плоскости.`:`Собирательное свойство: всё, что лежит в Σ ⊥ П${SUB[k]}, проецируется на след Σ${SUB[k]}. Линия пересечения лежит в Σ → <b>l${SUB[k]} ≡ Σ${SUB[k]}</b> (известна сразу!). Дальше — как «прямая в плоскости»: точки 1 и 2 на сторонах переносим на П${SUB[o]}. <span class="cnv">Зелёным</span> — отрезок пересечения внутри треугольника.`);};};
+ if(v==='line')dragStep();else mcq(R,{q:'Шаг 1. Где линия пересечения l видна сразу, без построений?',cols:1,opts:[{t:`на П${SUB[k]}: l${SUB[k]} совпадает со следом Σ${SUB[k]}`,ok:true,why:`Σ ⊥ П${SUB[k]} — на П${SUB[k]} вся плоскость видна одной линией (следом). l лежит в Σ → её проекция тоже на следе.`},{t:`на П${SUB[o]}`,ok:false},{t:'нигде, надо строить обе проекции',ok:false,why:'Одна проекция уже есть бесплатно — собирательное свойство.'}],onAnswer:ok=>{good=ok;st=1;ep.render();dragStep();}});
+}}}};
+
+'use strict';
+const TQ=[
+ ['Прямая параллельна П₁. Как она называется?',['горизонталь','фронталь','горизонтально-проецирующая','профильная'],'«Горизонт» — пол, П₁. Параллельна полу = горизонталь. А «горизонтально-<b>проецирующая</b>» — перпендикулярная полу.'],
+ ['У отрезка A₂B₂ ∥ оси x. Где натуральная величина?',['на П₁','на П₂','нигде','на П₂ и П₃'],'A₂B₂ ∥ x → одинаковая высота → прямая ∥ П₁ (горизонталь) → НВ на П₁. Правило: <i>где проекция ∥ x — там НВ нет, она на другой</i>.'],
+ ['Фронтальная проекция отрезка — точка. Прямая…',['фронтально-проецирующая','фронталь','горизонтально-проецирующая','общего положения'],'Точка на П₂ = смотрим вдоль прямой спереди → она ⊥ П₂.'],
+ ['Для угла β (к П₂) катеты треугольника:',['A₂B₂ и Δy','A₁B₁ и Δz','A₂B₂ и Δz','A₁B₁ и Δy'],'Угол к П₂ → проекция на П₂. У A₂(x;z) нет y → Δy.'],
+ ['Для угла α (к П₁) катеты треугольника:',['A₁B₁ и Δz','A₂B₂ и Δy','A₁B₁ и Δy','A₂B₂ и Δz'],'Угол к П₁ → проекция на П₁. У A₁(x;y) нет z → Δz.'],
+ ['У фронтали без искажений виден угол…',['α — между f₂ и осью x','β — между f₁ и осью x','γ — между f₁ и осью y','никакой'],'f ∥ П₂ → на П₂ она в НВ, и угол между f₂ и осью x (линией пола) — наклон к полу, α.'],
+ ['У горизонтали без искажений виден угол…',['β — между h₁ и осью x','α — между h₂ и осью x','α — между h₁ и осью x','никакой'],'h ∥ П₁ → на П₁ она в НВ; ось x на П₁ — это линия передней стены → угол с ней = наклон к П₂, β.'],
+ ['Плоскость ⊥ П₁. Где окажутся горизонтальные проекции всех её точек?',['на её горизонтальном следе Σ₁','на оси x','на фронтальном следе','где угодно'],'Собирательное свойство: сверху такая плоскость видна «торцом» — линией Σ₁.'],
+ ['У горизонтали плоскости какая проекция всегда ∥ оси x?',['h₂','h₁','обе','никакая'],'h ∥ П₁ → одна высота → на П₂ горизонтальная линия. Поэтому h₂ строят первой.'],
+ ['С чего начинают строить фронталь плоскости?',['f₁ ∥ x','f₂ ∥ x','f₂ ∥ следу','с любой проекции'],'Фронталь ∥ П₂ → одинаковая глубина → на П₁ она ∥ x.'],
+ ['Проекции двух прямых пересекаются, и точки пересечения лежат на одной линии связи. Прямые…',['пересекаются','скрещиваются','параллельны','совпадают'],'Одна линия связи → проекции одной точки → общая точка есть.'],
+ ['Горизонтально-конкурирующие точки (A₁≡B₁). Какая видна на П₁?',['та, что выше (больше z)','та, что ближе к нам (больше y)','та, что левее','обе'],'Смотрим сверху — верхняя закрывает нижнюю. Высоту сравниваем на П₂.'],
+ ['Фронтально-конкурирующие точки (A₂≡B₂). Какая видна на П₂?',['та, что ближе к нам (больше y)','та, что выше','та, что дальше от нас','никакая'],'Смотрим спереди — ближняя закрывает дальнюю. Глубину сравниваем на П₁ (дальше от оси x = ближе к нам).'],
+ ['Точка лежит в плоскости, если…',['она лежит на прямой этой плоскости','её проекции внутри проекций треугольника','она на одной линии связи с вершиной','её проекции на следах'],'«Внутри треугольника на чертеже» — ловушка: так может выглядеть и точка, висящая над плоскостью.'],
+ ['Прямая лежит в плоскости, если…',['проходит через две точки плоскости','параллельна одной стороне треугольника','пересекает одну сторону','её проекции внутри треугольника'],'Или: проходит через точку плоскости и параллельна прямой этой плоскости.'],
+ ['Задают ли плоскость две скрещивающиеся прямые?',['нет','да','только если они ∥ П₁','да, если пересекаются их проекции'],'Скрещивающиеся прямые не лежат в одной плоскости. Плоскость задают только ∥ или пересекающиеся.'],
+ ['Сколько плоскостей проходит через три точки на одной прямой?',['бесконечно много','одна','ни одной','две'],'Как дверь на петлях: через прямую проходит «веер» плоскостей.'],
+ ['Горизонтальная плоскость уровня (∥ П₁) одновременно…',['⊥ П₂ и ⊥ П₃','⊥ П₁','общего положения','∥ П₂'],'Пол параллелен потолку и перпендикулярен стенам. Поэтому на П₂ и П₃ она — линии ∥ осям.'],
+ ['НВ отрезка общего положения по сравнению с его проекциями:',['больше любой проекции','меньше','равна фронтальной','равна горизонтальной'],'Проекция = НВ · cos(угла), а cos < 1 → проекция всегда короче.'],
+ ['Отрезок длиной 40 мм наклонён к П₁ под 60°. Длина A₁B₁?',['20 мм','40 мм','34,6 мм','0'],'|A₁B₁| = 40 · cos 60° = 20.'],
+ ['Обратная задача: даны A₁B₁, A₂ и угол α. Сколько решений?',['2','1','0','бесконечно много'],'Δz известна по величине, но B может быть выше или ниже A.'],
+ ['Для профильной прямой α + β =',['90°','0°','180°','любое'],'Профильная лежит в плоскости ∥ П₃, где П₁ и П₂ видны как две перпендикулярные линии. Углы с ними в сумме 90°.'],
+ ['Плоскость ABC общего положения пересекают горизонтально-проецирующей Σ. l₁ …',['совпадает с Σ₁','∥ оси x','⊥ оси x','надо искать по точкам'],'Собирательное свойство Σ ⊥ П₁.'],
+ ['Две параллельные плоскости пересечены третьей. Линии пересечения…',['параллельны','пересекаются','скрещиваются','совпадают'],'Пол и потолок, разрезанные стеной, дают две параллельные линии.'],
+ ['Плоскости Σ(h∩f) и Θ(h′∩f′) параллельны, если…',['h₁∥h′₁ и f₂∥f′₂','h₂∥h′₂','их треугольники похожи','f₁∥f′₁'],'h₂ и f₁ всегда ∥ x — они ничего не доказывают! Сравнивать надо «живые» проекции h₁ и f₂.'],
+ ['Горизонтали на топографической карте — это…',['линии одинаковой высоты (горизонтали поверхности)','следы плоскостей','фронтали','профильные прямые'],'Холм режут горизонтальными плоскостями через 10 м и проецируют срезы на П₁.'],
+ ['Индекс 2 у точки A₂ означает…',['проекция на П₂ — вид спереди','вторая точка','вид сверху','вид слева'],'Индекс = номер плоскости проекций.'],
+ ['У горизонтали плоскости, заданной следами: h₁ ∥ …',['Σ₁ (горизонтальному следу)','Σ₂','оси z','ничему'],'Горизонтальный след — это сама горизонталь на нулевой высоте. Все горизонтали параллельны.'],
+ ['Плоскость: на П₂ треугольник выродился в наклонную линию. Это…',['фронтально-проецирующая','горизонтальная уровня','фронтальная уровня','общего положения'],'Линия на П₂ → ⊥ П₂. Наклонная → не уровня.'],
+ ['Плоскость: на П₁ треугольник — линия ∥ оси x. Это…',['фронтальная (уровня, ∥ П₂)','горизонтально-проецирующая','горизонтальная уровня','профильная уровня'],'∥ x на П₁ → одинаковая глубина y → ∥ П₂. НВ на П₂.'],
+ ['Почему у восходящей прямой проекции наклонены в одну сторону?',['дальний от нас конец выше — и на П₂ он выше, и на П₁ ближе к оси x (тоже выше)','так договорились','потому что x влево','это не так'],'Уходить от нас = уменьшать y. На П₁ меньший y — ближе к оси x, то есть выше на листе. Если при этом z растёт, на П₂ этот конец тоже выше.'],
+ ['След плоскости — это…',['линия пересечения плоскости с плоскостью проекций','проекция плоскости','горизонталь','точка на оси'],'Где плоскость «врезается» в пол или стену.']
+];
+GEN.theory={id:'theory',name:'Теория: быстрый вопрос',make(){const q=pick(TQ);return{render(box,api){mcq(box,{q:q[0],opts:q[1].map((t,i)=>({t,ok:i===0})),onAnswer:ok=>api.done(ok,q[2])});}}}};
+const CARDS=[
+ ['Что значит индекс у A₁, A₂, A₃?','Номер плоскости: П₁ — пол (вид сверху), П₂ — стена перед нами (вид спереди), П₃ — стена справа (вид слева).'],
+ ['Какие координаты «знает» A₁, A₂, A₃?','A₁(x; y) · A₂(x; z) · A₃(y; z). Каждая теряет одну — ту, вдоль которой шёл луч.'],
+ ['Прямая общего положения — признак?','Ни одна проекция не ∥ и не ⊥ оси x и не точка. НВ нигде → метод треугольника.'],
+ ['Восходящая vs нисходящая?','Проекции наклонены в одну сторону — восходящая (удаляясь от нас, поднимается). В разные — нисходящая.'],
+ ['Горизонталь h — признак и НВ?','h₂ ∥ x. НВ на П₁. На П₁ виден угол β (между h₁ и x).'],
+ ['Фронталь f — признак и НВ?','f₁ ∥ x. НВ на П₂. На П₂ виден угол α (между f₂ и x).'],
+ ['Профильная прямая p — признак?','p₁ и p₂ на одной вертикальной линии связи (⊥ x). НВ на П₃. Достраивай третью проекцию!'],
+ ['Горизонтально-проецирующая?','⊥ П₁: A₁ ≡ B₁ (точка), A₂B₂ ⊥ x. НВ на П₂ и П₃.'],
+ ['Фронтально-проецирующая?','⊥ П₂: A₂ ≡ B₂, A₁B₁ ⊥ x. НВ на П₁ и П₃.'],
+ ['Профильно-проецирующая?','⊥ П₃: обе проекции ∥ x. НВ на П₁ и П₂.'],
+ ['Главная фишка «уровня»','Где проекция ∥ оси x — там прямая «спрятала» длину. НВ живёт на ДРУГОЙ проекции.'],
+ ['Метод прямоугольного треугольника — правило','I катет — проекция на П; II катет — Δ той координаты, которой у проекции нет. Гипотенуза = НВ. Угол при проекции = наклон к этой П.'],
+ ['Катеты для α, β, γ?','α: A₁B₁ + Δz · β: A₂B₂ + Δy · γ: A₃B₃ + Δx.'],
+ ['Где взять Δz, Δy, Δx на чертеже?','Δz — на П₂ (разность высот). Δy — на П₁ (разность расстояний до оси x). Δx — расстояние между линиями связи.'],
+ ['Обратная задача, тип 1','Угол к «своей» плоскости (α и дана A₁B₁): треугольник на проекции → Δ → откладываем вверх/вниз. 2 решения.'],
+ ['Обратная задача, тип 2','Угол к «чужой» плоскости (β, а дана A₁B₁): Δy с П₁ → |A₂B₂| = Δy/tg β → дуга из A₂ до линии связи. 2, 1 или 0 решений.'],
+ ['6 способов задать плоскость','3 точки не на прямой · прямая + точка · 2 параллельные · 2 пересекающиеся · плоская фигура · следы.'],
+ ['След плоскости','Линия пересечения плоскости с плоскостью проекций. Σ₁ (h₀) — с П₁, Σ₂ (f₀) — с П₂. Пересекаются на оси x в точке схода следов.'],
+ ['Плоскость общего положения — признак?','Все проекции фигуры — «настоящие» треугольники; следы наклонены ко всем осям. НВ нигде.'],
+ ['Проецирующая плоскость — признак?','⊥ одной П: на ней фигура схлопывается в НАКЛОННУЮ линию (след). Собирательное свойство.'],
+ ['Плоскость уровня — признак?','∥ одной П: на двух других проекциях — линии ∥ осям; на «своей» П фигура в НВ.'],
+ ['Собирательное свойство','Всё, что лежит в проецирующей плоскости, проецируется на её «вырожденный» след.'],
+ ['Точка в плоскости — признак','Точка лежит в плоскости, если лежит на прямой этой плоскости.'],
+ ['Прямая в плоскости — признак','Проходит через 2 точки плоскости ИЛИ через точку плоскости ∥ прямой этой плоскости.'],
+ ['Как построить горизонталь плоскости?','h₂ ∥ x первой → точка на стороне 1₂ → по линии связи 1₁ на той же стороне → h₁.'],
+ ['Как построить фронталь плоскости?','f₁ ∥ x первой → 1₁ → по линии связи 1₂ → f₂.'],
+ ['Две прямые пересекаются, если…','Точки пересечения одноимённых проекций на ОДНОЙ линии связи.'],
+ ['Две прямые скрещиваются, если…','Проекции пересекаются, но точки пересечения НЕ на одной линии связи (или вообще не ∥ и не пересекаются).'],
+ ['Конкурирующие точки — что это?','Точки на одном проецирующем луче: их проекции на одну П совпадают.'],
+ ['Видимость на П₁ / П₂','На П₁ видна та, что выше (z больше). На П₂ — та, что ближе к нам (y больше).'],
+ ['Пересечение с проецирующей плоскостью','Одна проекция линии пересечения = след (бесплатно). Вторую — по двум точкам на сторонах.'],
+ ['Параллельные плоскости — признак','Две пересекающиеся прямые одной ∥ двум пересекающимся прямым другой. Для h∩f: h₁∥h′₁ и f₂∥f′₂.']
+];
+
+'use strict';
+const SECTIONS=[];
+function S(id,mod,t,init){SECTIONS.push({id,mod,t,init});}
+function doneAfter(id,need=3){let c=0;return(ok)=>{if(ok&&++c>=need)markDone(id);};}
+function sliders(host,defs,onCh){const w=el('<div class="ctrls"></div>');host.appendChild(w);const val={};
+ defs.forEach(d=>{val[d.k]=d.v;const s=el(`<label class="sl">${d.l}<input type="range" min="${d.min}" max="${d.max}" step="${d.st||1}" value="${d.v}"><output>${d.v}</output></label>`);const inp=s.querySelector('input');inp.oninput=()=>{val[d.k]=+inp.value;s.querySelector('output').textContent=inp.value+(d.u||'');onCh(val);};w.appendChild(s);});return val;}
+function segBtns(host,opts,onCh,cur){const w=el('<div class="seg"></div>');host.appendChild(w);opts.forEach(([v,t])=>{const b=el(`<button>${t}</button>`);if(v===cur)b.classList.add('on');b.onclick=()=>{[...w.children].forEach(x=>x.classList.remove('on'));b.classList.add('on');onCh(v);};w.appendChild(b);});return w;}
+function reads(host){const r=el('<div class="reads"></div>');host.appendChild(r);return a=>{r.innerHTML=a.map(([k,v,c])=>`<div class="rd" ${c?`style="border-left:4px solid var(--${c})"`:''}>${k}<b>${v}</b></div>`).join('');};}
+function H(root,html){root.insertAdjacentHTML('beforeend',html);}
+function box(root){const d=el('<div></div>');root.appendChild(d);return d;}
+
+/* ===================== СТАРТ ===================== */
+S('start','Старт','Как устроен этот тренажёр',root=>{
+ H(root,`<div class="kicker">Начерталка · Лекции 2–4 + зачёт</div><h1>Понять, а не зазубрить</h1>
+ <p class="lead">Лекцию 1 ты понял — значит, у тебя уже есть главный инструмент: <b>точка, три проекции и линии связи</b>. Всё дальнейшее — это та же точка, только её <b>две</b> (прямая) или <b>три</b> (плоскость). Здесь каждая тема собрана так: <b>вопрос «зачем» → модель, которую можно крутить → одно правило → задачи до автоматизма</b>.</p>
+ <div class="rule"><div class="t">🧭 Вся начерталка в 4 мыслях</div><ol>
+ <li><b>Индекс = вид.</b> ₁ — смотрим сверху, ₂ — спереди, ₃ — слева. Любая проекция — просто «как это выглядит с этой стороны».</li>
+ <li><b>Параллельно стене → вижу настоящий размер (НВ).</b> Перпендикулярно стене → вижу торец: прямая превращается в <b>точку</b>, плоскость — в <b>линию</b>.</li>
+ <li><b>Наклонно → короче.</b> Тень = НВ · cos(угла). Чтобы вернуть НВ, достраиваем прямоугольный треугольник.</li>
+ <li><b>Принадлежность — через линии связи.</b> Точка на прямой → её проекции на проекциях прямой. Точка в плоскости → она на прямой этой плоскости.</li></ol></div>
+ <h2>Карта: что откуда берётся</h2><div class="mapg" id="map"></div>
+ <h2>Почему тут так много задач (и почему это работает)</h2>
+ <div class="grid2"><div class="card"><b>🤔 Сначала предскажи</b><p>Перед правилом — вопрос. Мозг лучше запоминает ответ, который сначала пытался угадать (эффект генерации), даже если угадал неверно.</p></div>
+ <div class="card"><b>🧩 Пример → неполный пример → сам</b><p>Сначала разбор по шагам, потом ты делаешь шаги сам, а тренажёр поправляет. Так учат в лучших интерактивных курсах.</p></div>
+ <div class="card"><b>🎲 Бесконечные задачи + разбор «почему»</b><p>Каждая задача генерируется заново. После ответа — объяснение именно твоей ошибки. Вспоминать > перечитывать.</p></div>
+ <div class="card"><b>🔀 Перемешка и 🃏 интервалы</b><p>В «Миксе» темы идут вперемешку, а тренажёр чаще подсовывает то, где ты ошибаешься. Карточки возвращают забытое через интервалы.</p></div></div>
+ <div class="mem"><div class="t">🎨 Язык цветов (везде одинаковый)</div><span class="c1">синий — П₁, вид сверху</span> · <span class="c2">фиолетовый — П₂, спереди</span> · <span class="c3">оранжевый — П₃, слева</span> · <span class="cnv">зелёный — натуральная величина</span> · <span class="cdd">жёлтый — Δ (разность координат)</span> · <span class="cang">красный — угол / искомое</span></div>
+ <p class="cmut">💾 Прогресс и опыт сохраняются в этом браузере. Если 3D-модель не помещается — крути её пальцем/мышью, кнопки «спереди / сверху / слева» показывают, что каждая проекция — это просто вид.</p>`);
+ const m=$('#map',root);SECTIONS.filter(s=>s.id!=='start').forEach((s,i)=>{const c=el(`<button class="mapc"><div class="n">${s.mod}</div><div class="h">${s.t}</div></button>`);c.onclick=()=>go(s.id);m.appendChild(c);});
+ markDone('start');
+});
+/* ===================== РАЗМИНКА ===================== */
+S('warm','Старт','Разминка: точка (Л1) за 2 минуты',root=>{
+ H(root,`<div class="kicker">Мост от лекции 1</div><h1>Разминка: точка в комнате</h1><p class="lead">Всё дальше строится на этом. Подвигай точку, нажми «разложить в эпюр» — и посмотри, как комната превращается в чертёж.</p>`);
+ const g=el('<div class="grid2"><div></div><div></div></div>');root.appendChild(g);
+ let P={x:35,y:25,z:30};const v=new View3D(g.children[0],{build:()=>[...room(),...ptb([P.x,P.y,P.z],'A',{p3:true,links:true})]});
+ const R=g.children[1];const rd=reads(box(R));
+ const upd=()=>{rd([['A₁ (вид сверху)',`(${P.x}; ${P.y})`,'p1'],['A₂ (вид спереди)',`(${P.x}; ${P.z})`,'p2'],['A₃ (вид слева)',`(${P.y}; ${P.z})`,'p3']]);v.render();};
+ sliders(R,[{k:'x',l:'x — влево',min:5,max:55,v:35},{k:'y',l:'y — к нам',min:5,max:55,v:25},{k:'z',l:'z — вверх',min:5,max:55,v:30}],val=>{P=val;upd();});upd();
+ H(R,`<div class="mem"><div class="t">Помни</div>Каждая проекция <b>теряет</b> одну координату — ту, вдоль которой смотрим. Сверху не видно высоту, спереди не видно глубину, слева не видно x. <b>Это понадобится в методе треугольника!</b></div>`);
+ const q=box(root);const cb=doneAfter('warm',3);
+ mcq(q,{q:'1) Какую координату НЕ видно на виде сверху (A₁)?',opts:[{t:'z — высоту',ok:true,why:'Сверху все точки одной вертикали сливаются.'},{t:'x',ok:false},{t:'y',ok:false}],onAnswer:cb});
+ mcq(q,{q:'2) Точка поднялась вверх (z вырос). Какие проекции сдвинутся?',opts:[{t:'A₂ и A₃',ok:true,why:'z видно спереди и сбоку. A₁ стоит на месте.'},{t:'только A₁',ok:false},{t:'все три',ok:false}],onAnswer:cb});
+ mcq(q,{q:'3) На эпюре A₁ и A₂ всегда лежат…',opts:[{t:'на одной вертикальной линии связи',ok:true,why:'У них общий x, а x на эпюре — это расстояние по горизонтали.'},{t:'на одной горизонтали',ok:false,why:'На одной горизонтали A₂ и A₃ (общий z).'},{t:'как угодно',ok:false}],onAnswer:cb});
+});
+
+/* ===================== ПРЯМАЯ ===================== */
+S('lwhy','Прямая (Л2)','Почему длина «врёт»',root=>{
+ H(root,`<div class="kicker">Лекция 2 · шаг 1</div><h1>Прямая = две точки. Но длина врёт</h1>
+ <div class="hook"><div class="t">🎯 Зачем это</div>Прямую на эпюре строят просто: проекции двух точек → соединяем одноимённые (A₁ с B₁, A₂ с B₂). Это ты уже умеешь. Весь вопрос лекции 2 в другом: <b>когда проекция показывает настоящую длину, а когда — враньё?</b> От этого зависит вся классификация прямых.</div>`);
+ const g=el('<div class="grid2"><div></div><div></div></div>');root.appendChild(g);
+ let al=30;const Lg=36,A=[46,30,8];const Bf=()=>[A[0]-Lg*Math.cos(rad(al)),30,A[2]+Lg*Math.sin(rad(al))];
+ const v=new View3D(g.children[0],{build:()=>{const B=Bf();return[...room(),...segb(A,B,{nv:[2],label:'AB'}),...ptb(A,'A',{nolab:false}),...ptb(B,'B',{})];}});
+ const R=g.children[1];const rd=reads(box(R));
+ const upd=()=>{const c=Lg*Math.cos(rad(al));rd([['|AB| — настоящая',Lg+' мм','obj'],['|A₁B₁| — тень на полу',fmt(c)+' мм','p1'],['|A₂B₂| — на стене',Lg+' мм','nv'],['cos α',fmt(Math.cos(rad(al)),3),'aux']]);v.render();};
+ sliders(R,[{k:'a',l:'наклон α к полу',min:0,max:90,v:30,u:'°'}],val=>{al=val.a;upd();});upd();
+ H(R,`<p>Отрезок стоит параллельно передней стене П₂ — поэтому на П₂ он <span class="cnv">всегда в НВ</span>. А тень на полу меняется.</p>`);
+ predict(root,{q:'Поставь мысленно отрезок вертикально (α = 90°). Что станет с его тенью на полу П₁?',opts:[{t:'станет точкой',ok:true},{t:'станет длиннее',ok:false},{t:'не изменится',ok:false},{t:'исчезнет вообще',ok:false}],
+  reveal:'<p>Проверь ползунком! При 90° тень — <b>точка</b> (смотрим на отрезок «в торец»). При 0° — тень равна самому отрезку. Между ними: <b>|тень| = |НВ| · cos α</b>.</p>',onAnswer:()=>markDone('lwhy')});
+ H(root,`<div class="rule"><div class="t">💡 Одно правило, из которого растёт вся лекция</div><ul><li>Отрезок <b>∥ плоскости</b> → на неё он падает <b>без искажения</b> (НВ). <i>Палка, которую держат горизонтально над столом, отбрасывает тень своей длины.</i></li><li>Отрезок <b>⊥ плоскости</b> → на неё падает <b>точкой</b>.</li><li>Отрезок <b>наклонён</b> → тень <b>короче</b>: ·cos α.</li></ul></div>
+ <div class="why"><div class="t">❓ Почему так</div>Луч проецирования перпендикулярен плоскости. Отрезок, его тень и два луча образуют прямоугольную трапецию; если сдвинуть тень вверх до конца A, получится прямоугольный треугольник: гипотенуза — сам отрезок, катет — тень. Катет всегда короче гипотенузы. Запомни этот треугольник — он вернётся в «методе прямоугольного треугольника».</div>
+ <p>Отсюда три семьи прямых: <b>общего положения</b> (наклонена ко всем — врёт везде), <b>уровня</b> (∥ одной — на ней правда) и <b>проецирующие</b> (⊥ одной — на ней точка).</p>`);
+});
+const LEX={up:[[48,40,10],[14,12,42]],down:[[48,12,10],[14,40,42]],h:[[48,12,30],[14,40,30]],f:[[48,25,8],[14,25,44]],p:[[30,10,44],[30,44,10]],hp:[[30,25,8],[30,25,44]],fp:[[30,8,30],[30,44,30]],pp:[[50,25,30],[12,25,30]]};
+function lineLab(host,init,only){let t=init;const g=el('<div class="grid2"><div></div><div></div></div>');
+ const top=box(host);host.appendChild(g);
+ const v=new View3D(g.children[0],{build:()=>{const[A,B]=LEX[t];return[...room(),...segb(A,B,{nv:LT[t].nv,p3:true}),...ptb(A,'A',{p3:true,links:true,o2:[-22,-8]}),...ptb(B,'B',{p3:true,links:true,o2:[-22,-8]})];}});
+ const ep=new Ep(g.children[1],{axes:'xyz',maxH:360});ep.draw=gg=>{const[A,B]=LEX[t];drawSeg2(gg,A,B,{p3:true,nv:LT[t].nv});};
+ const info=box(host);const rd=reads(box(host));
+ const upd=()=>{const[A,B]=LEX[t];ep.fit(segPts(A,B,true),8);ep.render();v.render();const L=V.dist(A,B),d=V.sub(B,A).map(Math.abs);
+  info.innerHTML=`<div class="why" style="margin-top:12px"><div class="t">${LT[t].n}</div>${LT[t].why}</div>`;
+  rd([['|AB|',fmt(L)+' мм','obj'],['|A₁B₁|',fmt(Math.hypot(d[0],d[1]))+' мм',LT[t].nv.includes(1)?'nv':'p1'],['|A₂B₂|',fmt(Math.hypot(d[0],d[2]))+' мм',LT[t].nv.includes(2)?'nv':'p2'],['|A₃B₃|',fmt(Math.hypot(d[1],d[2]))+' мм',LT[t].nv.includes(3)?'nv':'p3'],['α (к П₁)',fmt(deg(Math.asin(d[2]/L)))+'°','ang'],['β (к П₂)',fmt(deg(Math.asin(d[1]/L)))+'°','ang'],['γ (к П₃)',fmt(deg(Math.asin(d[0]/L)))+'°','ang']]);};
+ segBtns(top,(only||LTK).map(k=>[k,{up:'восходящая',down:'нисходящая',h:'горизонталь h',f:'фронталь f',p:'профильная p',hp:'⊥ П₁',fp:'⊥ П₂',pp:'⊥ П₃'}[k]]),k=>{t=k;upd();},t);upd();}
+S('ltypes','Прямая (Л2)','7 положений прямой',root=>{
+ H(root,`<div class="kicker">Лекция 2 · шаг 2 · это задача 1 на зачёте</div><h1>Семь положений прямой — одна логика</h1>
+ <div class="hook"><div class="t">🎯 Зачем</div>На зачёте дают эпюр прямой и спрашивают: какая она и какие у неё свойства. Зубрить 7 типов не надо — каждый получается из правила «∥ → НВ, ⊥ → точка».</div>
+ <p>Выбери тип, покрути модель и нажми кнопки «спереди / сверху / слева». <span class="cnv">Зелёная</span> проекция — там, где НВ.</p>`);
+ lineLab(root,'h');
+ H(root,`<h2>Таблица, которую не надо зубрить</h2><table class="tb"><tr><th>Семья</th><th>Кто</th><th>Признак на эпюре</th><th>Где НВ</th></tr>
+ <tr><td><b>Общего положения</b><br><span class="cmut">косо ко всем</span></td><td>восходящая / нисходящая</td><td>ни одна проекция не ∥ и не ⊥ x, нет точек</td><td>нигде → метод треугольника</td></tr>
+ <tr><td rowspan="3"><b>Уровня</b><br><span class="cmut">∥ одной П</span></td><td>горизонталь h ∥ П₁</td><td><b>h₂ ∥ x</b></td><td class="cnv">П₁</td></tr><tr><td>фронталь f ∥ П₂</td><td><b>f₁ ∥ x</b></td><td class="cnv">П₂</td></tr><tr><td>профильная p ∥ П₃</td><td>p₁, p₂ на одной вертикали</td><td class="cnv">П₃</td></tr>
+ <tr><td rowspan="3"><b>Проецирующие</b><br><span class="cmut">⊥ одной П</span></td><td>горизонтально-проец. ⊥ П₁</td><td>A₁ ≡ B₁ (точка)</td><td class="cnv">П₂ и П₃</td></tr><tr><td>фронтально-проец. ⊥ П₂</td><td>A₂ ≡ B₂</td><td class="cnv">П₁ и П₃</td></tr><tr><td>профильно-проец. ⊥ П₃</td><td>обе ∥ x</td><td class="cnv">П₁ и П₂</td></tr></table>
+ <div class="why"><div class="t">❓ Почему у горизонтали ∥ оси x именно h₂, а НВ на П₁?</div>Горизонталь ∥ полу → у всех её точек <b>одна высота z</b>. Высоту видно спереди (на П₂). Одинаковая высота на виде спереди = <b>горизонтальная линия</b>, ∥ x. А длину честно видно на полу (П₁), потому что прямая ему параллельна.<br><b>Фишка:</b> где проекция ∥ x — там прямая «спрятала» длину; НВ живёт на <b>другой</b> проекции.</div>
+ <div class="mem"><div class="t">🧠 Как не путать «горизонталь» и «горизонтально-проецирующую»</div><b>Горизонталь</b> — лежит <i>как горизонт</i>, вдоль пола (∥ П₁). <b>Горизонтально-проецирующая</b> — <i>проецирует</i> себя на пол в точку, то есть воткнута в пол как гвоздь (⊥ П₁). Первое слово — всегда «с какой плоскостью особые отношения».</div>
+ <h2>Алгоритм «5 секунд» — пощёлкай</h2><div class="tree" id="tree"></div>`);
+ const tree=$('#tree',root);const Q=[['Есть проекция-точка?',['Да','Нет'],[()=>'Проецирующая: ⊥ той П, где точка. НВ — на двух других.',1]],['Хотя бы одна проекция ∥ оси x?',['Да, одна','Да, обе','Нет'],[()=>'Прямая уровня: A₂B₂ ∥ x → горизонталь (НВ на П₁); A₁B₁ ∥ x → фронталь (НВ на П₂).',()=>'Обе ∥ x → профильно-проецирующая (⊥ П₃).',2]],['Обе проекции на одной вертикали (⊥ x)?',['Да','Нет'],[()=>'Профильная прямая. НВ на П₃ — достраивай третью проекцию.',3]],['Проекции наклонены в одну сторону?',['Да','Нет, в разные'],[()=>'Общего положения, ВОСХОДЯЩАЯ.',()=>'Общего положения, НИСХОДЯЩАЯ.']]];
+ const show=i=>{const n=el(`<div class="tnode"><div class="qq">${i+1}. ${Q[i][0]}</div><div class="seg"></div></div>`);tree.appendChild(n);Q[i][1].forEach((a,j)=>{const b=el(`<button>${a}</button>`);b.onclick=()=>{while(tree.lastChild!==n)tree.removeChild(tree.lastChild);[...n.querySelector('.seg').children].forEach(x=>x.classList.remove('on'));b.classList.add('on');const r=Q[i][2][j];if(typeof r==='number')show(r);else tree.appendChild(el(`<div class="tnode"><div class="res">→ ${r()}</div></div>`));};n.querySelector('.seg').appendChild(b);});};show(0);
+ H(root,'<h2>Тренировка: узнай прямую</h2>');trainer(root,{title:'Тип прямой',gens:[GEN.ltype],onResult:doneAfter('ltypes',4)});
+});
+GEN.updown={id:'updown',name:'Восходящая или нисходящая?',make(){const t=pick(['up','down']);const[A,B]=genLine(t);return{render(b,api){b.appendChild(el('<div class="tr-task">Прямая общего положения. Восходящая или нисходящая?</div>'));const[L,R]=twoCol(b);const ep=new Ep(L,{maxH:340});ep.fit(segPts(A,B));ep.draw=g=>drawSeg2(g,A,B);ep.render();
+ api.hint('Посмотри, к какому концу поднимаются обе проекции. К одному → восходящая.');mcq(R,{q:'Ответ:',noShuffle:true,opts:[{t:'восходящая',ok:t==='up'},{t:'нисходящая',ok:t==='down'}],onAnswer:ok=>api.done(ok,LT[t].why)});}}}};
+S('updown','Прямая (Л2)','Восходящая и нисходящая',root=>{
+ H(root,`<div class="kicker">Лекция 2 · шаг 3</div><h1>Восходящая или нисходящая</h1>
+ <div class="hook"><div class="t">🎯 Ситуация</div>Ты стоишь перед стеной П₂ и смотришь на неё. <b>«Удаляться»</b> — значит идти от себя к стене (y уменьшается). Если, удаляясь, прямая <b>поднимается</b> — она восходящая. Как лестница, которая уходит от тебя вверх.</div>`);
+ lineLab(root,'up',['up','down']);
+ predict(root,{q:'У восходящей прямой дальний от нас конец выше. Где он на виде сверху (П₁)?',opts:[{t:'ближе к оси x — то есть тоже выше на листе',ok:true},{t:'дальше от оси x — ниже на листе',ok:false},{t:'на оси x',ok:false}],
+  reveal:'<div class="why"><div class="t">❓ Отсюда правило</div>На П₁ глубина y откладывается вниз от оси x: чем дальше от нас точка (меньше y), тем ближе к оси, то есть <b>выше на листе</b>. На П₂ этот же конец выше, потому что у него больше z. Значит обе проекции поднимаются к одному концу → <b>наклонены в одну сторону</b> = восходящая. В разные стороны = нисходящая.</div>'});
+ trainer(root,{title:'Восходящая / нисходящая',gens:[GEN.updown],onResult:doneAfter('updown',3)});
+});
+S('ltrain','Прямая (Л2)','Тренажёр: зачёт, задача 1',root=>{
+ H(root,`<div class="kicker">Зачёт · задача 1</div><h1>Положение прямой и её свойства</h1><p class="lead">На зачёте: «дан комплексный чертёж прямой → определить положение и описать свойства». Тут тренируем ровно это.</p>
+ <div class="rule"><div class="t">📝 Шаблон ответа</div><b>Название → признак на КЧ → свойства.</b><br>Пример: <i>AB — горизонталь h (прямая уровня, ∥ П₁), т.к. A₂B₂ ∥ Ox. Свойства: |A₁B₁| = |AB| (НВ на П₁); α = 0°; ∠(A₁B₁, Ox) = β; A₃B₃ ∥ Oy′.</i></div>
+ <div class="mem"><div class="t">🧠 Свойства выводятся, а не учатся</div>∥ П<sub>k</sub> → НВ на П<sub>k</sub> и угол к П<sub>k</sub> = 0°.<br>⊥ П<sub>k</sub> → на П<sub>k</sub> точка, угол 90°, а к двум другим плоскостям она ∥ (там НВ, углы 0°).</div>`);
+ trainer(root,{title:'Зачёт: задача 1',gens:[GEN.lprops,GEN.ltype],onResult:doneAfter('ltrain',5)});
+});
+
+/* ===================== ТРЕУГОЛЬНИК ===================== */
+S('twhy','Метод треугольника','Откуда берётся треугольник',root=>{
+ H(root,`<div class="kicker">Практика 2 · задача 2 на зачёте и РЗ</div><h1>Метод прямоугольного треугольника: откуда он</h1>
+ <div class="hook"><div class="t">🎯 Проблема</div>Прямая общего положения врёт на всех проекциях. Как узнать её настоящую длину и угол наклона, имея только плоский чертёж? Ответ: этот треугольник <b>уже есть в пространстве</b> — его надо просто «уложить» на лист. Двигай ползунок.</div>`);
+ const g=el('<div class="grid2"><div></div><div></div></div>');root.appendChild(g);
+ const A=[46,36,14],B=[14,14,40],A1=[A[0],A[1],0],B1=[B[0],B[1],0],Dz=B[2]-A[2];let s=0;
+ const u=V.norm(V.sub(B1,A1));let n=[-u[1],u[0],0];if(n[1]<0)n=V.mul(n,-1);
+ const v=new View3D(g.children[0],{h:380,build:()=>{const it=[...room(60,{p3:false}),...segb(A,B,{label:'AB'}),...ptb(A,'A',{}),...ptb(B,'B',{})];
+  const k1=Math.min(1,s),k2=Math.max(0,s-1),dz=A[2]*(1-k1);const T0=[A1[0],A1[1],dz],T1=[B1[0],B1[1],dz],th=k2*Math.PI/2;const T2=V.add(T1,V.add(V.mul([0,0,1],Dz*Math.cos(th)),V.mul(n,Dz*Math.sin(th))));
+  it.push({k:'poly',pts:[T0,T1,T2],c:'nv',fa:.28,sa:.9,w:1.5});it.push({k:'seg',a:T0,b:T1,c:'p1',w:3.4,label:'проекция',off:[0,14],lc:'p1'},{k:'seg',a:T1,b:T2,c:'dd',w:3.4,label:'Δz',lc:'dd'},{k:'seg',a:T0,b:T2,c:'nv',w:3.4,label:'НВ',lc:'nv',off:[-30,-6]});
+  it.push({k:'txt',p:V.add(T0,V.mul(V.norm(V.add(V.norm(V.sub(T1,T0)),V.norm(V.sub(T2,T0)))),7)),text:'α',c:'ang',f:'700 15px Georgia,serif'});return it;}});
+ const R=g.children[1];const stage=el('<div class="card" style="margin-top:0"></div>');
+ const upd=()=>{stage.innerHTML=s<0.05?'<b>0.</b> Зелёный треугольник висит в пространстве: гипотенуза — сам отрезок AB, один катет ∥ полу и равен проекции A₁B₁, второй — вертикальный, это <b class="cdd">Δz</b> — насколько B выше A.':s<1.02?'<b>1. Опускаем</b> треугольник на пол. Его форма не меняется — сдвиг ничего не искажает. Горизонтальный катет лёг ровно на <b class="c1">A₁B₁</b>.':'<b>2. Укладываем</b> (поворачиваем вокруг A₁B₁) на пол. Теперь весь треугольник лежит в П₁ — значит виден сверху <b>без искажений</b>: гипотенуза = <b class="cnv">НВ</b>, угол при A₁B₁ = <b class="cang">α</b>.';v.render();};
+ sliders(R,[{k:'s',l:'опустить → уложить',min:0,max:2,st:0.02,v:0}],val=>{s=val.s;upd();});R.appendChild(stage);upd();
+ H(R,`<p class="cmut">Нажми «сверху → П₁» после укладки — увидишь, что получается на эпюре.</p>`);
+ H(root,`<div class="rule"><div class="t">💡 Правило (как в тетради)</div>Для нахождения НВ отрезка строят прямоугольный треугольник: <b>I катет</b> — проекция отрезка на плоскость проекций, <b>II катет</b> — разность расстояний концов отрезка до этой плоскости. <b>Гипотенуза — НВ.</b> Угол между проекцией и гипотенузой — угол наклона прямой к этой плоскости.</div>
+ <table class="tb"><tr><th>Ищем угол с</th><th>I катет</th><th>II катет</th><th>Где взять II катет на чертеже</th><th>Угол</th></tr>
+ <tr><td>П₁</td><td class="c1">A₁B₁</td><td class="cdd">Δz</td><td>на П₂: разность высот (по вертикали)</td><td class="cang">α</td></tr>
+ <tr><td>П₂</td><td class="c2">A₂B₂</td><td class="cdd">Δy</td><td>на П₁: разность расстояний до оси x</td><td class="cang">β</td></tr>
+ <tr><td>П₃</td><td class="c3">A₃B₃</td><td class="cdd">Δx</td><td>расстояние между линиями связи</td><td class="cang">γ</td></tr></table>
+ <div class="mem"><div class="t">🧠 Как не перепутать никогда</div><b>Δ — это та координата, которой у проекции нет.</b> A₁(x; y) — нет z → Δz. A₂(x; z) — нет y → Δy. A₃(y; z) — нет x → Δx.<br>Логика: проекция «съела» одну координату — треугольник её возвращает.</div>
+ <div class="trap"><div class="t">⚠️ Частые ошибки</div><ul><li>Отложить Δ <b>вдоль</b> проекции, а не перпендикулярно.</li><li>Мерить угол между Δ и гипотенузой. Угол наклона — <b>при проекции</b>.</li><li>Для α взять Δy (для β — Δz).</li><li>Строить треугольник для горизонтали/фронтали — там НВ уже видна, Δ = 0.</li></ul></div>`);
+ trainer(root,{title:'Какой треугольник?',gens:[GEN.trimini],onResult:doneAfter('twhy',4)});
+});
+S('tsteps','Метод треугольника','Разбор по шагам',root=>{
+ H(root,`<div class="kicker">Пример → потом сам</div><h1>Разбор задачи по шагам</h1><p class="lead">Дано: A(45; 10; 12), B(15; 30; 38). Найти НВ и углы α, β. Листай «Дальше» — на чертеже появляется следующая линия, справа — откуда она.</p>`);
+ const A=[45,10,12],B=[15,30,38];const a1=P1(A),b1=P1(B),a2=P2(A),b2=P2(B);const Dz=26,Dy=20;
+ let n1=V.norm(V.perp(V.sub(b1,a1)));if(n1[1]>0)n1=V.mul(n1,-1);let n2=V.norm(V.perp(V.sub(b2,a2)));if(n2[1]<0)n2=V.mul(n2,-1);
+ const B0=V.add(b1,V.mul(n1,Dz)),B0b=V.add(b2,V.mul(n2,Dy));const NV=V.dist(A,B);
+ stepper(root,{box:[-62,-62,8,72],base:g=>drawSeg2(g,A,B),steps:[
+  {s:'Анализ',t:'Смотрим на чертёж: ни одна проекция не ∥ и не ⊥ x, точек нет → <b>общего положения</b>. Обе поднимаются к B → восходящая? Нет: A₁ выше B₁, а A₂ ниже B₂ — в разные стороны → <b>нисходящая</b>. НВ нигде не видна → строим треугольники.'},
+  {s:'Δz на П₂',t:'Для α нужен треугольник на П₁. Второй катет — <b class="cdd">Δz</b> (у A₁ нет z). Высоты видно на П₂: ведём горизонталь от A₂ до линии связи B. Вертикальный кусок = Δz = 38 − 12 = <b>26</b>.',d:g=>{const F=[b2[0],a2[1]];g.link(a2,F,{c:'dd'});g.line(F,b2,{c:'dd',w:3.4});g.text(V.lerp(F,b2,.5),'Δz = 26',{c:'dd',dx:8});}},
+  {s:'Катет из B₁',t:'Из B₁ восставляем перпендикуляр к A₁B₁ и откладываем на нём Δz = 26 (циркулем или по линейке). Получаем точку <b>B₀</b>.',d:g=>{g.rightAngle(b1,a1,B0);g.line(b1,B0,{c:'dd',w:3.4});g.pt(B0,'B₀',{c:'nv',lp:[8,8]});}},
+  {s:'Гипотенуза = НВ',t:`Соединяем A₁ с B₀. Гипотенуза <b class="cnv">A₁B₀ = |AB| ≈ ${fmt(NV)} мм</b>. Обрати внимание: она длиннее и A₁B₁, и A₂B₂ — так и должно быть.`,d:g=>{g.line(a1,B0,{c:'nv',w:3.2});g.dim(a1,B0,'НВ',{c:'nv',dy:12});}},
+  {s:'Угол α',t:`Угол между проекцией A₁B₁ и гипотенузой — <b class="cang">α ≈ ${fmt(deg(Math.atan2(Dz,V.dist(a1,b1))))}°</b>. Меряем транспортиром.`,d:g=>g.arc(a1,b1,B0,30,{label:'α'})},
+  {s:'Δy на П₁',t:'Для β — треугольник на П₂, второй катет <b class="cdd">Δy</b>. Глубину видно на П₁: горизонталь от A₁ до линии связи B → вертикальный кусок Δy = 30 − 10 = <b>20</b>.',d:g=>{const F=[b1[0],a1[1]];g.link(a1,F,{c:'dd'});g.line(F,b1,{c:'dd',w:3.4});g.text(V.lerp(F,b1,.5),'Δy = 20',{c:'dd',dx:8});}},
+  {s:'Треугольник на П₂',t:`Из B₂ ⊥ A₂B₂ откладываем Δy = 20 → B₀′. Гипотенуза A₂B₀′ ≈ ${fmt(NV)} — <b>та же НВ</b>! Это бесплатная самопроверка: два треугольника обязаны дать одну длину.`,d:g=>{g.rightAngle(b2,a2,B0b);g.line(b2,B0b,{c:'dd',w:3.4});g.line(a2,B0b,{c:'nv',w:3.2});g.pt(B0b,'B₀′',{c:'nv',lp:[8,-8]});}},
+  {s:'Угол β',t:`Угол при A₂B₂ — <b class="cang">β ≈ ${fmt(deg(Math.atan2(Dy,V.dist(a2,b2))))}°</b>. Проверка: α + β ≤ 90° ✓.`,d:g=>g.arc(a2,b2,B0b,30,{label:'β'})}],onEnd:()=>markDone('tsteps')});
+ H(root,`<div class="card"><b>📓 Как оформить в тетради</b><p><b>Дано:</b> [AB] (A₁B₁, A₂B₂). <b>Найти:</b> |AB| — ? α = ∠(AB, П₁) — ? β = ∠(AB, П₂) — ?</p><p><b>Алгоритм:</b><br>1) I катет — [A₁B₁]; II катет — Δz = z<sub>B</sub> − z<sub>A</sub>; |A₁B₀| = |AB|; α = ∠(A₁B₁, A₁B₀).<br>2) I катет — [A₂B₂]; II катет — Δy = y<sub>B</sub> − y<sub>A</sub>; |A₂B₀′| = |AB|; β = ∠(A₂B₂, A₂B₀′).</p></div>`);
+});
+S('ttrain','Метод треугольника','Тренажёр: строим сами',root=>{
+ H(root,`<div class="kicker">Зачёт · задача 2</div><h1>Теперь ты строишь треугольник</h1><p class="lead">Те же шаги, что в разборе, но делаешь ты: выбираешь катеты, тянешь второй катет нужной длины, находишь угол и НВ. Ошибёшься — тренажёр поправит и объяснит.</p>`);
+ trainer(root,{title:'Метод треугольника',icon:'📐',gens:[GEN.tri,GEN.tri,GEN.trimini,GEN.trinum],onResult:doneAfter('ttrain',4)});
+});
+S('tinv','Метод треугольника','Обратные задачи',root=>{
+ H(root,`<div class="kicker">Задачи 3–4 практики · ДЗ 1-13…1-20</div><h1>Обратные задачи: достроить проекцию</h1>
+ <div class="hook"><div class="t">🎯 Идея</div>Тот же треугольник, только наоборот. Раньше: есть катеты → находим угол. Теперь: есть <b>угол</b> (или НВ) и один катет → находим <b>Δ</b> → откладываем Δ по линии связи неизвестной точки.</div>
+ <div class="grid2"><div class="card"><b>Тип 1 — простой</b><p>Угол дан к той плоскости, на которой проекция есть целиком (α и дана A₁B₁; β и дана A₂B₂) или дана НВ.</p><p>Треугольник строим прямо на проекции → получаем Δ → откладываем <b>вверх и вниз</b> от уровня известной точки.</p><p><b>Решений: 2.</b></p></div>
+ <div class="card"><b>Тип 2 — с окружностью</b><p>Угол дан к «чужой» плоскости (β, а дана A₁B₁).</p><p>Δy берём с данной проекции, по Δy и углу строим треугольник сбоку → узнаём <b>длину</b> недостающей проекции |A₂B₂| = Δy / tg β → дуга циркулем из A₂ до линии связи B.</p><p><b>Решений: 2, 1 или 0</b> — сколько точек пересечения.</p></div></div>
+ <div class="why"><div class="t">❓ Почему в типе 1 всегда два решения</div>Треугольник даёт только <b>величину</b> Δ — насколько B выше (ближе) A, но не знак. B может быть выше на столько же или ниже на столько же. Оба отрезка имеют ту же проекцию и тот же угол — как две лестницы одинаковой крутизны: одна вверх, другая вниз.</div>
+ <div class="why"><div class="t">❓ Почему в типе 2 бывает 0 решений</div>Самая короткая A₂B₂ — когда B₂ на уровне A₂: тогда |A₂B₂| = Δx (расстояние между линиями связи). Если нужная длина Δy/tg β меньше Δx — окружность не достаёт до линии связи. Угол β «слишком крутой» для такой A₁B₁.</div>`);
+ H(root,'<h2>Тип 1</h2>');trainer(root,{title:'Обратная задача · тип 1',icon:'↩️',gens:[GEN.inv1],onResult:doneAfter('tinv',2)});
+ H(root,'<h2>Тип 2</h2>');trainer(root,{title:'Обратная задача · тип 2',icon:'⭕',gens:[GEN.inv2]});
+});
+
+'use strict';
+/* ===================== общие помощники для плоскостей ===================== */
+function fitBox(pts,pad=9){let a=1e9,b=1e9,c=-1e9,d=-1e9;pts.concat([[0,0]]).forEach(p=>{a=Math.min(a,p[0]);b=Math.min(b,p[1]);c=Math.max(c,p[0]);d=Math.max(d,p[1]);});return[a-pad,b-pad,c+pad,d+pad];}
+/* многоугольник сечения куба [0,L]^3 плоскостью n·p=d */
+function planePoly(n,d,L=60){const P=[];const cs=[0,L];
+ for(let ax=0;ax<3;ax++)for(const u of cs)for(const v of cs){const o=[0,0,0];const i1=(ax+1)%3,i2=(ax+2)%3;o[i1]=u;o[i2]=v;
+  if(Math.abs(n[ax])<1e-12){if(Math.abs(n[i1]*u+n[i2]*v-d)<1e-9){const a=o.slice(),b=o.slice();b[ax]=L;P.push(a,b);}continue;}
+  const t=(d-n[i1]*u-n[i2]*v)/n[ax];if(t>=-1e-9&&t<=L+1e-9){o[ax]=t;P.push(o);}}
+ const Q=[];P.forEach(p=>{if(!Q.some(q=>V.dist(p,q)<1e-6))Q.push(p);});if(Q.length<3)return null;
+ const c=Q.reduce((a,b)=>V.add(a,b),[0,0,0]).map(x=>x/Q.length);const nn=V.norm(n);let u=V.cross(nn,[0,0,1]);if(V.len(u)<.1)u=V.cross(nn,[1,0,0]);u=V.norm(u);const w=V.cross(nn,u);
+ return Q.sort((p,q)=>Math.atan2(V.dot(V.sub(p,c),w),V.dot(V.sub(p,c),u))-Math.atan2(V.dot(V.sub(q,c),w),V.dot(V.sub(q,c),u)));}
+/* отрезок прямой a·u+b·v=d внутри квадрата [0,L]^2 */
+function clip2(a,b,d,L=60){if(Math.abs(a)<1e-12&&Math.abs(b)<1e-12)return null;const P=[];
+ [[0,null],[L,null],[null,0],[null,L]].forEach(([u,v])=>{if(u!==null){if(Math.abs(b)<1e-12)return;const vv=(d-a*u)/b;if(vv>=-1e-9&&vv<=L+1e-9)P.push([u,vv]);}else{if(Math.abs(a)<1e-12)return;const uu=(d-b*v)/a;if(uu>=-1e-9&&uu<=L+1e-9)P.push([uu,v]);}});
+ const Q=[];P.forEach(p=>{if(!Q.some(q=>V.dist(p,q)<1e-6))Q.push(p);});if(Q.length<2)return null;let best=[Q[0],Q[1]],bd=0;Q.forEach(p=>Q.forEach(q=>{const dd=V.dist(p,q);if(dd>bd){bd=dd;best=[p,q];}}));return bd<1e-6?null:best;}
+/* три следа плоскости n·p=d: возвращает {1:[A,B],2:..,3:..} в 3D */
+function traces(n,d,L=60){const r={};let s=clip2(n[0],n[1],d,L);if(s)r[1]=s.map(p=>[p[0],p[1],0]);s=clip2(n[0],n[2],d,L);if(s)r[2]=s.map(p=>[p[0],0,p[1]]);s=clip2(n[1],n[2],d,L);if(s)r[3]=s.map(p=>[0,p[0],p[1]]);return r;}
+function hLine(n,d,z,L=60){const s=clip2(n[0],n[1],d-n[2]*z,L);return s?s.map(p=>[p[0],p[1],z]):null;}
+
+/* ===================== ПЛОСКОСТЬ (Л3) ===================== */
+const PDEF=[
+ ['Три точки A, B, C, не лежащие на одной прямой',true,'Через три точки не на одной прямой проходит <b>ровно одна</b> плоскость. Табурет на трёх ножках никогда не шатается — три точки «фиксируют» плоскость.'],
+ ['Три точки, лежащие на одной прямой',false,'Если точки на одной прямой, через неё проходит <b>бесконечно много</b> плоскостей — как страницы книги вокруг корешка. Нужна точка «в стороне».'],
+ ['Прямая и точка, не лежащая на ней',true,'Возьми на прямой две точки + данная точка = три точки не на одной прямой → одна плоскость.'],
+ ['Прямая и точка, лежащая на этой прямой',false,'Точка ничего не добавила: это всё ещё одна прямая → «книга» из бесконечного числа плоскостей.'],
+ ['Две пересекающиеся прямые',true,'Точка пересечения + по одной точке на каждой прямой = три точки не на одной прямой.'],
+ ['Две параллельные прямые',true,'Параллельные по определению лежат в одной плоскости. Две точки на одной + одна на другой = три точки.'],
+ ['Две скрещивающиеся прямые',false,'Скрещивающиеся — это именно те, что <b>не лежат</b> в одной плоскости. Плоскости, содержащей обе, нет.'],
+ ['Треугольник (любая плоская фигура)',true,'Вершины треугольника — три точки не на одной прямой. Удобно: сразу видно «кусок» плоскости.'],
+ ['Две точки',false,'Две точки задают только прямую. Через прямую — бесконечно много плоскостей.'],
+ ['Следы Σ₁ и Σ₂, пересекающиеся на оси x',true,'Следы — это две пересекающиеся прямые плоскости (в точке схода на оси x). Частный случай способа «две пересекающиеся прямые».'],
+ ['Одна прямая',false,'Прямая — «корешок книги»: вокруг неё вращается бесконечно много плоскостей.']];
+GEN.pdef={id:'pdef',name:'Задаёт ли это плоскость?',make(){const c=pick(PDEF);return{render(box,api){
+ box.appendChild(el(`<div class="tr-task">Однозначно ли задают плоскость: <b>${c[0]}</b>?</div>`));
+ api.hint('Попробуй свести к трём точкам. Если получилось найти три точки НЕ на одной прямой — плоскость одна.');
+ mcq(box,{q:'Ответ:',noShuffle:true,opts:[{t:'Да, ровно одна плоскость',ok:c[1]},{t:'Нет, не задают однозначно (или плоскости нет)',ok:!c[1]}],onAnswer:ok=>api.done(ok,c[2])});}}}};
+
+S('pdef','Плоскость (Л3)','6 способов задать плоскость',root=>{
+ H(root,`<div class="kicker">Лекция 3 · шаг 1</div><h1>Как задать плоскость</h1>
+ <div class="hook"><div class="t">🎯 Главная мысль</div>Плоскость бесконечна — нарисовать её целиком нельзя. Поэтому на чертеже рисуют <b>минимум, по которому она восстанавливается однозначно</b>. И этот минимум всегда сводится к одному: <b>три точки не на одной прямой</b> (табурет на трёх ножках не шатается).</div>`);
+ predict(root,{q:'Сколько плоскостей проходит через одну прямую?',opts:[{t:'бесконечно много',ok:true},{t:'одна',ok:false},{t:'ни одной',ok:false}],reveal:'<div class="why"><div class="t">❓ Поэтому нужна «третья точка в стороне»</div>Представь книгу: корешок — прямая, страницы — плоскости. Их бесконечно много. Чтобы выбрать одну страницу, нужна точка <b>не на корешке</b>. Отсюда все 6 способов.</div>'});
+ const W=[['1. Три точки','A, B, C не на одной прямой','это и есть «табурет»'],['2. Прямая + точка','a и A ∉ a','2 точки на прямой + A'],['3. Две пересекающиеся','a ∩ b = K','K + по точке на a и b'],['4. Две параллельные','a ∥ b','2 точки на a + 1 на b'],['5. Плоская фигура','△ABC, четырёхугольник…','вершины — точки плоскости'],['6. Следы','Σ₁ и Σ₂ (пересекаются на x)','частный случай способа 3']];
+ const g=el('<div class="grid3"></div>');root.appendChild(g);
+ W.forEach(w=>{const f=el(`<div class="flip" style="margin:0"><div class="flip-in" style="min-height:150px"><div class="face"><b style="font-size:17px">${w[0]}</b><div>${w[1]}</div><small>нажми — как свести к 3 точкам</small></div><div class="face back"><b>→ 3 точки:</b><div>${w[2]}</div></div></div></div>`);f.onclick=()=>f.classList.toggle('on');g.appendChild(f);});
+ H(root,`<div class="why"><div class="t">❓ Зачем столько способов, если всё равно 3 точки?</div>Разные задачи дают плоскость по-разному: в одной — треугольник, в другой — две прямые, в третьей — следы. Ты всегда можешь перейти от одного способа к другому: на любой прямой взять точки, через любые две точки провести прямую.</div>
+ <div class="trap"><div class="t">⚠️ Ловушки</div>Три точки <b>на одной прямой</b> — не задают. Две <b>скрещивающиеся</b> прямые — не задают (плоскости нет вообще). Прямая и точка <b>на ней</b> — не задают.</div>`);
+ trainer(root,{title:'Задаёт ли плоскость?',icon:'🧱',gens:[GEN.pdef],onResult:doneAfter('pdef',4)});
+});
+
+const TRP={gen:[50,40,45,0],hp:[45,40,0,0],fp:[45,0,40,0],pp:[0,40,45,0],hl:[0,0,30,0],fl:[0,30,0,0],pl:[30,0,0,0]};
+S('ptraces','Плоскость (Л3)','Следы плоскости',root=>{
+ H(root,`<div class="kicker">Лекция 3 · шаг 2</div><h1>Следы: где плоскость «врезается» в стены</h1>
+ <div class="hook"><div class="t">🎯 Картинка</div>Поставь наклонно лист картона в угол комнаты. Линия, где он касается <b>пола</b>, — <span class="c1">горизонтальный след Σ₁ (h₀)</span>. Где касается <b>передней стены</b> — <span class="c2">фронтальный след Σ₂ (f₀)</span>. Боковой стены — <span class="c3">профильный Σ₃</span>. Точка, где два следа встречаются на оси, — <b>точка схода</b> Σₓ.</div>
+ <p>Двигай ползунки: a, b, c — где плоскость пересекает оси x, y, z. Кнопки сверху ставят особые положения. Нажми «разложить в эпюр» — следы лягут на чертёж.</p>`);
+ let st={a:50,b:40,c:45,zh:20},inf={a:false,b:false,c:false};const top=box(root);
+ const g=el('<div class="grid2"><div></div><div></div></div>');root.appendChild(g);
+ const nrm=()=>[inf.a?0:1/st.a,inf.b?0:1/st.b,inf.c?0:1/st.c];
+ const v=new View3D(g.children[0],{build:()=>{const n=nrm(),it=[...room()];const pp=planePoly(n,1);if(pp)it.push({k:'poly',pts:pp,c:'teal',fa:.25,sa:.8,w:1.5,sp:true});
+  const tr=traces(n,1);[1,2,3].forEach(k=>{if(tr[k])it.push({k:'seg',a:tr[k][0],b:tr[k][1],c:'p'+k,w:3.4,tag:TAG[k],label:'Σ'+SUB[k],lc:'p'+k});});
+  if(!inf.a)it.push({k:'pt',p:[st.a,0,0],c:'ink',r:4,label:'Σₓ'});
+  const h=hLine(n,1,st.zh);if(h&&(n[0]||n[1])){it.push({k:'seg',a:h[0],b:h[1],c:'nv',w:3,sp:true,label:'h'},{k:'seg',a:prj(h[0],1),b:prj(h[1],1),c:'nv',w:2,tag:'p1',dash:1},{k:'seg',a:prj(h[0],2),b:prj(h[1],2),c:'nv',w:2,dash:1});}
+  return it;}});
+ const ep=new Ep(g.children[1],{axes:'xyz',maxH:420,box:[-66,-66,66,66]});
+ ep.draw=gg=>{const n=nrm(),tr=traces(n,1);
+  [1,2,3].forEach(k=>{if(!tr[k])return;const a=PR[k](tr[k][0]),b=PR[k](tr[k][1]);gg.line(a,b,{c:'c'+k,w:3});gg.text(V.lerp(a,b,.5),'Σ'+SUB[k],{c:'c'+k,dx:8,dy:-10});});
+  if(!inf.b&&st.b<=60){gg.link([0,-st.b],[st.b,-st.b]);gg.link([st.b,-st.b],[st.b,0]);gg.pt([0,-st.b],'Σy',{c:'ink',lp:[-24,0]});gg.pt([st.b,0],'Σy′',{c:'ink',lp:[4,-12]});}
+  if(!inf.a&&st.a<=60)gg.pt([-st.a,0],'Σₓ',{c:'ink',lp:[-8,-13]});if(!inf.c&&st.c<=60)gg.pt([0,st.c],'Σz',{c:'ink',lp:[7,-4]});
+  const h=hLine(n,1,st.zh);if(h&&(n[0]||n[1])){[1,2].forEach(k=>{const a=PR[k](h[0]),b=PR[k](h[1]);gg.line(a,b,{c:'nv',w:2.2,dash:1});gg.text(b,'h'+SUB[k],{c:'nv',dx:6,dy:-9});});}};
+ const info=box(root);
+ const upd=()=>{v.render();ep.render();const z=Object.keys(inf).filter(k=>inf[k]).join('');
+  const T={'':'gen',c:'hp',b:'fp',a:'pp',ab:'hl',ac:'fl',bc:'pl'}[z];const W={
+   gen:'Все три оси пересечены → все следы наклонные, сходятся попарно на осях. <b>Общее положение.</b> Горизонталь h (зелёная) — прямая плоскости на высоте z: обрати внимание, <b>h₁ ∥ Σ₁</b> (ведь Σ₁ — это тоже горизонталь, только на высоте 0), а <b>h₂ ∥ x</b>.',
+   hp:'Ось z не пересекается (c = ∞) → плоскость <b>вертикальная, ⊥ П₁</b>. Тогда Σ₂ и Σ₃ — <b>вертикальные</b> линии (⊥ x), а Σ₁ — наклонная, и на неё «падает» сверху вся плоскость (собирательное свойство). Как стена дома, стоящая под углом.',
+   fp:'Ось y не пересекается → <b>⊥ П₂</b>. Σ₁ ⊥ x, а Σ₂ наклонный: спереди плоскость видна ребром. Как открытая крышка ноутбука, если смотреть сбоку… то есть спереди.',
+   pp:'Ось x не пересекается → <b>⊥ П₃</b> (точки схода Σₓ нет). Σ₁ и Σ₂ — обе <b>∥ x</b>! Скат крыши с коньком вдоль x. Ловушка: на П₁ и П₂ плоскость не «схлопнута», выдаёт её только П₃.',
+   hl:'Пересекает только z → <b>горизонтальная плоскость (∥ П₁)</b>, как пол второго этажа. Есть только Σ₂ ∥ x и Σ₃ ∥ y′. Следа на П₁ нет — она с ним не встречается.',
+   fl:'Пересекает только y → <b>фронтальная (∥ П₂)</b>, как стена перед тобой. Σ₁ ∥ x, Σ₃ ∥ z. Следа на П₂ нет.',
+   pl:'Пересекает только x → <b>профильная (∥ П₃)</b>. Σ₁ и Σ₂ — на одной вертикали, ⊥ x. Следа на П₃ нет.'}[T];
+  info.innerHTML=`<div class="why"><div class="t">${PT[T].n}</div>${W}</div>`;};
+ segBtns(top,[['gen','общая'],['hp','⊥ П₁'],['fp','⊥ П₂'],['pp','⊥ П₃'],['hl','∥ П₁'],['fl','∥ П₂'],['pl','∥ П₃']],k=>{const p=TRP[k];inf={a:!p[0],b:!p[1],c:!p[2]};if(p[0])st.a=p[0];if(p[1])st.b=p[1];if(p[2])st.c=p[2];upd();},'gen');
+ sliders(top,[{k:'a',l:'a — пересечение с x',min:15,max:90,v:50},{k:'b',l:'b — с y',min:15,max:90,v:40},{k:'c',l:'c — с z',min:15,max:90,v:45},{k:'zh',l:'высота горизонтали h',min:2,max:55,v:20}],val=>{Object.assign(st,val);upd();});
+ upd();
+ H(root,`<div class="rule"><div class="t">📌 Правила следов (выведи их сам из модели)</div><ol>
+ <li><b>Σ₁ и Σ₂ всегда сходятся на оси x</b> (в точке Σₓ) — или оба ∥ x. Почему: точка схода лежит и на полу, и на стене, а пол со стеной встречаются только по оси x.</li>
+ <li><b>Горизонталь плоскости ∥ Σ₁</b>, фронталь ∥ Σ₂. Почему: Σ₁ — это горизонталь на нулевой высоте; все горизонтали одной плоскости параллельны.</li>
+ <li><b>Проецирующая плоскость:</b> один след наклонный (на «своей» П), остальные ⊥ осям. На наклонный след проецируется всё, что лежит в плоскости.</li>
+ <li><b>Плоскость уровня:</b> следы только ∥ осям, на «своей» П следа нет.</li></ol></div>
+ <div class="mem"><div class="t">🧠 Обозначения в разных учебниках</div>Σ₁ = h₀ (горизонтальный след), Σ₂ = f₀ (фронтальный), Σ₃ = p₀. Буквы h и f — потому что след на полу и есть «нулевая горизонталь», а след на стене — «нулевая фронталь».</div>`);
+ const q=box(root);const cb=doneAfter('ptraces',3);
+ mcq(q,{q:'1) Σ₁ и Σ₂ плоскости общего положения пересекаются…',opts:[{t:'на оси x',ok:true,why:'Общие точки пола и передней стены — только на оси x.'},{t:'в любой точке листа',ok:false},{t:'на оси z',ok:false}],onAnswer:cb});
+ mcq(q,{q:'2) У плоскости оба следа Σ₁ и Σ₂ ∥ x. Это…',opts:[{t:'профильно-проецирующая (⊥ П₃)',ok:true,why:'Плоскость не пересекает ось x — она «тянется» вдоль x. Ребром видна только слева.'},{t:'общего положения',ok:false},{t:'горизонтальная',ok:false,why:'У горизонтальной вообще нет Σ₁.'}],onAnswer:cb});
+ mcq(q,{q:'3) Горизонталь h плоскости на П₁ параллельна…',opts:[{t:'следу Σ₁',ok:true,why:'Σ₁ — тоже горизонталь (на высоте 0). Горизонтали одной плоскости параллельны.'},{t:'оси x',ok:false,why:'Оси x параллельна h₂, а не h₁.'},{t:'следу Σ₂',ok:false}],onAnswer:cb});
+});
+
+S('ptypes','Плоскость (Л3)','7 положений плоскости',root=>{
+ H(root,`<div class="kicker">Лекция 3 · шаг 3</div><h1>Семь положений плоскости — та же логика, что у прямой</h1>
+ <div class="hook"><div class="t">🎯 Перенос знаний</div>У прямой: ∥ П → НВ; ⊥ П → точка. У плоскости ровно так же: <b>∥ П → фигура в НВ</b>; <b>⊥ П → фигура схлопывается в линию</b> (видна «ребром», как лист бумаги, на который смотришь с торца).</div>`);
+ let t='gen',T=genPlaneTri('gen');const top=box(root);const g=el('<div class="grid2"><div></div><div></div></div>');root.appendChild(g);
+ const NVK={hl:[1],fl:[2],pl:[3]};
+ const v=new View3D(g.children[0],{build:()=>{const it=[...room()];[1,2,3].forEach(k=>{const nv=(NVK[t]||[]).includes(k);it.push({k:'poly',pts:T.map(p=>prj(p,k)),c:nv?'nv':'p'+k,fa:.3,sa:1,w:nv?3:2,tag:TAG[k]});});
+  it.push({k:'poly',pts:T,c:'obj',fa:.3,sa:1,w:2.5,sp:true});T.forEach((p,i)=>it.push(...ptb(p,'ABC'[i],{p3:true,nolab:true})));return it;}});
+ const ep=new Ep(g.children[1],{axes:'xyz',maxH:400});ep.draw=gg=>drawTri(gg,T,{nv:NVK[t]});
+ const info=box(root);
+ const upd=()=>{ep.fit(triPts(T),8);ep.render();v.render();info.innerHTML=`<div class="why"><div class="t">${PT[t].n}</div>${PT[t].why}</div>`;};
+ const bt=el('<button class="btn ghost sm" style="margin-left:8px">🎲 другой пример</button>');
+ segBtns(top,PTK.map(k=>[k,{gen:'общая',hp:'⊥ П₁',fp:'⊥ П₂',pp:'⊥ П₃',hl:'∥ П₁',fl:'∥ П₂',pl:'∥ П₃'}[k]]),k=>{t=k;T=genPlaneTri(k)||T;upd();},'gen');top.appendChild(bt);bt.onclick=()=>{T=genPlaneTri(t)||T;upd();};upd();
+ H(root,`<table class="tb"><tr><th>Семья</th><th>Кто</th><th>Признак на эпюре</th><th>Где НВ фигуры</th></tr>
+ <tr><td><b>Общего положения</b></td><td>—</td><td>все три проекции — треугольники</td><td>нигде</td></tr>
+ <tr><td rowspan="3"><b>Проецирующие</b><br><span class="cmut">⊥ одной П</span></td><td>горизонтально-проец. ⊥ П₁</td><td>на П₁ — <b>наклонная линия</b></td><td>нигде*</td></tr>
+ <tr><td>фронтально-проец. ⊥ П₂</td><td>на П₂ — наклонная линия</td><td>нигде*</td></tr><tr><td>профильно-проец. ⊥ П₃</td><td>на П₃ — наклонная линия (на П₁, П₂ — треугольники!)</td><td>нигде*</td></tr>
+ <tr><td rowspan="3"><b>Уровня</b><br><span class="cmut">∥ одной П</span></td><td>горизонтальная ∥ П₁</td><td>на П₂ — линия <b>∥ x</b></td><td class="cnv">П₁</td></tr>
+ <tr><td>фронтальная ∥ П₂</td><td>на П₁ — линия ∥ x</td><td class="cnv">П₂</td></tr><tr><td>профильная ∥ П₃</td><td>на П₁ и П₂ — вертикальные линии</td><td class="cnv">П₃</td></tr></table>
+ <p class="cmut">* Зато на «схлопнутой» проекции сразу виден угол наклона плоскости к двум другим плоскостям проекций.</p>
+ <div class="why"><div class="t">❓ Почему плоскость уровня — это «дважды проецирующая»</div>Горизонтальная плоскость ∥ П₁ — она же ⊥ П₂ и ⊥ П₃. Поэтому на П₂ и П₃ она линия (∥ осям), а на П₁ — НВ. Проецирующая плоскость наклонена: на одной П — <b>наклонная</b> линия. Наклонная линия → проецирующая; линия ∥ оси → уровня.</div>
+ <div class="rule"><div class="t">📌 Собирательное свойство (самое полезное!)</div>Если плоскость ⊥ П₁, то <b>всё</b>, что в ней лежит (точки, прямые, фигуры), на П₁ попадает на одну линию — её след Σ₁. Поэтому задачи с проецирующими плоскостями решаются «бесплатно»: одна проекция уже известна.</div>
+ <div class="mem"><div class="t">🧠 Алгоритм «3 секунды»</div>1) Есть проекция-<b>линия</b>? Нет → общего положения. 2) Линия <b>∥ оси</b>? Да → уровня (НВ на другой проекции). Нет (наклонная) → проецирующая, ⊥ той П, где линия. 3) Не забудь глянуть на П₃!</div>`);
+ trainer(root,{title:'Положение плоскости',icon:'🔷',gens:[GEN.ptype],onResult:doneAfter('ptypes',4)});
+});
+
+/* ===================== ВЗАИМНОЕ ПОЛОЖЕНИЕ (Л4) ===================== */
+S('rpoint','Взаимное положение (Л4)','Точка на прямой',root=>{
+ H(root,`<div class="kicker">Лекция 4 · шаг 1</div><h1>Лежит ли точка на прямой</h1>
+ <div class="hook"><div class="t">🎯 Идея</div>Если бусина надета на нитку, то её тень лежит на тени нитки — <b>с любой стороны</b>. Значит, на эпюре: M ∈ AB ⇔ <b>M₁ ∈ A₁B₁ и M₂ ∈ A₂B₂</b> (и M₁, M₂ на одной линии связи).</div>`);
+ predict(root,{q:'M₁ лежит на A₁B₁, а M₂ — над A₂B₂. Лежит ли M на AB?',opts:[{t:'нет',ok:true},{t:'да, хватает одной проекции',ok:false}],reveal:'<div class="why"><div class="t">❓ Почему одной проекции мало</div>Сверху бусина на нитке и муха прямо над ниткой выглядят одинаково. Вид сверху «не знает» высоту. Только вторая проекция покажет, что муха висит выше.</div>'});
+ H(root,`<div class="trap"><div class="t">⚠️ Ловушка: профильная прямая</div>У профильной прямой A₁B₁ и A₂B₂ лежат на <b>одной вертикали</b>. Любая точка на этой вертикали формально «на обеих проекциях», но может не лежать на прямой! Проверка — только по <b>П₃</b> (или делением отрезка в одном отношении: AM : MB одинаково на всех проекциях).</div>
+ <div class="mem"><div class="t">🧠 Бонус: деление в отношении</div>Если M делит AB как 1:2, то M₁ делит A₁B₁ как 1:2 и M₂ делит A₂B₂ как 1:2. Параллельное проецирование сохраняет отношения.</div>`);
+ trainer(root,{title:'Точка на прямой',icon:'📍',gens:[GEN.pol],onResult:doneAfter('rpoint',4)});
+});
+
+const RL={int:{a:[[50,10,10],[10,40,40]],b:[[48,35,30],[12,15,20]]},sk:{a:[[50,10,10],[10,40,40]],b:[[48,35,40],[12,15,30]]},par:{a:[[50,10,10],[10,40,40]],b:[[50,25,8],[18,49,32]]}};
+S('rlines','Взаимное положение (Л4)','Две прямые: ∥, ∩, скрещиваются',root=>{
+ H(root,`<div class="kicker">Лекция 4 · шаг 2</div><h1>Две прямые: три варианта</h1>
+ <div class="hook"><div class="t">🎯 В жизни</div>Рельсы — <b>параллельные</b>. Ножницы — <b>пересекающиеся</b> (есть общий винтик). Мост над дорогой — <b>скрещивающиеся</b>: сверху кажется, что пересекаются, но машина под мостом не врежется в машину на мосту.</div>`);
+ let t='int';const top=box(root);const g=el('<div class="grid2"><div></div><div></div></div>');root.appendChild(g);
+ const v=new View3D(g.children[0],{build:()=>{const{a,b}=RL[t];const it=[...room()];
+  [[a,'a','obj'],[b,'b','teal']].forEach(([L,n,c])=>{[1,2].forEach(k=>it.push({k:'seg',a:prj(L[0],k),b:prj(L[1],k),c:k===1?'p1':'p2',w:2.2,tag:TAG[k],label:n+SUB[k]}));it.push({k:'seg',a:L[0],b:L[1],c,w:3.4,sp:true,label:n});});
+  if(t==='int')it.push(...ptb([30,25,25],'K',{links:true}));return it;}});
+ const ep=new Ep(g.children[1],{maxH:400});
+ ep.draw=gg=>{const{a,b}=RL[t];[1,2].forEach(k=>{drawNamedLine(gg,a[0],a[1],'c'+k,'a',k);drawNamedLine(gg,b[0],b[1],'teal','b',k);});
+  const x1=lx(P1(a[0]),P1(a[1]),P1(b[0]),P1(b[1])),x2=lx(P2(a[0]),P2(a[1]),P2(b[0]),P2(b[1]));
+  if(t==='int'){gg.link(x1.p,x2.p,{c:'ang'});gg.pt(x1.p,'K₁',{c:'ang',lp:[8,12]});gg.pt(x2.p,'K₂',{c:'ang',lp:[8,-12]});}
+  if(t==='sk'){gg.link(x1.p,[x1.p[0],5],{c:'ang'});gg.link(x2.p,[x2.p[0],-5],{c:'ang'});gg.pt(x1.p,'1₁≡2₁',{c:'ang',lp:[8,12]});gg.pt(x2.p,'3₂≡4₂',{c:'ang',lp:[8,-12]});}};
+ const info=box(root);
+ const W={int:'Точки пересечения проекций K₁ и K₂ лежат <b>на одной линии связи</b> → это одна и та же точка K пространства, общая для обеих прямых → <b>пересекаются</b>.',sk:'Проекции пересекаются, но точки пересечения <b>не на одной линии связи</b>. Значит на П₁ «пересечение» — это две разные точки (одна над другой), а на П₂ — две другие (одна перед другой). Общей точки нет → <b>скрещиваются</b>.',par:'a₁ ∥ b₁ и a₂ ∥ b₂ → прямые <b>параллельны</b>. Параллельное проецирование сохраняет параллельность: тени рельсов на полу тоже параллельны.'};
+ const upd=()=>{const{a,b}=RL[t];ep.fit([a,b].flatMap(L=>L.flatMap(p=>[P1(p),P2(p)])),9);ep.render();v.render();info.innerHTML=`<div class="why">${W[t]}</div>`;};
+ segBtns(top,[['int','пересекаются'],['sk','скрещиваются'],['par','параллельны']],k=>{t=k;upd();},'int');upd();
+ H(root,`<table class="tb"><tr><th>Случай</th><th>Признак на эпюре</th><th>Почему</th></tr>
+ <tr><td><b>∥</b></td><td>a₁ ∥ b₁ и a₂ ∥ b₂</td><td>проецирование сохраняет параллельность</td></tr>
+ <tr><td><b>∩</b></td><td>K₁ и K₂ на <b>одной линии связи</b></td><td>K — реальная общая точка, у неё одни x</td></tr>
+ <tr><td><b>скрещ.</b></td><td>всё остальное: «пересечения» проекций не на одной линии связи</td><td>это две разные точки — конкурирующие</td></tr></table>
+ <div class="trap"><div class="t">⚠️ Ловушка с профильными прямыми</div>Если обе прямые профильные, их проекции на П₁ и П₂ параллельны (вертикальны) всегда — даже если прямые скрещиваются. Решает только П₃.</div>`);
+ trainer(root,{title:'Две прямые',icon:'✂️',gens:[GEN.rel],onResult:doneAfter('rlines',4)});
+});
+
+S('rcomp','Взаимное положение (Л4)','Конкурирующие точки и видимость',root=>{
+ H(root,`<div class="kicker">Лекция 4 · шаг 3</div><h1>Конкурирующие точки: кто кого закрывает</h1>
+ <div class="hook"><div class="t">🎯 Зачем</div>На чертеже детали линии пересекаются, и надо решить, какую рисовать сплошной (видна), а какую — штрихом (закрыта). Отвечают на это <b>конкурирующие точки</b>: две точки на одном луче зрения, которые «сливаются» в одну проекцию.</div>`);
+ const A=[50,15,40],B=[10,35,20],C=[50,37,6],D=[10,13,18],K1=[30,25,30],K2=[30,25,12];
+ const g=el('<div class="grid2"><div></div><div></div></div>');root.appendChild(g);
+ const v=new View3D(g.children[0],{build:()=>{const it=[...room(60,{p3:false})];
+  [[A,B,'a','obj'],[C,D,'b','teal']].forEach(([X,Y,n,c])=>{it.push({k:'seg',a:prj(X,1),b:prj(Y,1),c:'p1',w:2,tag:'p1',label:n+'₁'},{k:'seg',a:prj(X,2),b:prj(Y,2),c:'p2',w:2,label:n+'₂'},{k:'seg',a:X,b:Y,c,w:3.4,sp:true,label:n});});
+  it.push({k:'seg',a:[30,25,0],b:[30,25,58],c:'ang',w:1.4,dash:1,sp:true},{k:'txt',p:[30,25,60],text:'👁 взгляд сверху',c:'ang',sp:true});
+  it.push({k:'pt',p:K1,c:'ang',r:5,label:'1 (на a, выше)',sp:true},{k:'pt',p:K2,c:'ang',r:5,label:'2 (на b, ниже)',sp:true},{k:'pt',p:[30,25,0],c:'p1',label:'1₁≡2₁',tag:'p1'});return it;}});
+ const ep=new Ep(g.children[1],{maxH:400});ep.fit([A,B,C,D].flatMap(p=>[P1(p),P2(p)]),9);
+ ep.draw=gg=>{const c1=P1(K1);drawNamedLine(gg,C,D,'teal','b',1);gg.gap(V.add(c1,[-3.5,-2.6]),V.add(c1,[3.5,2.6]),{w:9});drawNamedLine(gg,A,B,'c1','a',1);drawNamedLine(gg,A,B,'c2','a',2);drawNamedLine(gg,C,D,'teal','b',2);
+  gg.link(c1,P2(K1),{c:'ang'});gg.pt(c1,'1₁≡2₁',{c:'ang',lp:[8,12]});gg.pt(P2(K1),'1₂',{c:'ang',lp:[8,-10]});gg.pt(P2(K2),'2₂',{c:'ang',lp:[8,10]});};ep.render();
+ predict(root,{q:'Сверху точки 1 и 2 слились. Какая прямая видна на П₁ в этом месте?',opts:[{t:'a — точка 1 выше',ok:true},{t:'b',ok:false},{t:'обе одинаково',ok:false}],reveal:'<div class="why"><div class="t">❓ Как это узнать по эпюру</div>Смотрим сверху → кто <b>выше</b>, тот и виден. Высота видна на <b>П₂</b>: опускаем… точнее поднимаем линию связи от 1₁≡2₁ на П₂ и видим, что 1₂ выше 2₂. Значит видна a, а b на П₁ уходит «под» неё (на чертеже — разрыв).</div>'});
+ H(root,`<div class="rule"><div class="t">📌 Правило видимости — «смотри на другую проекцию»</div><table class="tb"><tr><th>Где слились</th><th>Смотрим на</th><th>Видна та, что…</th></tr>
+ <tr><td>на П₁ (1₁ ≡ 2₁)</td><td>П₂</td><td><b>выше</b> (больше z) — мы смотрим сверху</td></tr>
+ <tr><td>на П₂ (3₂ ≡ 4₂)</td><td>П₁</td><td><b>ближе к нам</b> (больше y; на П₁ — дальше от оси x)</td></tr>
+ <tr><td>на П₃</td><td>П₁ или П₂</td><td><b>левее</b> (больше x) — мы смотрим слева</td></tr></table></div>
+ <div class="mem"><div class="t">🧠 Как запомнить</div>Ты — наблюдатель. Сверху видишь того, кто ближе к тебе = выше. Спереди — того, кто ближе к тебе = больше y. «Кто ко мне ближе — тот и виден». А «ближе» всегда узнаёшь по <b>другой</b> проекции, потому что в этой проекции координата «ко мне» как раз потеряна.</div>
+ <div class="trap"><div class="t">⚠️ Частая ошибка</div>На П₂ точка «ниже на листе» на П₁ — это <b>ближе к нам</b> (y откладывается вниз от оси x). Не путай «выше на листе» с «выше в пространстве».</div>`);
+ trainer(root,{title:'Видимость',icon:'👁',gens:[GEN.comp],onResult:doneAfter('rcomp',4)});
+});
+
+const TX=[[52,12,10],[30,48,46],[8,22,20]];
+S('rinplane','Взаимное положение (Л4)','Точка и прямая в плоскости',root=>{
+ H(root,`<div class="kicker">Лекция 4 · шаг 4 · главный приём</div><h1>Точка в плоскости: через вспомогательную прямую</h1>
+ <div class="hook"><div class="t">🎯 Почему нельзя «просто перенести»</div>Дана D₂ внутри A₂B₂C₂. Где D₁? Линия связи говорит только x, а глубину y — нет: D₂ «не знает», насколько точка далеко. Подсказку даёт <b>плоскость</b>: если D в ней, то D лежит на какой-то прямой этой плоскости. А прямую плоскости мы построить умеем!</div>
+ <div class="rule"><div class="t">📌 Две аксиомы (вся тема на них)</div>1) <b>Прямая лежит в плоскости</b>, если проходит через две её точки (или через точку и ∥ прямой плоскости).<br>2) <b>Точка лежит в плоскости</b>, если лежит на прямой этой плоскости.</div>`);
+ const T=TX,w=[.3,.35,.35],D=[0,1,2].map(i=>w[0]*T[0][i]+w[1]*T[1][i]+w[2]*T[2][i]),K=[0,1,2].map(i=>(w[1]*T[1][i]+w[2]*T[2][i])/(w[1]+w[2]));
+ const a1=P1(T[0]),a2=P2(T[0]),k1=P1(K),k2=P2(K),d1=P1(D),d2=P2(D);
+ stepper(root,{box:fitBox(triPts(T,false),9),base:g=>{drawTri(g,T,{ks:[1,2]});g.pt(d2,'D₂',{c:'ang',lp:[9,-10]});},steps:[
+  {s:'Дано',t:'Плоскость ABC, точка D ∈ ABC, дана D₂. Найти D₁. Сразу ясно лишь одно: D₁ на линии связи D₂ (пунктир).',d:g=>g.inf([d2[0],0],[d2[0],1],{c:'aux',w:1,dash:2})},
+  {s:'Прямая через D₂',t:'Через D₂ проводим вспомогательную прямую плоскости. Удобнее всего — из вершины: A₂ → D₂ → до стороны B₂C₂. Точка на стороне — <b>1₂</b>.',d:g=>{g.line(a2,k2,{c:'nv',w:2.4});g.pt(k2,'1₂',{c:'nv',lp:lblDir(k2,a2)});}},
+  {s:'1₂ → 1₁',t:'Точка 1 лежит на стороне BC → её горизонтальная проекция на B₁C₁. Опускаем линию связи до B₁C₁ — это <b>1₁</b>. (Это просто «точка на прямой» из прошлого шага!)',d:g=>{g.link(k2,k1,{c:'nv'});g.pt(k1,'1₁',{c:'nv',lp:lblDir(k1,a1)});}},
+  {s:'Прямая A₁1₁',t:'Прямая A–1 лежит в плоскости (A и 1 — точки плоскости). Проводим её на П₁: <b>A₁ → 1₁</b>.',d:g=>g.line(a1,k1,{c:'nv',w:2.4})},
+  {s:'D₁',t:'D лежит на A–1 → D₁ на A₁1₁ и на линии связи D₂. Пересечение — <b>D₁</b>. Готово! Тот же приём используют для горизонталей, линий пересечения, сечений.',d:g=>{g.link(d2,d1,{c:'ang'});g.pt(d1,'D₁',{c:'ang',lp:[9,10]});}}],onEnd:()=>markDone('rinplane')});
+ H(root,`<div class="why"><div class="t">❓ А если надо проверить, лежит ли точка E в плоскости?</div>Делаем то же самое по E₂: строим прямую A–1 и смотрим, попала ли E₁ на A₁1₁. Попала → лежит. Не попала → E висит перед плоскостью или за ней (как муха перед стеклом: спереди кажется, что она «на стекле»).</div>
+ <div class="mem"><div class="t">🧠 Формула-заклинание</div><b>«Не знаешь, где точка, — проведи через неё прямую»</b>. Прямая плоскости строится по двум точкам на сторонах, каждая из которых переносится по линии связи на ту же сторону.</div>`);
+ trainer(root,{title:'Точка в плоскости',icon:'🎯',gens:[GEN.pip],onResult:doneAfter('rinplane',3)});
+ H(root,'<h2>Прямая в плоскости</h2><p>Та же логика: дана одна проекция прямой — находим две её точки на сторонах и переносим.</p>');
+ trainer(root,{title:'Прямая в плоскости',icon:'📏',gens:[GEN.cut],intro:'Здесь будут задачи «дострой вторую проекцию прямой плоскости» и «пересечение с проецирующей плоскостью».'});
+});
+
+S('rhf','Взаимное положение (Л4)','Горизонталь и фронталь плоскости',root=>{
+ H(root,`<div class="kicker">Лекция 4 · шаг 5</div><h1>Горизонталь и фронталь плоскости</h1>
+ <div class="hook"><div class="t">🎯 Что это и зачем</div><b>Горизонталь</b> плоскости — прямая в плоскости на одной высоте (как линия уровня воды, налитой в наклонённый поднос). <b>Фронталь</b> — прямая плоскости на одной глубине. Это «линейки», которыми потом решают почти все метрические задачи (углы, расстояния, перпендикуляры).</div>`);
+ const T=TX,U=T[0],Wv=T[1],Vv=T[2];const K=V.lerp(U,Wv,(Vv[2]-U[2])/(Wv[2]-U[2]));
+ const c2=P2(Vv),k2=P2(K),c1=P1(Vv),k1=P1(K);
+ stepper(root,{box:fitBox(triPts(T,false),9),base:g=>drawTri(g,T,{ks:[1,2]}),steps:[
+  {s:'Задача',t:'Провести горизонталь h плоскости ABC через вершину C. Вопрос: какую проекцию h мы знаем <b>сразу</b>?'},
+  {s:'h₂ ∥ x',t:'h ∥ П₁ → все её точки на одной высоте → на П₂ это <b>горизонтальная линия</b>. Проводим h₂ через C₂ параллельно оси x до стороны A₂B₂ — точка <b>1₂</b>.',d:g=>{g.line(V.add(c2,[6,0]),V.add(k2,[-6,0]),{c:'nv',w:2.6});g.pt(k2,'1₂',{c:'nv',lp:[-8,-12]});g.text(V.add(c2,[6,0]),'h₂',{c:'nv',dx:4,dy:-10});}},
+  {s:'1₂ → 1₁',t:'1 лежит на AB → по линии связи вниз до A₁B₁: <b>1₁</b>.',d:g=>{g.link(k2,k1,{c:'nv'});g.pt(k1,'1₁',{c:'nv',lp:lblDir(k1,c1)});}},
+  {s:'h₁',t:'Соединяем C₁ и 1₁ — это <b>h₁</b>. Она показывает горизонталь в <b>НВ</b> (h ∥ П₁) и параллельна следу Σ₁.',d:g=>{const d=V.norm(V.sub(k1,c1));g.line(V.add(c1,V.mul(d,-6)),V.add(k1,V.mul(d,6)),{c:'nv',w:2.6});g.text(V.add(k1,V.mul(d,6)),'h₁',{c:'nv',dx:4,dy:10});}}],onEnd:()=>markDone('rhf')});
+ H(root,`<table class="tb"><tr><th></th><th>Горизонталь h</th><th>Фронталь f</th></tr>
+ <tr><td>∥ чему</td><td>П₁ (одна высота)</td><td>П₂ (одна глубина)</td></tr>
+ <tr><td>Строим первой</td><td><b>h₂ ∥ x</b></td><td><b>f₁ ∥ x</b></td></tr><tr><td>Потом</td><td>1₂ → 1₁ → h₁</td><td>1₁ → 1₂ → f₂</td></tr>
+ <tr><td>НВ на</td><td class="cnv">П₁</td><td class="cnv">П₂</td></tr><tr><td>∥ следу</td><td>Σ₁ (h₁ ∥ Σ₁)</td><td>Σ₂ (f₂ ∥ Σ₂)</td></tr></table>
+ <div class="trap"><div class="t">⚠️ Самая частая ошибка</div>Начинать с h₁ ∥ x. Нет! Параллельна x та проекция, на которой <b>видна одинаковая координата</b>: высоту видно на П₂ → h₂ ∥ x. Глубину видно на П₁ → f₁ ∥ x.</div>
+ <div class="mem"><div class="t">🧠 Мнемоника</div>«<b>H</b>orizontal — смотри на высоту, а высоту видно <b>спереди</b> (П₂)». «<b>F</b>ront — одна глубина, а глубину видно <b>сверху</b> (П₁)». Начинаем всегда с проекции «наоборот».</div>`);
+ trainer(root,{title:'h и f плоскости',icon:'〰️',gens:[GEN.hf],onResult:doneAfter('rhf',3)});
+});
+
+S('rcut','Взаимное положение (Л4)','Пересечение с проецирующей плоскостью',root=>{
+ H(root,`<div class="kicker">Лекция 4 · шаг 6</div><h1>Плоскость общего положения ∩ проецирующая плоскость</h1>
+ <div class="hook"><div class="t">🎯 Картинка</div>Режем наклонный лист вертикальным ножом. Нож — плоскость Σ ⊥ П₁. Сверху нож виден <b>линией</b> (след Σ₁). Линия разреза лежит в ноже → сверху она тоже на этой линии. <b>Половина ответа известна бесплатно!</b></div>
+ <div class="rule"><div class="t">📌 Алгоритм</div><ol><li><b>l₁ ≡ Σ₁</b> (собирательное свойство: всё в Σ проецируется на след).</li><li>Отмечаем точки 1₁, 2₁, где Σ₁ пересекает стороны треугольника.</li><li>Переносим 1 и 2 по линиям связи на те же стороны на П₂ (это «прямая в плоскости»).</li><li>1₂2₂ = l₂. Готово.</li></ol>Для Σ ⊥ П₂ — то же самое, только начинаем с П₂: l₂ ≡ Σ₂.</div>
+ <div class="why"><div class="t">❓ Почему это важно</div>Это ключ к пересечению двух плоскостей общего положения и прямой с плоскостью (следующие лекции): там через прямую проводят вспомогательную проецирующую плоскость — и задача сводится к этой.</div>`);
+ trainer(root,{title:'Пересечение с проецирующей',icon:'🔪',gens:[GEN.cut],onResult:doneAfter('rcut',3)});
+});
+
+GEN.ppar={id:'ppar',name:'Параллельны ли плоскости?',make(){const T=genGenTri();const yes=Math.random()<.5;let K,m,nn,bad=0;
+ for(let i=0;i<300;i++){K=[rnd(14,46),rnd(14,46),rnd(14,46)];const nrm=V.cross(V.sub(T[1],T[0]),V.sub(T[2],T[0]));if(Math.abs(V.dot(V.sub(K,T[0]),V.norm(nrm)))>8)break;}
+ const d1=V.mul(V.sub(T[1],T[0]),.35),d2=V.mul(V.sub(T[2],T[0]),.35);m=d1;nn=d2.slice();if(!yes){bad=pick([1,2]);nn[bad]+=(Math.random()<.5?-1:1)*rnd(8,13);}
+ const seg=d=>[V.sub(K,d),V.add(K,d)];const M=seg(m),N=seg(nn);
+ return{render(box,api){box.appendChild(el('<div class="tr-task">Плоскость Γ задана пересекающимися прямыми m и n (через точку K). Параллельна ли Γ плоскости ABC?</div>'));
+ const[L,R]=twoCol(box);const ep=new Ep(L,{maxH:420});ep.fit(triPts(T,false).concat([...M,...N].flatMap(p=>[P1(p),P2(p)])),8);
+ ep.draw=g=>{drawTri(g,T,{ks:[1,2]});[1,2].forEach(k=>{drawNamedLine(g,M[0],M[1],'teal','m',k);drawNamedLine(g,N[0],N[1],'ang','n',k);g.pt(PR[k](K),'K'+SUB[k],{c:'ink',lp:[8,10]});});g.link(P1(K),P2(K));};ep.render();
+ api.hint('Признак: две пересекающиеся прямые одной плоскости ∥ двум пересекающимся прямым другой. Проверь: m ∥ AB на обеих проекциях? n ∥ AC на обеих?');
+ mcq(R,{q:'Ответ:',noShuffle:true,opts:[{t:'Да, Γ ∥ ABC',ok:yes},{t:'Нет',ok:!yes}],onAnswer:ok=>api.done(ok,`m ∥ AB: m₁ ∥ A₁B₁ и m₂ ∥ A₂B₂ ✓. ${yes?'n ∥ AC: n₁ ∥ A₁C₁ и n₂ ∥ A₂C₂ ✓ → две пересекающиеся прямые Γ параллельны двум пересекающимся прямым ABC → <b>Γ ∥ ABC</b>.':`Но n${SUB[bad===1?1:2]} <b>не</b> ∥ A${SUB[bad===1?1:2]}C${SUB[bad===1?1:2]} (присмотрись к наклону) → n не ∥ AC. Одной пары параллельных прямых мало — плоскости могут пересекаться по линии, ∥ m. → <b>не параллельны</b>.`}`)});}}}};
+
+S('rpar','Взаимное положение (Л4)','Параллельные плоскости и жизнь',root=>{
+ H(root,`<div class="kicker">Лекция 4 · шаг 7</div><h1>Параллельные плоскости</h1>
+ <div class="hook"><div class="t">🎯 Признак</div>Плоскости параллельны, если <b>две пересекающиеся</b> прямые одной параллельны <b>двум пересекающимся</b> прямым другой. Одной пары мало: две страницы раскрытой книги обе ∥ корешку, но не параллельны друг другу.</div>
+ <p>Двигай вторую плоскость. Следы остаются параллельными, а горизонтали на одной высоте — тоже.</p>`);
+ const n=[1/50,1/40,1/45];let st={k:160,zh:15};const top=box(root);const g=el('<div class="grid2"><div></div><div></div></div>');root.appendChild(g);
+ const v=new View3D(g.children[0],{build:()=>{const it=[...room(60,{p3:false})];[[1,'teal','Σ'],[st.k/100,'acc','Γ']].forEach(([d,c,nm])=>{const pp=planePoly(n,d);if(pp)it.push({k:'poly',pts:pp,c,fa:.22,sa:.8,sp:true});const tr=traces(n,d);[1,2].forEach(k=>{if(tr[k])it.push({k:'seg',a:tr[k][0],b:tr[k][1],c:k===1?'p1':'p2',w:3,tag:TAG[k],label:nm+SUB[k]});});
+   const h=hLine(n,d,st.zh);if(h)it.push({k:'seg',a:h[0],b:h[1],c:'nv',w:3,sp:true,label:nm==='Σ'?'h':'h′'},{k:'seg',a:prj(h[0],1),b:prj(h[1],1),c:'nv',w:2,dash:1,tag:'p1'});});return it;}});
+ const ep=new Ep(g.children[1],{maxH:400,box:[-66,-66,6,66]});
+ ep.draw=gg=>{[[1,'Σ',''],[st.k/100,'Γ','′']].forEach(([d,nm,pr])=>{const tr=traces(n,d);[1,2].forEach(k=>{if(!tr[k])return;const a=PR[k](tr[k][0]),b=PR[k](tr[k][1]);gg.line(a,b,{c:'c'+k,w:2.8});gg.text(V.lerp(a,b,.35),nm+SUB[k],{c:'c'+k,dx:8,dy:-10});});
+  const h=hLine(n,d,st.zh);if(h){[1,2].forEach(k=>{const a=PR[k](h[0]),b=PR[k](h[1]);gg.line(a,b,{c:'nv',w:2,dash:1});gg.text(b,'h'+pr+SUB[k],{c:'nv',dx:6,dy:-9});});}});};
+ sliders(top,[{k:'k',l:'сдвиг плоскости Γ',min:40,max:190,v:160},{k:'zh',l:'высота горизонталей',min:2,max:50,v:15}],val=>{Object.assign(st,val);v.render();ep.render();});v.render();ep.render();
+ H(root,`<div class="rule"><div class="t">📌 Как это выглядит на эпюре</div><ul><li>Заданы следами: <b>Σ₁ ∥ Γ₁ и Σ₂ ∥ Γ₂</b> → плоскости параллельны.</li><li>Заданы как угодно: строим в обеих горизонтали и фронтали. <b>h₁ ∥ h′₁ и f₂ ∥ f′₂</b> → параллельны. (Горизонтали и фронтали — те самые «две пересекающиеся прямые».)</li><li>Через точку K провести плоскость ∥ ABC: через K₁, K₂ провести две прямые ∥ двум сторонам треугольника (на обеих проекциях).</li></ul></div>
+ <div class="why"><div class="t">❓ Третья плоскость режет две параллельные — что получится?</div>Две <b>параллельные</b> линии. Именно это ты видишь в модели: горизонтальная плоскость на высоте z режет Σ и Γ по h и h′, и h ∥ h′. Поэтому у параллельных плоскостей параллельны и следы (их режут П₁ и П₂).</div>
+ <h2>Где это в жизни</h2><div class="grid3">
+ <div class="card"><b>🏠 Крыша</b><p>Скат крыши — проецирующая плоскость (⊥ П₃, конёк вдоль x). Горизонтали ската — линии, по которым идут ряды черепицы и желоб. Вода стекает по <b>линии наибольшего ската</b> — она ⊥ горизонталям.</p></div>
+ <div class="card"><b>🗺 Карта рельефа</b><p>Горизонтали на топографической карте — это и есть горизонтали поверхности (линии одной высоты), спроецированные на П₁. Где они гуще — склон круче (то же «Δz на коротком катете», что в методе треугольника).</p></div>
+ <div class="card"><b>🔧 Трубы и вентиляция</b><p>Монтажник проверяет, пересекутся ли две трубы или пройдут мимо (скрещиваются), и какая из них «сверху» на плане — это конкурирующие точки и видимость.</p></div></div>`);
+ const q=box(root);const cb=doneAfter('rpar',3);
+ mcq(q,{q:'1) Прямая a одной плоскости ∥ прямой b другой. Плоскости параллельны?',opts:[{t:'не обязательно',ok:true,why:'Нужны ДВЕ пересекающиеся пары. Страницы книги ∥ корешку, но пересекаются.'},{t:'да',ok:false},{t:'нет, никогда',ok:false}],onAnswer:cb});
+ mcq(q,{q:'2) Σ₁ ∥ Γ₁, но Σ₂ не ∥ Γ₂. Плоскости…',opts:[{t:'пересекаются (по горизонтали)',ok:true,why:'Пересекаются по линии, ∥ общему направлению следов на П₁ — то есть по горизонтали.'},{t:'параллельны',ok:false},{t:'совпадают',ok:false}],onAnswer:cb});
+ mcq(q,{q:'3) Третья плоскость пересекает две параллельные. Линии пересечения…',opts:[{t:'параллельны',ok:true,why:'Классическая теорема стереометрии. На ней и держится признак через следы.'},{t:'пересекаются',ok:false},{t:'скрещиваются',ok:false,why:'Обе линии лежат в третьей плоскости — скрещиваться не могут.'}],onAnswer:cb});
+ trainer(root,{title:'Параллельны ли плоскости?',icon:'🟰',gens:[GEN.ppar]});
+});
+
+/* ===================== ТРЕНИРОВКА ===================== */
+S('mix','Тренировка','🔀 Микс всех тем',root=>{
+ H(root,`<div class="kicker">Перемешанная практика</div><h1>Микс: все темы вперемешку</h1>
+ <p class="lead">Задачи всех тем идут в случайном порядке. Тренажёр <b>чаще даёт то, где ты ошибаешься</b> (статистика ниже). Перемешка сложнее, чем задачи «по одной теме», — зато именно так проверяется, умеешь ли ты <b>узнавать тип задачи</b>, как на зачёте.</p><div id="mstat"></div>`);
+ const sh=()=>{const s=Store.get('stats',{}),rows=Object.values(GEN).map(g=>{const r=s[g.id];return[g.name,r?r.n:0,r&&r.n?Math.round(r.ok/r.n*100):null];});
+  $('#mstat',root).innerHTML=`<details><summary class="cmut">📊 Моя статистика по типам задач</summary><table class="tb">${rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]} реш.</td><td>${r[2]===null?'—':`<b style="color:var(--${r[2]>=80?'good':r[2]>=50?'dd':'ang'})">${r[2]}%</b>`}</td></tr>`).join('')}</table></details>`;};sh();
+ trainer(root,{title:'Микс',icon:'🔀',gens:Object.values(GEN),onResult:(ok,o,n)=>{sh();if(n>=10)markDone('mix');}});
+});
+
+S('exam','Тренировка','🎓 Пробный зачёт',root=>{
+ H(root,`<div class="kicker">Как на настоящем</div><h1>Пробный зачёт: 6 задач</h1>
+ <p class="lead">Порядок как в контрольной: 1) положение и свойства прямой, 2) метод треугольника, 3) обратная задача, 4) положение плоскости, 5) прямые / видимость, 6) точка/прямая в плоскости. Подсказки работают, но честнее без них 😉</p>
+ <div class="reads"><div class="rd">⏱ Время<b id="etime">0:00</b></div><div class="rd">🏆 Лучший результат<b id="ebest">${Store.get('examBest',null)===null?'—':Store.get('examBest')+'%'}</b></div></div>`);
+ let t0=0,iv=null;const tick=()=>{const s=Math.round((Date.now()-t0)/1000);$('#etime',root).textContent=Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};
+ trainer(root,{title:'Пробный зачёт',icon:'🎓',n:6,xp:25,gens:[GEN.lprops],seq:[GEN.lprops,GEN.tri,[GEN.inv1,GEN.inv2],GEN.ptype,[GEN.comp,GEN.rel],[GEN.pip,GEN.hf,GEN.cut]],intro:'Нажми «Начать» — пойдёт таймер. На зачёте на 6 задач обычно около 40–60 минут; здесь цель — уложиться в 15.',
+  onStart:()=>{t0=Date.now();clearInterval(iv);iv=setInterval(tick,1000);},onFinish:pc=>{clearInterval(iv);const b=Store.get('examBest',0);if(pc>b)Store.set('examBest',pc);$('#ebest',root).textContent=Math.max(pc,b)+'%';if(pc>=85)markDone('exam');}});
+});
+
+S('cards','Тренировка','🃏 Карточки (интервалы)',root=>{
+ H(root,`<div class="kicker">Интервальное повторение</div><h1>Карточки по системе Лейтнера</h1>
+ <p class="lead">Сначала <b>вспомни ответ сам</b> (вслух или в голове), потом переверни. Знал → карточка уезжает в следующую коробку и будет попадаться реже. Не знал → возвращается в коробку 1. Так мозг тратит время только на то, что забывается.</p><div class="boxes"></div>
+ <div class="flip"><div class="flip-in"><div class="face"><div class="cq" style="font-size:19px;font-weight:650"></div><small>нажми, чтобы перевернуть</small></div><div class="face back"><div class="ca"></div></div></div></div>
+ <div style="display:flex;gap:10px;justify-content:center"><button class="btn ghost cb-no">😕 Не знал</button><button class="btn good cb-yes">😎 Знал</button></div>`);
+ const lb=Store.get('lb',{});const bx=i=>lb[i]||1;let cur=0,last=-1;const f=$('.flip',root);
+ const pickC=()=>{const w=CARDS.map((_,i)=>i===last?0:Math.pow(2,5-bx(i)));let r=Math.random()*w.reduce((a,b)=>a+b,0);for(let i=0;i<w.length;i++){r-=w[i];if(r<=0)return i;}return 0;};
+ const show=()=>{const c=[0,0,0,0,0];CARDS.forEach((_,i)=>c[bx(i)-1]++);$('.boxes',root).innerHTML=c.map((n,i)=>`<span>📦 ${i+1}<br><b>${n}</b></span>`).join('');
+  cur=pickC();f.classList.remove('on');setTimeout(()=>{$('.cq',root).innerHTML=CARDS[cur][0];$('.ca',root).innerHTML=CARDS[cur][1];},f.classList.contains('on')?250:0);};
+ f.onclick=()=>f.classList.toggle('on');let cnt=0;
+ const ans=k=>{if(!f.classList.contains('on')){f.classList.add('on');return;}lb[cur]=k?Math.min(5,bx(cur)+1):1;Store.set('lb',lb);last=cur;if(k)addXP(3);if(++cnt>=15)markDone('cards');show();};
+ $('.cb-yes',root).onclick=()=>ans(true);$('.cb-no',root).onclick=()=>ans(false);show();
+ H(root,'<p class="cmut" style="text-align:center">Клавиши: <span class="kbd">пробел</span> — перевернуть, <span class="kbd">→</span> знал, <span class="kbd">←</span> не знал</p>');
+ document.addEventListener('keydown',e=>{if(!root.classList.contains('on')||e.target.tagName==='INPUT')return;if(e.key===' '){e.preventDefault();f.classList.toggle('on');}else if(e.key==='ArrowRight')ans(true);else if(e.key==='ArrowLeft')ans(false);});
+});
+
+S('cheat','Тренировка','📋 Шпаргалка',root=>{
+ H(root,`<div class="kicker">Всё на одной странице</div><h1>Шпаргалка (сначала попробуй вспомнить сам!)</h1>
+ <h2>Прямая</h2><table class="tb"><tr><th>Тип</th><th>Признак</th><th>НВ</th><th>Углы видны</th></tr>
+ <tr><td>общего положения</td><td>проекции наклонны к x</td><td>метод △</td><td>метод △</td></tr>
+ <tr><td>горизонталь h ∥ П₁</td><td>h₂ ∥ x</td><td>П₁</td><td>β на П₁ (h₁ с x)</td></tr><tr><td>фронталь f ∥ П₂</td><td>f₁ ∥ x</td><td>П₂</td><td>α на П₂ (f₂ с x)</td></tr>
+ <tr><td>профильная p ∥ П₃</td><td>p₁, p₂ ⊥ x</td><td>П₃</td><td>α, β на П₃</td></tr><tr><td>⊥ П₁</td><td>A₁ ≡ B₁</td><td>П₂, П₃</td><td>α = 90°</td></tr><tr><td>⊥ П₂</td><td>A₂ ≡ B₂</td><td>П₁, П₃</td><td>β = 90°</td></tr><tr><td>⊥ П₃</td><td>обе ∥ x</td><td>П₁, П₂</td><td>γ = 90°</td></tr></table>
+ <h2>Метод прямоугольного треугольника</h2><div class="rule">Катет 1 — проекция отрезка; катет 2 — <b>Δ потерянной координаты</b> (для П₁ — Δz, для П₂ — Δy, для П₃ — Δx), берётся с другой проекции. Гипотенуза = НВ. Угол между проекцией и гипотенузой = угол прямой с этой П (α, β, γ).<br><b>Обратная тип 1:</b> 2 решения (Δ вверх/вниз). <b>Тип 2:</b> |A₂B₂| = Δy / tg β → дуга до линии связи: 2, 1 или 0 решений.</div>
+ <h2>Плоскость</h2><table class="tb"><tr><th>Тип</th><th>Признак</th><th>Следы</th></tr>
+ <tr><td>общего положения</td><td>все проекции — фигуры</td><td>все наклонные, сходятся на осях</td></tr>
+ <tr><td>⊥ П₁</td><td>на П₁ наклонная линия</td><td>Σ₁ наклонный, Σ₂ ⊥ x</td></tr><tr><td>⊥ П₂</td><td>на П₂ наклонная линия</td><td>Σ₂ наклонный, Σ₁ ⊥ x</td></tr><tr><td>⊥ П₃</td><td>на П₃ наклонная линия</td><td>Σ₁ ∥ x, Σ₂ ∥ x</td></tr>
+ <tr><td>∥ П₁</td><td>на П₂ линия ∥ x</td><td>только Σ₂ ∥ x (и Σ₃)</td></tr><tr><td>∥ П₂</td><td>на П₁ линия ∥ x</td><td>только Σ₁ ∥ x (и Σ₃)</td></tr><tr><td>∥ П₃</td><td>на П₁, П₂ вертикали</td><td>Σ₁, Σ₂ ⊥ x</td></tr></table>
+ <h2>Взаимное положение</h2><div class="grid2"><div class="rule"><b>Точка ∈ прямой:</b> M₁ ∈ a₁ и M₂ ∈ a₂ (кроме профильной — проверяй П₃).<br><b>Прямые ∥:</b> a₁ ∥ b₁, a₂ ∥ b₂.<br><b>∩:</b> K₁ и K₂ на одной линии связи.<br><b>Скрещиваются:</b> иначе.</div>
+ <div class="rule"><b>Видимость:</b> слились на П₁ → видна та, что выше (смотри П₂). Слились на П₂ → та, что ближе (смотри П₁).<br><b>Точка в плоскости:</b> на прямой плоскости. <b>Прямая в плоскости:</b> через 2 точки плоскости.</div>
+ <div class="rule"><b>h плоскости:</b> h₂ ∥ x → 1₂ → 1₁ → h₁ (НВ, ∥ Σ₁).<br><b>f плоскости:</b> f₁ ∥ x → 1₁ → 1₂ → f₂ (НВ, ∥ Σ₂).</div>
+ <div class="rule"><b>∩ с проецирующей Σ ⊥ П₁:</b> l₁ ≡ Σ₁, точки на сторонах → на П₂.<br><b>Плоскости ∥:</b> две пересекающиеся ∥ двум пересекающимся; Σ₁∥Γ₁, Σ₂∥Γ₂; h₁∥h′₁, f₂∥f′₂.</div></div>
+ <div class="mem"><div class="t">🖨 Совет</div>Шпаргалка полезна <b>после</b> попытки вспомнить. Закрой страницу, напиши на листке всё, что помнишь, и только потом сверься — это в 2–3 раза эффективнее перечитывания.</div>`);
+ markDone('cheat');
+});
+
+'use strict';
+/* ===================== оболочка приложения ===================== */
+const inited={};let curId=null;
+function markDone(id){const d=Store.get('done',{});if(d[id])return;d[id]=1;Store.set('done',d);addXP(15);navUpd();const s=SECTIONS.find(x=>x.id===id);if(s&&id!=='start'&&id!=='cheat')toast('✅ Раздел пройден: '+s.t);}
+function navUpd(){const d=Store.get('done',{}),sn=Store.get('seen',{});$$('.navi').forEach(b=>{const id=b.dataset.id;b.classList.toggle('on',id===curId);b.classList.toggle('done',!!d[id]);b.classList.toggle('seen',!!sn[id]);});
+ const mods={};SECTIONS.forEach(s=>{mods[s.mod]=mods[s.mod]||[0,0];mods[s.mod][1]++;if(d[s.id])mods[s.mod][0]++;});$$('.mod').forEach(m=>{const c=mods[m.dataset.m];m.querySelector('span').textContent=c[0]+'/'+c[1];});}
+function go(id,noHash){const s=SECTIONS.find(x=>x.id===id)||SECTIONS[0];id=s.id;curId=id;
+ if(!inited[id]){const sec=el(`<section class="sec" id="s-${id}"></section>`);$('main').appendChild(sec);inited[id]=sec;try{s.init(sec);}catch(e){console.error(e);sec.insertAdjacentHTML('beforeend','<div class="trap">Ошибка раздела: '+e.message+'</div>');}
+  const i=SECTIONS.indexOf(s),p=SECTIONS[i-1],n=SECTIONS[i+1];const pg=el(`<div class="pager">${p?`<button class="btn ghost">← ${p.t}</button>`:'<span></span>'}${n?`<button class="btn">${n.t} →</button>`:'<span></span>'}</div>`);
+  const bs=pg.querySelectorAll('button');if(p)bs[0].onclick=()=>go(p.id);if(n)bs[p?1:0].onclick=()=>go(n.id);sec.appendChild(pg);}
+ $$('.sec').forEach(x=>x.classList.toggle('on',x===inited[id]));const sn=Store.get('seen',{});sn[id]=1;Store.set('seen',sn);Store.set('last',id);
+ navUpd();$('#side').classList.remove('open');window.scrollTo(0,0);if(!noHash&&location.hash!=='#'+id)history.replaceState(null,'','#'+id);
+ requestAnimationFrame(()=>window.dispatchEvent(new Event('resize')));}
+function boot(){const nav=$('#side');let mod=null;
+ SECTIONS.forEach(s=>{if(s.mod!==mod){mod=s.mod;nav.appendChild(el(`<div class="mod" data-m="${mod}">${mod}<span></span></div>`));}const b=el(`<button class="navi" data-id="${s.id}"><span class="dot"></span><span>${s.t}</span></button>`);b.onclick=()=>go(s.id);nav.appendChild(b);});
+ $('#menuBtn').onclick=()=>nav.classList.toggle('open');
+ const th=Store.get('theme',matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.classList.toggle('dark',th==='dark');
+ $('#themeBtn').onclick=()=>{const d=!document.documentElement.classList.contains('dark');document.documentElement.classList.toggle('dark',d);Store.set('theme',d?'dark':'light');Object.values(inited).forEach(()=>{});window.dispatchEvent(new Event('resize'));rerenderAll();};
+ $('#resetBtn').onclick=()=>{if(confirm('Сбросить весь прогресс, опыт и статистику?')){localStorage.removeItem('ng_trainer_v1');location.hash='';location.reload();}};
+ addEventListener('hashchange',()=>go(location.hash.slice(1),true));
+ updateXP();go(location.hash.slice(1)||Store.get('last','start'),false);}
+/* перерисовка canvas/svg при смене темы (canvas берёт цвета из CSS при рендере) */
+const R3=[];const _r=View3D.prototype.render;View3D.prototype.render=function(){if(!this._reg){this._reg=1;R3.push(this);}return _r.call(this);};
+const RE=[];const _e=Ep.prototype.render;Ep.prototype.render=function(){if(!this._reg){this._reg=1;RE.push(this);}return _e.call(this);};
+function rerenderAll(){R3.forEach(v=>v.render());RE.forEach(e=>e.render());}
+document.addEventListener('DOMContentLoaded',boot);
+</script></body></html>

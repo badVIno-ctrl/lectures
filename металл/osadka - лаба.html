@@ -1,0 +1,1421 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Лабораторная работа №1 — Изучение процесса осадки</title>
+<style>
+:root{
+  --text:#2C2C2B; --text2:#7D7A75; --bg:#FFFFFF; --soft:#F9F8F7; --surface:#F0EFED;
+  --border:#E6E5E3; --blue:#2783DE; --blue-soft:#E5F2FC; --green:#46A171; --green-soft:#E8F1EC;
+  --orange:#D5803B; --orange-soft:#FBEBDE; --red:#E56458; --red-soft:#FCE9E7;
+  --scene1:#F4F6F8; --scene2:#E7ECF1;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --text:#FFFFFF; --text2:rgba(255,255,255,.65); --bg:#191919; --soft:#202020; --surface:#252525;
+    --border:rgba(255,255,255,.20); --blue:#5E9FE8; --blue-soft:rgba(94,159,232,.12);
+    --green:#72BC8F; --green-soft:rgba(114,188,143,.12); --orange:#DE9255; --orange-soft:rgba(222,146,85,.12);
+    --red:#E97366; --red-soft:rgba(233,115,102,.12);
+    --scene1:#1E2226; --scene2:#15181B;
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--text);
+  font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-text-size-adjust:100%;
+}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px 64px}
+header.top{border-bottom:1px solid var(--border);background:var(--bg)}
+.top-in{max-width:1120px;margin:0 auto;padding:22px 24px 14px}
+.kicker{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--text2);margin:0 0 6px}
+h1{font-size:30px;line-height:1.2;margin:0 0 6px;font-weight:650}
+.sub{color:var(--text2);margin:0;font-size:15px}
+nav.tabs{position:sticky;top:0;z-index:30;background:var(--bg);border-bottom:1px solid var(--border)}
+.tabs-in{max-width:1120px;margin:0 auto;padding:8px 16px;display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.tabs-in::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;min-height:44px;padding:10px 16px;border:1px solid transparent;border-radius:8px;background:transparent;
+  color:var(--text2);font:inherit;font-size:15px;cursor:pointer;white-space:nowrap}
+.tab:hover{background:var(--soft);color:var(--text)}
+.tab[aria-selected="true"]{background:var(--blue-soft);color:var(--blue);border-color:var(--blue);font-weight:600}
+.tab:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+section.panel{display:none;padding-top:28px}
+section.panel.active{display:block}
+h2{font-size:24px;margin:36px 0 12px;font-weight:650}
+h2:first-child{margin-top:8px}
+h3{font-size:18px;margin:26px 0 8px;font-weight:600}
+p{margin:0 0 12px;max-width:74ch}
+ul,ol{max-width:74ch;padding-left:22px;margin:0 0 14px}
+li{margin:6px 0}
+.card{border:1px solid var(--border);border-radius:12px;background:var(--soft);padding:18px 20px;margin:16px 0}
+.card.blue{background:var(--blue-soft);border-color:color-mix(in srgb,var(--blue) 35%, transparent)}
+.card.green{background:var(--green-soft);border-color:color-mix(in srgb,var(--green) 35%, transparent)}
+.card.orange{background:var(--orange-soft);border-color:color-mix(in srgb,var(--orange) 35%, transparent)}
+.card h3{margin-top:0}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.mini{border:1px solid var(--border);border-radius:12px;padding:16px;background:var(--bg)}
+.mini .big{font-size:26px;font-weight:650;letter-spacing:-.01em}
+.mini .lbl{font-size:13px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em}
+formula,.formula{display:block;background:var(--surface);border:1px solid var(--border);border-radius:8px;
+  padding:14px 16px;margin:12px 0;font-family:Menlo,Consolas,monospace;font-size:15px;overflow-x:auto;white-space:nowrap}
+.tag{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:3px 9px;border-radius:6px;white-space:nowrap}
+.dot{width:10px;height:10px;border-radius:3px;display:inline-block}
+.z1{background:var(--blue-soft);color:var(--blue)} .z1 .dot{background:#2783DE}
+.z2{background:var(--orange-soft);color:var(--orange)} .z2 .dot{background:#D5803B}
+.z3{background:var(--green-soft);color:var(--green)} .z3 .dot{background:#46A171}
+/* ---- 3D scene ---- */
+.stage{position:relative;border:1px solid var(--border);border-radius:12px;overflow:hidden;
+  background:linear-gradient(180deg,var(--scene1),var(--scene2));touch-action:none}
+#scene{display:block;width:100%;height:clamp(320px,52vh,520px);cursor:grab}
+#scene.dragging{cursor:grabbing}
+.labels{position:absolute;inset:0;pointer-events:none}
+.lab{position:absolute;transform:translate(-50%,-50%);background:var(--bg);border:1px solid var(--border);
+  border-radius:6px;padding:3px 8px;font-size:12px;font-weight:600;white-space:nowrap;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.lab.z1{border-color:#2783DE;color:#2783DE}
+.lab.z2{border-color:#D5803B;color:#D5803B}
+.lab.z3{border-color:#46A171;color:#46A171}
+.hint{position:absolute;left:12px;bottom:10px;font-size:12px;color:var(--text2);background:var(--bg);
+  border:1px solid var(--border);border-radius:6px;padding:4px 8px;opacity:.9}
+.hud{position:absolute;right:10px;top:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;
+  padding:8px 10px;font-size:12px;line-height:1.6;min-width:132px}
+.hud b{font-variant-numeric:tabular-nums}
+.controls{margin-top:14px;display:grid;gap:14px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+button.btn{min-height:44px;padding:10px 16px;border-radius:8px;border:1px solid var(--border);background:var(--bg);
+  color:var(--text);font:inherit;font-size:15px;cursor:pointer}
+button.btn:hover{background:var(--soft)}
+button.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:600}
+button.btn.on{background:var(--blue-soft);border-color:var(--blue);color:var(--blue);font-weight:600}
+.slider{display:grid;gap:6px}
+.slider label{font-size:14px;color:var(--text2);display:flex;justify-content:space-between;gap:12px}
+.slider label b{color:var(--text);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;height:44px;accent-color:var(--blue);background:transparent}
+input[type=number]{width:100%;min-height:44px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;
+  background:var(--bg);color:var(--text);font:inherit}
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+table{border-collapse:collapse;width:100%;font-size:15px;margin:12px 0}
+.tablewrap{overflow-x:auto}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--surface);font-weight:600}
+details{border:1px solid var(--border);border-radius:8px;padding:0 16px;margin:10px 0;background:var(--bg)}
+details[open]{padding-bottom:6px}
+summary{cursor:pointer;padding:14px 0;font-weight:600;min-height:44px;display:flex;align-items:center}
+.steps{counter-reset:s;list-style:none;padding:0}
+.steps li{counter-increment:s;position:relative;padding-left:44px;margin:14px 0}
+.steps li::before{content:counter(s);position:absolute;left:0;top:0;width:30px;height:30px;border-radius:8px;
+  background:var(--blue-soft);color:var(--blue);font-weight:700;display:flex;align-items:center;justify-content:center}
+.gloss dt{font-weight:650;margin-top:14px}
+.gloss dd{margin:2px 0 0;color:var(--text2)}
+.svgbox{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:12px;overflow-x:auto}
+svg{display:block;max-width:100%;height:auto}
+footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--border);color:var(--text2);font-size:14px}
+@media (max-width:640px){
+  .wrap{padding:0 16px 48px} .top-in{padding:16px 16px 12px} h1{font-size:23px} h2{font-size:20px}
+  #scene{height:clamp(300px,50vh,400px)}
+  .stage{overflow:hidden}
+  .hud{font-size:10.5px;min-width:0;padding:5px 7px;line-height:1.35;top:auto;bottom:8px;right:8px;opacity:.95}
+  .labels .lab{max-width:44vw}
+  .lab{font-size:11px;padding:2px 6px} .hint{display:none}
+  .formula{font-size:13px}
+}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+<style>
+/* ===== v2: увеличенная сцена и расширенное управление ===== */
+.stage{position:relative}
+#scene{display:block;width:100%;height:clamp(460px,76vh,860px);cursor:grab;touch-action:none}
+#scene.dragging{cursor:grabbing}
+#scene.panning{cursor:move}
+.stage:fullscreen{border-radius:0;border:0}
+.stage:fullscreen #scene{height:100vh}
+.wrap.wide{max-width:1320px}
+.hud{right:12px;top:12px;min-width:186px;font-size:12.5px;background:color-mix(in srgb,var(--bg) 92%, transparent);
+  backdrop-filter:blur(6px);box-shadow:0 2px 10px rgba(0,0,0,.06)}
+.hud .hud-title{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--text2);margin-bottom:4px}
+.hud .hud-phase{font-weight:700;margin-bottom:6px}
+.hud hr{border:0;border-top:1px solid var(--border);margin:6px 0}
+.stagebar{position:absolute;left:12px;top:12px;display:flex;gap:6px;flex-wrap:wrap;max-width:60%}
+.chip{font-size:11.5px;padding:4px 9px;border-radius:999px;border:1px solid var(--border);background:var(--bg);color:var(--text2)}
+.chip.act{border-color:var(--blue);color:var(--blue);font-weight:700;background:var(--blue-soft)}
+.chip.done{border-color:var(--green);color:var(--green);background:var(--green-soft)}
+.toolbar{position:absolute;right:12px;bottom:12px;display:flex;gap:6px}
+.iconbtn{width:38px;height:38px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);
+  font-size:15px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.iconbtn:hover{background:var(--soft)}
+.ctlbox{border:1px solid var(--border);border-radius:12px;background:var(--soft);padding:14px 16px}
+.ctlbox h4{margin:0 0 10px;font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:var(--text2);font-weight:700}
+.ctlgrid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));margin-top:14px}
+button.btn.sm{min-height:36px;padding:7px 12px;font-size:14px}
+.kbd{display:inline-block;border:1px solid var(--border);border-bottom-width:2px;border-radius:5px;padding:0 6px;
+  font:600 12px/1.7 Menlo,Consolas,monospace;background:var(--bg);color:var(--text2)}
+.keys{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--text2);margin-top:10px}
+.seg{display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:var(--bg);color:var(--text2);font:inherit;font-size:14px;padding:9px 13px;cursor:pointer;min-height:40px}
+.seg button + button{border-left:1px solid var(--border)}
+.seg button.on{background:var(--blue-soft);color:var(--blue);font-weight:650}
+@media (max-width:640px){
+  #scene{height:clamp(340px,60vh,520px)}
+  .stagebar{max-width:calc(100% - 24px);gap:4px}
+  .stagebar .chip{display:none}
+  .stagebar .chip.act{display:inline-flex}
+  .chip{font-size:10px;padding:3px 7px}
+  .hud{top:auto;bottom:56px;right:8px;min-width:0;font-size:10.5px;line-height:1.45;padding:6px 8px}
+  .hud .hud-title{font-size:9px;margin-bottom:2px}
+  .hud .hud-phase{margin-bottom:3px}
+  .toolbar{right:8px;bottom:8px}
+  .keys{display:none}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <p class="kicker">Основы обработки металлов давлением • ИТ в машиностроении</p>
+    <h1>Лабораторная работа №1. Изучение процесса осадки</h1>
+    <p class="sub">Интерактивная 3D-модель опыта + теория простыми словами. Свинцовый образец сжимают между плитами пресса.</p>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="Разделы работы">
+  <div class="tabs-in">
+    <button class="tab" role="tab" aria-selected="true" aria-controls="p-exp" id="t-exp">🧪 3D-опыт</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="p-theory" id="t-theory">📚 Теория</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="p-schemes" id="t-schemes">📐 Схемы и трение</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="p-calc" id="t-calc">🧮 Расчёты</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="p-gloss" id="t-gloss">🔤 Обозначения</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="p-report" id="t-report">📝 Отчёт</button>
+  </div>
+</nav>
+
+<main class="wrap wide">
+
+<!-- ============ 3D ОПЫТ ============ -->
+<section class="panel active" id="p-exp" role="tabpanel" aria-labelledby="t-exp">
+  <h2>Что происходит в опыте</h2>
+  <p>Цилиндрик из свинца ставят на нижнюю плиту <b>гидравлического пресса</b> (это и есть «сжиматель»; в лабораториях его ещё называют испытательной машиной). Верхняя плита опускается и давит сверху. Образец становится <b>ниже и толще</b> — это и есть <b>осадка</b>. Из-за трения о плиты бока выпучиваются «бочкой».</p>
+
+  <div class="stage" id="stage">
+    <canvas id="scene" tabindex="0" aria-label="Трёхмерная модель гидравлического пресса и осадки свинцового образца" role="img"></canvas>
+    <div class="labels" id="labels"></div>
+    <div class="stagebar" id="stagebar"></div>
+    <div class="hud" id="hud"></div>
+    <div class="toolbar">
+      <button class="iconbtn" id="btnFit" title="Весь пресс / рабочая зона (клавиша F)" aria-label="Вписать"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+      <button class="iconbtn" id="btnFull" title="Во весь экран" aria-label="Во весь экран"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M8 9h8M8 13h5"/></svg></button>
+    </div>
+    <div class="hint">ЛКМ — поворот • ПКМ или Shift+ЛКМ — сдвиг • колесо — масштаб • двойной клик — сброс вида</div>
+  </div>
+
+  <div class="controls">
+    <div class="row">
+      <button class="btn primary" id="btnPlay">▶︎ Пуск пресса</button>
+      <button class="btn" id="btnStep">⏭ Следующий этап</button>
+      <button class="btn" id="btnReset">🔄 Сброс опыта</button>
+      <span class="seg" role="group" aria-label="Скорость">
+        <button id="sp05" data-sp="0.5">0,5×</button>
+        <button id="sp1" class="on" data-sp="1">1×</button>
+        <button id="sp2" data-sp="2">2×</button>
+        <button id="sp4" data-sp="4">4×</button>
+      </span>
+    </div>
+
+    <div class="ctlgrid">
+      <div class="ctlbox">
+        <h4>Параметры опыта</h4>
+        <div class="slider">
+          <label for="sDef">Степень деформации ε <b><span id="vDef">0</span> %</b></label>
+          <input type="range" id="sDef" min="0" max="70" step="0.1" value="0">
+        </div>
+        <div class="slider" style="margin-top:10px">
+          <label for="sMu">Коэффициент трения μ <b><span id="vMu">0.40</span></b></label>
+          <input type="range" id="sMu" min="0.05" max="1" step="0.05" value="0.4">
+        </div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn sm" id="muLub">Со смазкой μ=0,15</button>
+          <button class="btn sm on" id="muMid">Наш опыт μ=0,40</button>
+          <button class="btn sm" id="muDry">Сухие плиты μ=0,80</button>
+        </div>
+      </div>
+
+      <div class="ctlbox">
+        <h4>Что показывать</h4>
+        <div class="row">
+          <button class="btn sm" id="btnCut">✂︎ Разрез</button>
+          <button class="btn sm on" id="btnZones">🎨 Зоны деформации</button>
+          <button class="btn sm" id="btnFric">⭕ Зоны трения на торце</button>
+          <button class="btn sm" id="btnGrid">▦ Координатная сетка</button>
+          <button class="btn sm" id="btnFlow">→ Течение металла</button>
+          <button class="btn sm" id="btnDims">↔ Размеры</button>
+          <button class="btn sm on" id="btnLabels">🏷 Подписи</button>
+          <button class="btn sm on" id="btnPress">🏭 Пресс целиком</button>
+        </div>
+      </div>
+
+      <div class="ctlbox">
+        <h4>Камера</h4>
+        <div class="row">
+          <button class="btn sm" id="btnFront">Спереди</button>
+          <button class="btn sm" id="btnIso">Изометрия</button>
+          <button class="btn sm" id="btnTop">Сверху (торец)</button>
+          <button class="btn sm" id="btnZoomIn">＋</button>
+          <button class="btn sm" id="btnZoomOut">－</button>
+        </div>
+        <div class="keys">
+          <span><span class="kbd">Space</span> пуск/пауза</span>
+          <span><span class="kbd">←→↑↓</span> поворот</span>
+          <span><span class="kbd">+ −</span> масштаб</span>
+          <span><span class="kbd">C</span> разрез</span>
+          <span><span class="kbd">Z</span> зоны</span>
+          <span><span class="kbd">G</span> сетка</span>
+          <span><span class="kbd">V</span> течение</span>
+          <span><span class="kbd">D</span> размеры</span>
+          <span><span class="kbd">R</span> сброс</span>
+          <span><span class="kbd">F</span> вписать</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="legend">
+      <span class="tag z1"><i class="dot"></i> Зона I — затруднённая деформация («мёртвая»)</span>
+      <span class="tag z2"><i class="dot"></i> Зона II — интенсивная пластическая деформация</span>
+      <span class="tag z3"><i class="dot"></i> Зона III — растяжение (бочка, тут трещины)</span>
+    </div>
+  </div>
+
+  <div class="card blue">
+    <h3>Как читать модель</h3>
+    <ul>
+      <li><b>Пресс</b> — станина, две колонны, верхняя траверса, гидроцилиндр с плунжером и два бойка (плиты). Манометр слева внизу показывает реальную силу P, которая считается по формуле p = σ<sub>т</sub>[1 + μ·d/(3h)].</li>
+      <li><b>Образец</b> — свинцовый цилиндр Ø36 × 37,7 мм. «Пуск пресса» проигрывает опыт по этапам: установка → подвод бойка → осадка до ε = 58,6 % → выдержка → разгрузка (с упругим последействием) → замер H<sub>к</sub> = 15,6 мм и D<sub>к</sub> ≈ 55,6 мм.</li>
+      <li><b>«Разрез»</b> — половина образца убирается, видно три зоны и деформированную <b>координатную сетку</b>, которую в реальной работе наносят на меридиональное сечение.</li>
+      <li><b>«Течение металла»</b> — стрелки показывают, куда ползёт металл: у плит он заторможен трением, в середине выдавливается наружу.</li>
+      <li><b>μ</b> — трение: больше μ → резче «мёртвые» конусы, больше бочка и выше давление.</li>
+    </ul>
+  </div>
+
+  <h2>Почему получается «бочка», а не ровный цилиндр</h2>
+  <div class="grid">
+    <div class="mini"><div class="lbl">Шаг 1</div><p>Металл под давлением течёт вбок — ему надо куда-то деваться, объём-то не меняется.</p></div>
+    <div class="mini"><div class="lbl">Шаг 2</div><p>Но у плит металл «прилипает»: <b>трение</b> держит его и не даёт скользить наружу.</p></div>
+    <div class="mini"><div class="lbl">Шаг 3</div><p>Поэтому середина, где трение не мешает, вылезает сильнее — получается бочка, а деформация становится неравномерной.</p></div>
+  </div>
+</section>
+
+<!-- ============ ТЕОРИЯ ============ -->
+<section class="panel" id="p-theory" role="tabpanel" aria-labelledby="t-theory">
+  <h2>Цель работы</h2>
+  <div class="card">
+    <ul>
+      <li>Изучить, как <b>меняется деформация</b>, когда растёт влияние контактного трения (при увеличении отношения <b>d/h</b>).</li>
+      <li>Изучить <b>кинетику течения металла</b> при осадке (куда и как он «ползёт»).</li>
+      <li>Определить <b>коэффициент контактного трения</b> и посчитать удельное сопротивление деформированию.</li>
+    </ul>
+  </div>
+
+  <h2>Что такое ОМД и осадка — на пальцах</h2>
+  <p><b>ОМД (обработка металлов давлением)</b> — это когда деталь получают не резанием (стружкой), а <b>продавливанием/сминанием</b> металла: ковка, штамповка, прокатка, прессование. Металл ведёт себя как очень густой пластилин: форму меняет, а объём сохраняет.</p>
+  <div class="card green">
+    <h3>Осадка</h3>
+    <p style="margin:0"><b>Осадка</b> — технологическая операция ОМД, при которой <b>уменьшают высоту</b> заготовки и <b>увеличивают её поперечные размеры</b> (диаметр). Проще: «сплющили сверху — стало ниже и шире».</p>
+  </div>
+  <p>После осадки получают заготовку типа <b>диска / шайбы / фланца</b> — например, заготовки шестерён, дисков, фланцев. Ещё осадка нужна, чт��������бы «разбить» литую структуру металла и сделать его прочнее.</p>
+
+  <h2>Классификация процессов ОМД (из конспекта)</h2>
+  <div class="tablewrap">
+  <table>
+    <tr><th>Признак</th><th>Виды</th><th>Простыми словами</th></tr>
+    <tr><td>1. По температуре</td><td>Горячие и холодные</td><td>Горячие — металл нагрет (легче течёт, меньше сила). Холодные — при комнатной температуре (точнее размеры, но нужна бо́льшая сила). <b>Наш опыт — холодный</b>, потому что свинец и так мягкий.</td></tr>
+    <tr><td>2. По схеме течения</td><td>Плоские и объёмные</td><td>Плоское — металл течёт в одной плоскости (прокатка полосы). Объёмное — течёт во все стороны. <b>Осадка цилиндра — объёмная</b>.</td></tr>
+    <tr><td>3. По назначению</td><td>Заготовительные и формоизменяющие (фасонные)</td><td>Заготовительные — готовят «болванку» нужной формы. Формоизменяющие — дают готовую деталь. <b>Осадка — заготовительная операция</b>.</td></tr>
+  </table>
+  </div>
+
+  <h2>Три зоны внутри образца</h2>
+  <p>Если разрезать осаженный образец пополам, видно, что деформация внутри <b>неравномерная</b>. Выделяют три зоны:</p>
+  <div class="grid">
+    <div class="mini" style="border-color:#2783DE">
+      <span class="tag z1"><i class="dot"></i> Зона I</span>
+      <h3 style="margin:10px 0 6px">Затруднённая деформация</h3>
+      <p style="margin:0">Конусы металла прямо под плитами. Трение их «приклеило» к плитам, поэтому они почти не деформируются и движутся вниз вместе с плитой как жёсткая пробка. Второе название — <b>«мёртвые зоны»</b>.</p>
+    </div>
+    <div class="mini" style="border-color:#D5803B">
+      <span class="tag z2"><i class="dot"></i> Зона II</span>
+      <h3 style="margin:10px 0 6px">Интенсивная деформация</h3>
+      <p style="margin:0">Середина, между конусами. Здесь металл течёт сильнее всего: конусы «раздвигают» его в стороны, как клинья. Тут наибольшие сдвиги и наибольшая проработка структуры.</p>
+    </div>
+    <div class="mini" style="border-color:#46A171">
+      <span class="tag z3"><i class="dot"></i> Зона III</span>
+      <h3 style="margin:10px 0 6px">Зона растяжения (боковая)</h3>
+      <p style="margin:0">Выпуклая боковая поверхность — «бочка». Металл из середины выдавливается наружу и <b>растягивает</b> поверхность. Поэтому именно здесь при осадке хрупких металлов появляются продольные трещины.</p>
+    </div>
+  </div>
+
+  <h2>Основные факторы неравномерности деформации при осадке</h2>
+  <ol>
+    <li><b>Точность деформирующего оборудования</b> — если плиты пресса не идеально параллельны, образец «косит» на одну сторону.</li>
+    <li><b>Начальные свойства материала заготовки</b> — неоднородность структуры, разная твёрдость по сечению, литые дефекты.</li>
+    <li><b>Влияние внешних сил контактного трения</b> — главный фактор: трение о плиты тормозит металл у торцов.</li>
+  </ol>
+  <div class="card orange">
+    <p style="margin:0">Ключевой вывод: <b>чем больше сила контактного трения, тем больше касательные напряжения τ<sub>тр</sub> на контакте и тем сильнее неравномерность пластической деформации</b> (зоны I и III выражены резче, бочка больше, давление выше).</p>
+  </div>
+
+  <h2>Влияние отношения d/h</h2>
+  <p><b>d</b> — диаметр, <b>h</b> — высота. Чем <b>больше d/h</b> (низкая «лепёшка»), тем большую долю объёма занимают заторможенные трением слои → тем сильнее влияние трения и тем больше нужно давление. У высокого образца (маленькое d/h) середина далеко от плит и течёт свободнее.</p>
+  <p>Это прямо видно в формуле давления: множитель <b>μ·d/(3h)</b> растёт вместе с d/h. Подвигайте ползунок деформации в 3D-вкладке — увидите, как растут d/h и p.</p>
+
+  <details><summary>А почему объём не меняется?</summary>
+    <p>Пластическая деформация — это сдвиг слоёв металла друг относительно друга, атомы никуда не исчезают. Поэтому <b>V = const</b>: π·D₀²/4 · H₀ = π·D²/4 · H. Стал ниже в 2 раза → площадь выросла примерно в 2 раза. На этом построен весь расчёт модели на первой вкладке.</p>
+  </details>
+</section>
+
+<!-- ============ СХЕМЫ ============ -->
+<section class="panel" id="p-schemes" role="tabpanel" aria-labelledby="t-schemes">
+  <h2>Схемы напряжённо-деформированного состояния</h2>
+  <p>Мысленно вырежем из тела маленький кубик. На его грани действуют <b>главные нормальные напряжения σ₁, σ₂, σ₃</b> (стрелка внутрь — сжатие, наружу — растяжение). Схема показывает <b>направление напряжений и деформаций</b> в данной точке.</p>
+  <div class="svgbox">
+    <svg viewBox="0 0 720 250" role="img" aria-label="Схемы напряжённого состояния в трёх зонах">
+      <defs><marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#2C2C2B"/></marker></defs>
+      <g font-family="-apple-system,Segoe UI,Arial" font-size="13" fill="#2C2C2B">
+        <g transform="translate(40,40)">
+          <rect x="30" y="30" width="70" height="70" fill="#E5F2FC" stroke="#2783DE"/>
+          <line x1="65" y1="0" x2="65" y2="26" stroke="#2C2C2B" marker-end="url(#ar)"/>
+          <line x1="65" y1="130" x2="65" y2="104" stroke="#2C2C2B" marker-end="url(#ar)"/>
+          <line x1="0" y1="65" x2="26" y2="65" stroke="#2C2C2B" marker-end="url(#ar)"/>
+          <line x1="130" y1="65" x2="104" y2="65" stroke="#2C2C2B" marker-end="url(#ar)"/>
+          <text x="18" y="150" font-weight="700" fill="#2783DE">Зона I: всестороннее сжатие</text>
+          <text x="18" y="168">σ₁ ≈ σ₂ ≈ σ₃ (все сжимающие)</text>
+          <text x="18" y="186" fill="#7D7A75">металл «зажат», течь почти не может</text>
+        </g>
+        <g transform="translate(280,40)">
+          <rect x="30" y="30" width="70" height="70" fill="#FBEBDE" stroke="#D5803B"/>
+          <line x1="65" y1="0" x2="65" y2="26" stroke="#2C2C2B" marker-end="url(#ar)" stroke-width="2.5"/>
+          <line x1="65" y1="130" x2="65" y2="104" stroke="#2C2C2B" marker-end="url(#ar)" stroke-width="2.5"/>
+          <line x1="8" y1="65" x2="26" y2="65" stroke="#2C2C2B" marker-end="url(#ar)"/>
+          <line x1="122" y1="65" x2="104" y2="65" stroke="#2C2C2B" marker-end="url(#ar)"/>
+          <text x="18" y="150" font-weight="700" fill="#D5803B">Зона II: сильное сжатие сверху</text>
+          <text x="18" y="168">σ₁ &gt; σ₂ ≈ σ₃</text>
+          <text x="18" y="186" fill="#7D7A75">металл активно течёт в стороны</text>
+        </g>
+        <g transform="translate(520,40)">
+          <rect x="30" y="30" width="70" height="70" fill="#E8F1EC" stroke="#46A171"/>
+          <line x1="65" y1="0" x2="65" y2="26" stroke="#2C2C2B" marker-end="url(#ar)" stroke-width="2.5"/>
+          <line x1="65" y1="130" x2="65" y2="104" stroke="#2C2C2B" marker-end="url(#ar)" stroke-width="2.5"/>
+          <line x1="26" y1="65" x2="4" y2="65" stroke="#46A171" marker-end="url(#ar)"/>
+          <line x1="104" y1="65" x2="126" y2="65" stroke="#46A171" marker-end="url(#ar)"/>
+          <text x="6" y="150" font-weight="700" fill="#46A171">Зона III: сжати�� + растяжение</text>
+          <text x="6" y="168">σ₁ &gt; |σ₂| и |σ₃| — они растягивающие</text>
+          <text x="6" y="186" fill="#7D7A75">поэтому тут появляются трещины</text>
+        </g>
+      </g>
+    </svg>
+  </div>
+
+  <h2>Упругая и пластическая деформация</h2>
+  <div class="grid">
+    <div class="mini"><h3 style="margin-top:0">① Упругая</h3><p style="margin:0">Сняли нагрузку — <b>тело вернулось</b> в исходную форму (как пружина). Работает, пока σ &lt; σ<sub>т</sub>.</p></div>
+    <div class="mini"><h3 style="margin-top:0">② Пластическая</h3><p style="margin:0">Сняли нагрузку — <b>тело не вернулось</b>, форма изменилась навсегда. Начинается, когда σ ≥ σ<sub>т</sub> (предел текучести). Вся ОМД живёт здесь.</p></div>
+  </div>
+  <div class="svgbox">
+    <svg viewBox="0 0 620 260" role="img" aria-label="Диаграмма напряжение-деформация">
+      <g font-family="-apple-system,Segoe UI,Arial" font-size="13" fill="#2C2C2B">
+        <line x1="60" y1="210" x2="560" y2="210" stroke="#7D7A75"/><line x1="60" y1="210" x2="60" y2="30" stroke="#7D7A75"/>
+        <text x="500" y="236">ε — деформация</text><text x="26" y="28">σ</text>
+        <path d="M60,210 L180,110" stroke="#2783DE" stroke-width="3" fill="none"/>
+        <path d="M180,110 C260,70 380,60 520,58" stroke="#D5803B" stroke-width="3" fill="none"/>
+        <line x1="60" y1="110" x2="180" y2="110" stroke="#E6E5E3" stroke-dasharray="4 4"/>
+        <text x="14" y="114" fill="#D5803B" font-weight="700">σт</text>
+        <text x="78" y="180" fill="#2783DE" font-weight="700">упругая</text>
+        <text x="300" y="110" fill="#D5803B" font-weight="700">пластическая (металл течёт)</text>
+        <circle cx="180" cy="110" r="5" fill="#D5803B"/>
+      </g>
+    </svg>
+  </div>
+
+  <h2>Три условия трения на контакте</h2>
+  <div class="tablewrap">
+  <table>
+    <tr><th>Условие</th><th>μ</th><th>Что это</th></tr>
+    <tr><td>1. Жидкостное (минимальное)</td><td>0,1 – 0,2</td><td>Между плитой и металлом есть слой смазки, поверхности почти не касаются. Бочка минимальная.</td></tr>
+    <tr><td>2. Смешанное (среднее)</td><td>0,3 – 0,5</td><td>Смазка местами продавлена, часть контакта «сухая». <b>Наш случай: μ = 0,4</b>.</td></tr>
+    <tr><td>3. Сухое</td><td>0,5 – 1,0</td><td>Смазки нет, металл прилипает к плите. Максимальная бочка и максимальное давление.</td></tr>
+  </table>
+  </div>
+
+  <h2>Зоны трения на торце (вид на контактную поверхность)</h2>
+  <p>Если посмотреть на торец образца сверху, то по радиусу видно три кольца — это разные условия скольжения металла по плите:</p>
+  <div class="svgbox">
+    <svg viewBox="0 0 560 240" role="img" aria-label="Кольцевые зоны трения на торце образца">
+      <g font-family="-apple-system,Segoe UI,Arial" font-size="13" fill="#2C2C2B">
+        <circle cx="130" cy="120" r="100" fill="#E8F1EC" stroke="#46A171"/>
+        <circle cx="130" cy="120" r="62" fill="#FBEBDE" stroke="#D5803B"/>
+        <circle cx="130" cy="120" r="26" fill="#E5F2FC" stroke="#2783DE"/>
+        <text x="120" y="124" font-weight="700" fill="#2783DE">В</text>
+        <text x="130" y="78" font-weight="700" fill="#D5803B">Б</text>
+        <text x="130" y="40" font-weight="700" fill="#46A171">А</text>
+        <text x="260" y="70" font-weight="700" fill="#46A171">А — зона скольжения</text>
+        <text x="260" y="90" fill="#7D7A75">край торца: металл реально скользит наружу</text>
+        <text x="260" y="128" font-weight="700" fill="#D5803B">Б — зона торможения (прилипания)</text>
+        <text x="260" y="148" fill="#7D7A75">частичное сцепление, скольжение затруднено</text>
+        <text x="260" y="186" font-weight="700" fill="#2783DE">В — центральная зона</text>
+        <text x="260" y="206" fill="#7D7A75">металл «приварен» к плите, не скользит</text>
+      </g>
+    </svg>
+  </div>
+  <p>Эти кольца можно включить прямо на 3D-модели: кнопка «Зоны трения на торце» на вкладке 3D-опыта.</p>
+</section>
+
+<!-- ============ РАСЧЁТЫ ============ -->
+<section class="panel" id="p-calc" role="tabpanel" aria-labelledby="t-calc">
+  <h2>Замеры в опыте</h2>
+  <div class="grid">
+    <div class="slider"><label for="iH0">H₀ — начальная высота, мм</label><input type="number" id="iH0" value="37.7" step="0.1"></div>
+    <div class="slider"><label for="iD0">D₀ — начальный диаметр, мм</label><input type="number" id="iD0" value="36" step="0.1"></div>
+    <div class="slider"><label for="iHk">H<sub>к</sub> — конечная высот��, мм</label><input type="number" id="iHk" value="15.6" step="0.1"></div>
+    <div class="slider"><label for="iDk">D<sub>к</sub> — конечный диаметр, мм</label><input type="number" id="iDk" value="55.6" step="0.1"></div>
+    <div class="slider"><label for="iSt">σ<sub>т</sub> — предел текучести свинца, МПа</label><input type="number" id="iSt" value="20" step="1"></div>
+    <div class="slider"><label for="iMu">μ — к��эф��и��иент трения</label><input type="number" id="iMu" value="0.4" step="0.05"></div>
+  </div>
+
+  <h2>1. Степень пластической деформации</h2>
+  <p>Показывает, на сколько процентов образец стал ниже. Считается по высоте:</p>
+  <div class="formula">ε = (H₀ − H<sub>к</sub>) / H₀ · 100 %</div>
+  <div class="card" id="outEps"></div>
+
+  <h2>2. Удельное сопротивление пластической деформации</h2>
+  <p>Это <b>давление p</b>, которое нужно приложить к торцу, чтобы металл потёк. Если бы трения не было, хватило бы просто σ<sub>т</sub>. Трение добавляет «надбавку» — множитель в скобках:</p>
+  <div class="formula">p = σ<sub>т</sub> · [ 1 + μ · d / (3 · h) ]</div>
+  <ul>
+    <li><b>σ<sub>т</sub></b> — предел текучести металла (для свинца ≈ 20 МПа) — «с какого напряжения металл начинает течь»;</li>
+    <li><b>μ</b> — коэффициент контактного трения (в работе принят 0,4);</li>
+    <li><b>d</b> — конечный диаметр, <b>h</b> — конечная высота.</li>
+  </ul>
+  <div class="card" id="outP"></div>
+
+  <h2>3. Сила на прессе</h2>
+  <p>Давление × площадь торца — столько должен выдать пресс:</p>
+  <div class="formula">P = p · S = p · π·d² / 4</div>
+  <div class="card" id="outF"></div>
+
+  <h2>Проверка постоянства объёма</h2>
+  <div class="card" id="outV"></div>
+
+  <details><summary>Почему расчётный и замеренный диаметр немного отличаются</summary>
+    <p>Формула V = const даёт «средний» диаметр ровного цилиндра. Реальный образец — бочка: у него диаметр в середине больше, чем у торцов. Поэтому штангенциркулем можно намерить и чуть больше, и чуть меньше расчётного — в зависимости от того, где мерить. Разница в пару процентов — это норма для лабораторной.</p>
+  </details>
+</section>
+
+<!-- ============ ГЛОССАРИЙ ============ -->
+<section class="panel" id="p-gloss" role="tabpanel" aria-labelledby="t-gloss">
+  <h2>Все обозначения простыми словами</h2>
+  <dl class="gloss">
+    <dt>σ (сигма) — нормальное напряжение, МПа</dt>
+    <dd>Сила, приходящаяся на 1 мм² площади, направленная <b>перпендикулярно</b> площадке: σ = P / S. 1 МПа = 1 Н/мм². Проще: «насколько сильно давит/тянет металл внутри». Сжатие принято писать со знаком минус.</dd>
+    <dt>σ₁, σ₂, σ₃ — главные нормальные напряжения</dt>
+    <dd>Три взаимно перпендикулярных напряжения на гранях мысленного кубика. По ним рисуют «схему напряжённого состояния».</dd>
+    <dt>σ<sub>т</sub> — предел текучести, МПа</dt>
+    <dd>Порог: пока σ &lt; σ<sub>т</sub> — деформация упругая (вернётся), как только σ ≥ σ<sub>т</sub> — металл течёт необратимо. У свинца ≈ 20 МПа, у стали — сотни МПа.</dd>
+    <dt>τ (тау) — касательное напряжение, МПа</dt>
+    <dd>Напряжение <b>вдоль</b> площадки, «сдвигающее» слои друг относительно друга. Именно сдвиги и дают пластическую деформацию.</dd>
+    <dt>τ<sub>тр</sub> — касательное напряжение трения на контакте</dt>
+    <dd>Трение плиты о торец образца: τ<sub>тр</sub> = μ·σ. Чем оно больше, тем сильнее неравномерность деформации.</dd>
+    <dt>μ (мю) — коэффициент контактного трения</dt>
+    <dd>Безразмерное число от 0,1 до 1. Насколько «липкий» контакт: 0,1 — со смазкой, 1 — сухой контакт.</dd>
+    <dt>ε (эпсилон) — степень деформации, %</dt>
+    <dd>Относительное изменение размера: ε = (H₀ − H<sub>к</sub>)/H₀ · 100 %. «На сколько процентов сплющили».</dd>
+    <dt>p — удельное сопротивление деформированию, МПа</dt>
+    <dd>Давление на торце, необходимое для течения металла с учётом трения.</dd>
+    <dt>P — сила деформирования, Н (кН)</dt>
+    <dd>То, что показывает манометр/динамометр пресса: P = p·S.</dd>
+    <dt>H₀, D₀ / H<sub>к</sub>, D<sub>к</sub></dt>
+    <dd>Высота и диаметр до осадки и после неё.</dd>
+    <dt>d / h</dt>
+    <dd>Отношение диаметра к высоте. Чем больше — тем заметнее влияние трения и тем выше нужное давление.</dd>
+    <dt>ОМД</dt>
+    <dd>Обработка металлов давлением.</dd>
+    <dt>Пресс (гидравлический пресс / испытательная машина)</dt>
+    <dd>Тот самый «сжиматель»: рама, нижняя неподвижная плита и подвижная верхняя плита (боёк), которую толкает гидроцилиндр или винт. Плиты, между которыми лежит образец, называют <b>плитами</b> или <b>бойками</b>.</dd>
+  </dl>
+
+  <div class="card blue">
+    <h3>Мини-шпаргалка по единицам</h3>
+    <p style="margin:0">1 МПа = 1 Н/мм² = 10 кгс/см² (примерно). Сила в ньютонах: P[Н] = p[МПа] · S[мм²]. 1 кН = 1000 Н ≈ вес 100 кг.</p>
+  </div>
+</section>
+
+<!-- ============ ОТЧЁТ ============ -->
+<section class="panel" id="p-report" role="tabpanel" aria-labelledby="t-report">
+  <h2>Порядок выполнения работы</h2>
+  <ol class="steps">
+    <li>Замерить штангенциркулем начальные размеры свинцового образца: H₀ и D₀.</li>
+    <li>Смазать (или не смазывать) торцы и установить образец по центру нижней плиты пресса.</li>
+    <li>Плавно нагрузить: верхняя плита опускается, образец осаживается. Наблюдать образование бочки.</li>
+    <li>Снять нагрузку, замерить конечные размеры H<sub>к</sub> и D<sub>к</sub>.</li>
+    <li>Посчитать степень деформац��и ε и удельное сопротивление p.</li>
+    <li>Зарисовать схемы напряжённо-деформированного состояния и зоны I, II, III.</li>
+    <li>Сделать вывод о влиянии контактного трения на неравномерность деформации.</li>
+  </ol>
+
+  <h2>Вывод (по результатам работы)</h2>
+  <div class="card green">
+    <p>В данной лабораторной работе изучен процесс <b>осадки</b>, дана классификация этого процесса ОМД (холодный, объёмный, заготовительный). Изучены причины <b>неравномерности пластической деформации</b> при осадке, рассмотрены схемы напряжённо-деформированного состояния для трёх характерных зон.</p>
+    <p>Рассчитаны степень пластической деформации <b>ε = 58,62 %</b> и удельное сопротивление деформированию <b>p ≈ 29,5 МПа</b> (при σ<sub>т</sub> = 20 МПа и μ = 0,4).</p>
+    <p style="margin:0">Установлено: <b>чем больше сила контактного трения (и чем больше отношение d/h), тем больше касательные напряжения τ<sub>тр</sub> на контакте, тем неравномернее пластическая деформация и тем выше необходимое давление деформирования</b>. Именно трение создаёт «мёртвые» зоны у плит и бочкообразование с растягивающими напряжениями на боковой поверхности.</p>
+  </div>
+
+  <h2>Вопросы, которые обычно спрашивают на защите</h2>
+  <details><summary>Почему образец получается бочкообразным?</summary><p>Из-за контактного трения торцы заторможены и не могут свободно расширяться, а середина расширяется свободно.</p></details>
+  <details><summary>Что такое «мёртвая зона»?</summary><p>Конусообразные объёмы металла у плит (зона I), где из-за всестороннего сжатия и трения деформация практически не идёт.</p></details>
+  <details><summary>Где при осадке возникают трещины и почему?</summary><p>На боковой (бочкообразной) поверхности — зона III: там действуют растягивающие напряжения, а металлы плохо сопротивляются растяжению.</p></details>
+  <details><summary>Как уменьшить неравномерность деформации?</summary><p>Смазать торцы (снизить μ), нагреть заготовку, применять осадку в несколько переходов с кантовкой, использовать подкладные кольца/вогнутые бойки.</p></details>
+  <details><summary>Почему свинец?</summary><p>У свинца низкий предел текучести и температура рекристаллизации ниже комнатной: он пластично течёт при обычных условиях и «моделирует» горячую деформацию стали на маленьком прессе.</p></details>
+  <details><summary>Что покажет увеличение d/h?</summary><p>Рост доли заторможенного трением металла → больше давление p = σт[1 + μd/3h] и сильнее неравномерность.</p></details>
+
+  <footer>Интерактивное пособие к лабораторной работе «Изучение процесса осадки». 3D-модель рассчитывается по условию постоянства объёма; бочкообразность зависит от μ и ε.</footer>
+</section>
+
+</main>
+
+<script>
+(function(){
+"use strict";
+/* ---------------- Tabs ---------------- */
+var tabs=[].slice.call(document.querySelectorAll('.tab'));
+tabs.forEach(function(t){
+  t.addEventListener('click',function(){
+    tabs.forEach(function(x){x.setAttribute('aria-selected','false');});
+    t.setAttribute('aria-selected','true');
+    document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
+    document.getElementById(t.getAttribute('aria-controls')).classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+    resize(); render();
+  });
+});
+
+/* ======================================================================
+   3D-сцена: гидравлический пресс + осадка свинцового образца
+   Софт-рендер на canvas 2D: перспектива, сортировка граней, отсечение
+   нелицевых граней по явной нормали, направленный свет + подсветка.
+   Все размеры — в миллиметрах реального опыта.
+   ====================================================================== */
+var canvas=document.getElementById('scene'), ctx=canvas.getContext('2d');
+var stageEl=document.getElementById('stage');
+var labelsEl=document.getElementById('labels');
+var hudEl=document.getElementById('hud');
+var barEl=document.getElementById('stagebar');
+
+/* ---- данные реального опыта ---- */
+var EXP={H0:37.7, D0:36, HK:15.6, DK:55.6, SIGMA_T:20, MU:0.4};
+var EPS_MAX=(EXP.H0-EXP.HK)/EXP.H0*100;      /* 58,62 % */
+var SPRINGBACK=0.12;                          /* мм упругого последействия */
+
+var st={eps:0, mu:EXP.MU, cut:false, zones:true, fric:false, grid:false, flow:false,
+        dims:false, labels:true, press:true, playing:false, speed:1,
+        phase:0, pt:0, gap:34, spring:0, manual:false, load:0};
+
+/* ---- камера ---- */
+var cam={yaw:-0.62, pitch:0.16, zoom:1.75, dist:430, tx:0, ty:12, tz:0, px:0, py:0};
+var HOME={yaw:-0.62, pitch:0.16, zoom:1.75, tx:0, ty:12, px:0, py:0};
+var W=900,H=620,dpr=1,fit=1,focal=820;
+
+function resize(){
+  var r=canvas.getBoundingClientRect();
+  if(r.width<2) return;
+  dpr=Math.min(2,window.devicePixelRatio||1);
+  W=r.width; H=r.height;
+  fit=Math.max(0.5,Math.min(1.35,Math.min(W/900,H/620)));
+  canvas.width=Math.round(W*dpr); canvas.height=Math.round(H*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+
+/* ---- математика ---- */
+var TAU=Math.PI*2;
+function sub(a,b){return [a[0]-b[0],a[1]-b[1],a[2]-b[2]];}
+function cross(a,b){return [a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];}
+function dot(a,b){return a[0]*b[0]+a[1]*b[1]+a[2]*b[2];}
+function nrm(v){var l=Math.hypot(v[0],v[1],v[2])||1;return [v[0]/l,v[1]/l,v[2]/l];}
+
+function toView(p){
+  var x=p[0]-cam.tx, y=p[1]-cam.ty, z=p[2]-cam.tz;
+  var cy=Math.cos(cam.yaw), sy=Math.sin(cam.yaw);
+  var X=x*cy - z*sy, Z=x*sy + z*cy;
+  var cp=Math.cos(cam.pitch), sp=Math.sin(cam.pitch);
+  return [X, y*cp - Z*sp, y*sp + Z*cp];
+}
+function project(p){
+  var v=toView(p), zz=v[2]+cam.dist;
+  if(zz<12) zz=12;
+  var s=focal*cam.zoom*fit/zz;
+  return [W/2+v[0]*s+cam.px, H/2-v[1]*s+cam.py, zz];
+}
+function camPos(){
+  /* обратное преобразование точки (0,0,-dist) видовой системы в мир */
+  var y=0, z=-cam.dist;
+  var cp=Math.cos(-cam.pitch), sp=Math.sin(-cam.pitch);
+  var Y=y*cp - z*sp, Z=y*sp + z*cp, X=0;
+  var cy=Math.cos(-cam.yaw), sy=Math.sin(-cam.yaw);
+  return [X*cy - Z*sy + cam.tx, Y+cam.ty, X*sy + Z*cy + cam.tz];
+}
+
+/* ---- палитра (цвета НЕ смешиваются: каждая грань берёт ровно один цвет) ---- */
+var C={
+  base:[104,110,118], frame:[132,139,147], column:[158,165,172], traverse:[124,131,139],
+  cylBody:[112,119,127], rod:[203,208,213], holder:[136,143,151],
+  die:[198,204,210], dieEdge:[172,178,185], dieFace:[214,219,224],
+  table:[144,151,158], bolt:[92,98,105], floor:[176,182,188],
+  lead:[150,156,163], leadCap:[163,169,176],
+  z1:[39,131,222], z2:[213,128,59], z3:[70,161,113],
+  fA:[70,161,113], fB:[213,128,59], fC:[39,131,222],
+  gauge:[228,231,234]
+};
+var LIGHT=nrm([0.5,0.82,0.62]), LIGHT2=nrm([-0.6,0.25,-0.5]);
+var DARK=!!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+if(window.matchMedia){
+  try{window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',function(e){DARK=e.matches;render();});}catch(e){}
+}
+function ui(light,dark){return DARK?dark:light;}
+
+/* ---- накопители геометрии ---- */
+var faces=[], lines=[], marks=[];
+function addFace(p,c,n,cull){faces.push({p:p,c:c,n:n||null,cull:!!cull});}
+function addLine(a,b,col,w,dash){lines.push({a:a,b:b,col:col,w:w||1.2,dash:dash||null});}
+function addMark(p,text,col,dy){marks.push({p:p,t:text,c:col,dy:dy||0});}
+
+function box(cx,cy,cz,sx,sy,sz,col){
+  var x0=cx-sx/2,x1=cx+sx/2,y0=cy-sy/2,y1=cy+sy/2,z0=cz-sz/2,z1=cz+sz/2;
+  addFace([[x0,y1,z0],[x1,y1,z0],[x1,y1,z1],[x0,y1,z1]],col,[0,1,0],1);
+  addFace([[x0,y0,z1],[x1,y0,z1],[x1,y0,z0],[x0,y0,z0]],col,[0,-1,0],1);
+  addFace([[x0,y0,z1],[x1,y0,z1],[x1,y1,z1],[x0,y1,z1]],col,[0,0,1],1);
+  addFace([[x1,y0,z0],[x0,y0,z0],[x0,y1,z0],[x1,y1,z0]],col,[0,0,-1],1);
+  addFace([[x1,y0,z1],[x1,y0,z0],[x1,y1,z0],[x1,y1,z1]],col,[1,0,0],1);
+  addFace([[x0,y0,z0],[x0,y0,z1],[x0,y1,z1],[x0,y1,z0]],col,[-1,0,0],1);
+}
+function cyl(cx,cz,y0,y1,r,col,o){
+  o=o||{};
+  var seg=o.seg||40, side=o.side||col, capT=o.capT||col, capB=o.capB||col;
+  var rings=o.rings||1, fricTop=o.fricTop;
+  for(var i=0;i<seg;i++){
+    var a0=i/seg*TAU, a1=(i+1)/seg*TAU;
+    var c0=Math.cos(a0),s0=Math.sin(a0),c1=Math.cos(a1),s1=Math.sin(a1);
+    if(o.sides!==false){
+      addFace([[cx+r*c0,y0,cz+r*s0],[cx+r*c1,y0,cz+r*s1],[cx+r*c1,y1,cz+r*s1],[cx+r*c0,y1,cz+r*s0]],
+              side,nrm([(c0+c1)/2,0,(s0+s1)/2]),1);
+    }
+    for(var j=0;j<rings;j++){
+      var r0=r*j/rings, r1=r*(j+1)/rings, m=(j+0.5)/rings;
+      if(o.top!==false){
+        var ct=capT;
+        if(fricTop) ct = m<0.34?C.fC:(m<0.7?C.fB:C.fA);
+        addFace([[cx+r0*c0,y1,cz+r0*s0],[cx+r1*c0,y1,cz+r1*s0],[cx+r1*c1,y1,cz+r1*s1],[cx+r0*c1,y1,cz+r0*s1]],ct,[0,1,0],1);
+      }
+      if(o.bottom!==false){
+        var cb=capB;
+        if(o.fricBottom) cb = m<0.34?C.fC:(m<0.7?C.fB:C.fA);
+        addFace([[cx+r0*c1,y0,cz+r0*s1],[cx+r1*c1,y0,cz+r1*s1],[cx+r1*c0,y0,cz+r1*s0],[cx+r0*c0,y0,cz+r0*s0]],cb,[0,-1,0],1);
+      }
+    }
+  }
+}
+
+/* ======================= МОДЕЛЬ ОБРАЗЦА ======================= */
+function geom(){
+  var h=EXP.H0*(1-st.eps/100)+st.spring;
+  if(h<1) h=1;
+  var R0=EXP.D0/2, V=Math.PI*R0*R0*EXP.H0;
+  var b=Math.min(0.30, 0.43*st.mu*(st.eps/100));      /* бочкообразность (калибровка по опыту: μ=0,4 ε=58,6 % → Dmax≈57 мм) */
+  var k=1-2*b/3+b*b/5;                                 /* средний коэффициент сечения */
+  var Rmax=Math.sqrt(V/(Math.PI*h*k));
+  var Rmean=Math.sqrt(V/(Math.PI*h));
+  return {h:h,b:b,Rmax:Rmax,Rmean:Rmean,Rc:Rmax*(1-b),R0:R0,V:V};
+}
+function radiusAt(g,u){return g.Rmax*(1-g.b*u*u);}      /* u ∈ [-1,1] */
+
+/* зоны: I — мёртвые конусы у плит, III — приповерхностный слой бочки, II — остальное */
+function zoneAt(g,r,u){
+  var au=Math.abs(u);
+  if(g.b<0.015) return 2;
+  if(r <= 0.88*g.Rc*au) return 1;
+  if(r >= 0.74*radiusAt(g,u) && au<0.80) return 3;
+  return 2;
+}
+function zoneColor(z){
+  if(!st.zones || st.eps<1.5) return C.lead;
+  return z===1?C.z1:(z===3?C.z3:C.z2);
+}
+
+/* осевое отображение материальной координаты (в мёртвых зонах металл почти не деформируется) */
+function axialMap(g,zeta){
+  var a=1.9*g.b, N=48, sum=0, i, acc=[0];
+  for(i=0;i<N;i++){
+    var q=(i+0.5)/N*2-1;
+    var w=1+a*q*q;
+    sum+=w; acc.push(sum);
+  }
+  var target=zeta*N, idx=Math.min(N-1,Math.floor(target));
+  var frac=target-idx;
+  var val=(acc[idx]+ (acc[idx+1]-acc[idx])*frac)/sum;
+  return val;
+}
+function matToDeformed(g,rho,zeta){
+  var t=axialMap(g,zeta), u=t*2-1, y=t*g.h;
+  var r=rho*radiusAt(g,u);
+  return {r:r,y:y,u:u};
+}
+
+/* ======================= ПРЕСС ======================= */
+var PRESS={dieR:34, dieH:13, tableY:-14, openY:150};
+
+function buildPress(g){
+  var topY=g.h+(st.fric?Math.max(st.gap,46):st.gap);                 /* низ верхнего бойка */
+  if(!st.press){
+    /* только бойки — «чистая схема» */
+    cyl(0,0,PRESS.tableY,0,PRESS.dieR,C.die,{side:C.dieEdge,capT:C.dieFace,rings:st.fric?4:1,fricTop:st.fric,seg:48});
+    cyl(0,0,topY,topY+PRESS.dieH,PRESS.dieR,C.die,{side:C.dieEdge,capB:C.dieFace,rings:st.fric?4:1,fricBottom:st.fric,seg:48});
+    return topY;
+  }
+  /* станина и стол */
+  box(0,-64,-6,250,26,180,C.base);
+  box(0,-46,-6,214,12,150,C.frame);
+  box(0,PRESS.tableY-11,-6,196,22,136,C.table);
+  /* ножки */
+  box(-100,-80,60,22,6,22,C.bolt); box(100,-80,60,22,6,22,C.bolt);
+  box(-100,-80,-72,22,6,22,C.bolt); box(100,-80,-72,22,6,22,C.bolt);
+  /* колонны */
+  cyl(-92,-38,-40,158,10,C.column,{seg:20,top:false,bottom:false});
+  cyl( 92,-38,-40,158,10,C.column,{seg:20,top:false,bottom:false});
+  cyl(-104, 66,-40,158,9,C.column,{seg:20,top:false,bottom:false});
+  cyl( 104, 66,-40,158,9,C.column,{seg:20,top:false,bottom:false});
+  /* гайки на колоннах */
+  [[-92,-38],[92,-38],[-104,66],[104,66]].forEach(function(p){
+    cyl(p[0],p[1],152,160,14,C.bolt,{seg:6});
+    cyl(p[0],p[1],-40,-32,14,C.bolt,{seg:6});
+  });
+  /* верхняя траверса */
+  box(0,168,8,246,22,136,C.traverse);
+  /* корпус гидроцилиндра */
+  cyl(0,3,120,157,40,C.cylBody,{seg:36,top:false});
+  cyl(0,3,112,120,44,C.frame,{seg:36});
+  /* плунжер (шток) */
+  var rodTop=126;
+  cyl(0,3,Math.min(topY+PRESS.dieH+16,rodTop),rodTop,19,C.rod,{seg:28,top:false});
+  /* держатель верхнего бойка */
+  box(0,topY+PRESS.dieH+8,3,58,16,58,C.holder);
+  /* верхний боёк */
+  cyl(0,0,topY,topY+PRESS.dieH,PRESS.dieR,C.die,{side:C.dieEdge,capT:C.holder,capB:C.dieFace,
+      rings:st.fric?4:1,fricBottom:st.fric,seg:48});
+  /* нижний боёк */
+  cyl(0,0,PRESS.tableY,0,PRESS.dieR,C.die,{side:C.dieEdge,capT:C.dieFace,
+      rings:st.fric?4:1,fricTop:st.fric,seg:48});
+  /* трубка и манометр на колонне */
+  cyl(-92,3,96,120,4,C.frame,{seg:10});
+  return topY;
+}
+
+/* ======================= ОБРАЗЕЦ ======================= */
+/* Базис разреза: секущая плоскость всегда развёрнута к наблюдателю,
+   поэтому при вращении модели сечение остаётся видимым. */
+var CB={e:[0,0,1], t:[1,0,0]};
+function cutBasis(){
+  var eye=camPos();
+  var ex=eye[0]-cam.tx, ez=eye[2]-cam.tz, L=Math.hypot(ex,ez);
+  if(L<1e-4){ex=0;ez=1;L=1;}
+  CB.e=[ex/L,0,ez/L];
+  CB.t=[-CB.e[2],0,CB.e[0]];
+  return CB;
+}
+function P2(x,y,off){
+  off=off||0;
+  return [CB.t[0]*x+CB.e[0]*off, y, CB.t[2]*x+CB.e[2]*off];
+}
+function keepAngle(a){
+  if(!st.cut) return true;
+  return (Math.cos(a)*CB.e[0]+Math.sin(a)*CB.e[2]) <= 0.001;   /* ближнюю к камере половину убираем */
+}
+
+function buildSpecimen(g){
+  var mobile=W<620;
+  var NA=mobile?36:56, NV=mobile?16:26;
+  /* боковая поверхность */
+  for(var i=0;i<NA;i++){
+    var a0=i/NA*TAU, a1=(i+1)/NA*TAU, am=(a0+a1)/2;
+    if(!keepAngle(am)) continue;
+    var c0=Math.cos(a0),s0=Math.sin(a0),c1=Math.cos(a1),s1=Math.sin(a1);
+    for(var j=0;j<NV;j++){
+      var u0=-1+2*j/NV, u1=-1+2*(j+1)/NV, um=(u0+u1)/2;
+      var y0=(u0+1)/2*g.h, y1=(u1+1)/2*g.h;
+      var r0=radiusAt(g,u0), r1=radiusAt(g,u1);
+      var col=zoneColor(zoneAt(g,radiusAt(g,um)*0.999,um));
+      var nr=nrm([Math.cos(am),(r0-r1)/Math.max(0.001,(y1-y0))*0.6,Math.sin(am)]);
+      addFace([[r0*c0,y0,r0*s0],[r0*c1,y0,r0*s1],[r1*c1,y1,r1*s1],[r1*c0,y1,r1*s0]],col,nr,1);
+    }
+  }
+  /* торцы (контактные поверхности) */
+  var rc=g.Rc, RN=st.fric?5:3;
+  for(var i2=0;i2<NA;i2++){
+    var b0=i2/NA*TAU, b1=(i2+1)/NA*TAU, bm=(b0+b1)/2;
+    if(!keepAngle(bm)) continue;
+    var d0=Math.cos(b0),e0=Math.sin(b0),d1=Math.cos(b1),e1=Math.sin(b1);
+    for(var j2=0;j2<RN;j2++){
+      var q0=rc*j2/RN, q1=rc*(j2+1)/RN, m=(j2+0.5)/RN, col2;
+      if(st.fric) col2 = m<0.34?C.fC:(m<0.7?C.fB:C.fA);
+      else col2 = st.zones?zoneColor(1):C.leadCap;
+      addFace([[q0*d0,0.2,q0*e0],[q1*d0,0.2,q1*e0],[q1*d1,0.2,q1*e1],[q0*d1,0.2,q0*e1]],col2,[0,1,0],0);
+      addFace([[q0*d1,g.h-0.2,q0*e1],[q1*d1,g.h-0.2,q1*e1],[q1*d0,g.h-0.2,q1*e0],[q0*d0,g.h-0.2,q0*e0]],col2,[0,-1,0],0);
+    }
+  }
+  /* плоскость разреза (меридиональное сечение) */
+  if(st.cut){
+    var GJ=mobile?22:34, GI=mobile?24:38;
+    for(var jj=0;jj<GJ;jj++){
+      var v0=-1+2*jj/GJ, v1=-1+2*(jj+1)/GJ, vm=(v0+v1)/2;
+      var yy0=(v0+1)/2*g.h, yy1=(v1+1)/2*g.h;
+      var rr0=radiusAt(g,v0), rr1=radiusAt(g,v1);
+      for(var ii=0;ii<GI;ii++){
+        var f0=-1+2*ii/GI, f1=-1+2*(ii+1)/GI;
+        var rm=Math.abs((f0+f1)/2)*radiusAt(g,vm);
+        var cc=zoneColor(zoneAt(g,rm,vm));
+        addFace([P2(f0*rr0,yy0,0.05),P2(f1*rr0,yy0,0.05),P2(f1*rr1,yy1,0.05),P2(f0*rr1,yy1,0.05)],cc,CB.e,0);
+      }
+    }
+  }
+}
+
+/* координатная сетка и стрелки течения — на плоскости разреза */
+function buildGridAndFlow(g){
+  if(!st.cut) return;
+  var NR=8, NZ=6, i, j;
+  if(st.grid){
+    for(j=0;j<=NZ;j++){
+      var pts=[];
+      for(i=-NR;i<=NR;i++){
+        var p=matToDeformed(g,i/NR,j/NZ);
+        pts.push(P2(p.r,p.y,0.4));
+      }
+      for(i=0;i<pts.length-1;i++) addLine(pts[i],pts[i+1],ui('rgba(35,35,35,.6)','rgba(255,255,255,.75)'),1.1);
+    }
+    for(i=-NR;i<=NR;i++){
+      var col=[];
+      for(j=0;j<=NZ;j++){
+        var p2=matToDeformed(g,i/NR,j/NZ);
+        col.push(P2(p2.r,p2.y,0.4));
+      }
+      for(j=0;j<col.length-1;j++) addLine(col[j],col[j+1],ui('rgba(35,35,35,.6)','rgba(255,255,255,.75)'),1.1);
+    }
+  }
+  if(st.flow && g.b>0.004){
+    var AR=4, AZ=5;
+    for(j=1;j<AZ;j++){
+      var t=j/AZ, u=t*2-1, y=t*g.h, R=radiusAt(g,u);
+      for(i=1;i<=AR;i++){
+        var rr=R*i/AR*0.9;
+        for(var k2=0;k2<2;k2++){
+          var sg=k2?-1:1, x=sg*rr;
+          var vr=(rr/g.Rmax)*(1-Math.pow(Math.abs(u),1.6))*0.95+0.05;
+          var len=g.Rmax*(0.06+0.16*vr);
+          var dead=(Math.abs(u)>0.6 && rr<0.88*g.Rc*Math.abs(u));
+          var cc2=dead?'rgba(39,131,222,.95)':ui('rgba(30,30,30,.9)','rgba(255,255,255,.9)');
+          if(dead) len=g.Rmax*0.05;
+          var x2=x+sg*len, y2=y-(u>0?1:-1)*len*0.25*Math.abs(u);
+          addLine(P2(x,y,0.55),P2(x2,y2,0.55),cc2,1.8);
+          var dx=x2-x, dy=y2-y, L2=Math.hypot(dx,dy)||1, ux=dx/L2, uy=dy/L2, hl=Math.max(2.2,L2*0.32);
+          addLine(P2(x2,y2,0.55),P2(x2-hl*(ux*0.87-uy*0.5), y2-hl*(uy*0.87+ux*0.5),0.55),cc2,1.8);
+          addLine(P2(x2,y2,0.55),P2(x2-hl*(ux*0.87+uy*0.5), y2-hl*(uy*0.87-ux*0.5),0.55),cc2,1.8);
+        }
+      }
+    }
+  }
+}
+
+/* размерные линии — всегда в плоскости, развёрнутой к наблюдателю */
+function buildDims(g){
+  if(!st.dims) return;
+  var col='rgba(39,131,222,.95)', off=g.Rmax*0.05+0.8;
+  var y=g.h/2, R=g.Rmax;
+  addLine(P2(-R,y,off),P2(R,y,off),col,1.6);
+  [-1,1].forEach(function(sg){
+    addLine(P2(sg*R,y,off),P2(sg*(R-4),y+2.6,off),col,1.6);
+    addLine(P2(sg*R,y,off),P2(sg*(R-4),y-2.6,off),col,1.6);
+  });
+  addMark(P2(0,y,off),'D = '+(2*R).toFixed(1)+' мм','#2783DE',20);
+  var xo=R+18;
+  addLine(P2(xo,0,off),P2(xo,g.h,off),col,1.6);
+  addLine(P2(xo,0,off),P2(xo-2.6,4,off),col,1.6);
+  addLine(P2(xo,0,off),P2(xo+2.6,4,off),col,1.6);
+  addLine(P2(xo,g.h,off),P2(xo-2.6,g.h-4,off),col,1.6);
+  addLine(P2(xo,g.h,off),P2(xo+2.6,g.h-4,off),col,1.6);
+  addLine(P2(-R,0,off),P2(xo+6,0,off),'rgba(39,131,222,.4)',1,[4,4]);
+  addLine(P2(-R,g.h,off),P2(xo+6,g.h,off),'rgba(39,131,222,.4)',1,[4,4]);
+  addMark(P2(xo+10,g.h/2,off),'H = '+g.h.toFixed(1)+' мм','#2783DE',-14);
+}
+
+/* пол-сетка для ощущения пространства */
+function buildFloor(){
+  if(!st.press) return;
+  var y=-78, n=6, s=46, col='rgba(125,132,140,.28)';
+  for(var i=-n;i<=n;i++){
+    addLine([i*s,y,-n*s],[i*s,y,n*s],col,1);
+    addLine([-n*s,y,i*s],[n*s,y,i*s],col,1);
+  }
+}
+
+/* ======================= РЕНДЕР ======================= */
+function shade(c,n){
+  var d=Math.max(0,dot(n,LIGHT)), d2=Math.max(0,dot(n,LIGHT2));
+  var k=0.64+0.40*d+0.13*d2;
+  if(k>1.22) k=1.22;
+  return 'rgb('+Math.min(255,Math.round(c[0]*k))+','+Math.min(255,Math.round(c[1]*k))+','+Math.min(255,Math.round(c[2]*k))+')';
+}
+
+function build(){
+  faces=[]; lines=[]; marks=[];
+  cutBasis();
+  var g=geom();
+  buildFloor();
+  var topY=buildPress(g);
+  buildSpecimen(g);
+  buildGridAndFlow(g);
+  buildDims(g);
+  g.topY=topY;
+  return g;
+}
+
+function render(){
+  var g=build();
+  var eye=camPos();
+  ctx.clearRect(0,0,W,H);
+  var list=[],i,k;
+  for(i=0;i<faces.length;i++){
+    var f=faces[i], ps=f.p, sp=[], depth=0, ok=true, cx=0,cy=0,cz=0;
+    for(k=0;k<ps.length;k++){
+      var q=project(ps[k]);
+      if(!isFinite(q[0])||!isFinite(q[1])){ok=false;break;}
+      sp.push(q); depth+=q[2]; cx+=ps[k][0]; cy+=ps[k][1]; cz+=ps[k][2];
+    }
+    if(!ok) continue;
+    var n=f.n;
+    if(!n) n=nrm(cross(sub(ps[1],ps[0]),sub(ps[2],ps[0])));
+    var cen=[cx/ps.length,cy/ps.length,cz/ps.length];
+    var toEye=sub(eye,cen);
+    var facing=dot(n,toEye);
+    if(f.cull && facing<0) continue;
+    var nn = facing<0 ? [-n[0],-n[1],-n[2]] : n;
+    list.push({sp:sp,d:depth/ps.length,col:shade(f.c,nn)});
+  }
+  list.sort(function(a,b){return b.d-a.d;});
+  for(i=0;i<list.length;i++){
+    var it=list[i];
+    ctx.beginPath();
+    ctx.moveTo(it.sp[0][0],it.sp[0][1]);
+    for(k=1;k<it.sp.length;k++) ctx.lineTo(it.sp[k][0],it.sp[k][1]);
+    ctx.closePath();
+    ctx.fillStyle=it.col; ctx.fill();
+    ctx.strokeStyle=it.col; ctx.lineWidth=0.6; ctx.stroke();
+  }
+  /* линии */
+  for(i=0;i<lines.length;i++){
+    var L=lines[i], a=project(L.a), b=project(L.b);
+    ctx.beginPath();
+    if(L.dash) ctx.setLineDash(L.dash); else ctx.setLineDash([]);
+    ctx.strokeStyle=L.col; ctx.lineWidth=L.w;
+    ctx.moveTo(a[0],a[1]); ctx.lineTo(b[0],b[1]); ctx.stroke();
+  }
+  ctx.setLineDash([]);
+  /* текстовые метки размеров */
+  ctx.font='600 12px -apple-system,Segoe UI,Arial';
+  ctx.textAlign='center';
+  for(i=0;i<marks.length;i++){
+    var M=marks[i], sp2=project(M.p);
+    var tw=ctx.measureText(M.t).width;
+    ctx.fillStyle=ui('rgba(255,255,255,.92)','rgba(25,25,25,.92)');
+    ctx.fillRect(sp2[0]-tw/2-5, sp2[1]+M.dy-11, tw+10, 17);
+    ctx.strokeStyle=M.c; ctx.lineWidth=1;
+    ctx.strokeRect(sp2[0]-tw/2-5, sp2[1]+M.dy-11, tw+10, 17);
+    ctx.fillStyle=M.c;
+    ctx.fillText(M.t, sp2[0], sp2[1]+M.dy+1);
+  }
+  ctx.textAlign='left';
+  drawGauge(g);
+  drawLabels(g);
+  drawHud(g);
+  drawPhases();
+}
+
+/* ---- манометр пресса ---- */
+function forceNow(g){
+  var d=2*g.Rmean, h=g.h;
+  var p=EXP.SIGMA_T*(1+st.mu*d/(3*h));
+  var P=p*Math.PI*d*d/4/1000;                 /* кН */
+  return {p:p, P:P*st.load, d:d, h:h, Pfull:P};
+}
+function drawGauge(g){
+  var R=Math.max(34,42*fit), cx=R+24, cy=H-R-54;
+  var f=forceNow(g), maxKN=120;
+  ctx.save();
+  ctx.beginPath(); ctx.arc(cx,cy,R,0,TAU);
+  ctx.fillStyle=ui('rgba(255,255,255,.95)','rgba(32,32,32,.95)'); ctx.fill();
+  ctx.lineWidth=3; ctx.strokeStyle='#8A9099'; ctx.stroke();
+  ctx.beginPath(); ctx.arc(cx,cy,R-6,0,TAU); ctx.lineWidth=1; ctx.strokeStyle='#D9DDE1'; ctx.stroke();
+  var a0=Math.PI*0.75, a1=Math.PI*2.25;
+  for(var i=0;i<=12;i++){
+    var t=i/12, a=a0+(a1-a0)*t, big=(i%3===0);
+    var r1=R-8, r2=R-(big?16:12);
+    ctx.beginPath();
+    ctx.moveTo(cx+r1*Math.cos(a),cy+r1*Math.sin(a));
+    ctx.lineTo(cx+r2*Math.cos(a),cy+r2*Math.sin(a));
+    ctx.strokeStyle=big?ui('#3A3F45','#D7DBDF'):ui('#9AA0A7','#7E858C'); ctx.lineWidth=big?2:1; ctx.stroke();
+    if(big){
+      ctx.fillStyle=ui('#3A3F45','#D7DBDF'); ctx.font='600 '+Math.round(R*0.19)+'px -apple-system,Segoe UI,Arial';
+      ctx.textAlign='center';
+      ctx.fillText(String(Math.round(maxKN*t)), cx+(R-25)*Math.cos(a), cy+(R-25)*Math.sin(a)+3);
+    }
+  }
+  var frac=Math.max(0,Math.min(1,f.P/maxKN)), aa=a0+(a1-a0)*frac;
+  ctx.beginPath();
+  ctx.moveTo(cx-6*Math.cos(aa),cy-6*Math.sin(aa));
+  ctx.lineTo(cx+(R-14)*Math.cos(aa),cy+(R-14)*Math.sin(aa));
+  ctx.strokeStyle='#E56458'; ctx.lineWidth=2.6; ctx.lineCap='round'; ctx.stroke();
+  ctx.beginPath(); ctx.arc(cx,cy,4,0,TAU); ctx.fillStyle=ui('#3A3F45','#D7DBDF'); ctx.fill();
+  ctx.fillStyle='#7D7A75'; ctx.font='600 '+Math.round(R*0.2)+'px -apple-system,Segoe UI,Arial';
+  ctx.textAlign='center';
+  ctx.fillText('P, кН', cx, cy+R*0.40);
+  ctx.fillStyle=ui('#2C2C2B','#FFFFFF'); ctx.font='700 '+Math.round(R*0.26)+'px -apple-system,Segoe UI,Arial';
+  ctx.fillText(f.P.toFixed(1), cx, cy+R*0.70);
+  ctx.restore();
+  ctx.textAlign='left';
+}
+
+/* ---- выноски ---- */
+function drawLabels(g){
+  if(!st.labels){labelsEl.innerHTML=''; return;}
+  var items=[], mob=W<620;
+  if(st.press && !mob){
+    items.push({t:'Верхний боёк (сила P)',c:'',p:[PRESS.dieR*0.7,g.topY+6,PRESS.dieR*0.4],o:[150,-40]});
+    items.push({t:'Нижний боёк / стол пресса',c:'',p:[-PRESS.dieR*0.7,-6,PRESS.dieR*0.5],o:[-150,54]});
+    items.push({t:'Плунжер гидроцилиндра',c:'',p:[0,132,20],o:[150,-30]});
+    items.push({t:'Колонна станины',c:'',p:[-92,86,-40],o:[-140,-24]});
+  }
+  if(!st.cut) items.push({t:'Образец — свинец (Ø36×37,7 до осадки)',c:'',p:[-g.Rmax*0.78,g.h*0.55,g.Rmax*0.55],o:[-150,-6]});
+  if(st.cut){
+    items.push({t:'Зона I — мёртвая',c:'z1',p:P2(g.Rc*0.32,g.h*0.9,1),o:[170,-62]});
+    items.push({t:'Зона I — мёртвая',c:'z1',p:P2(-g.Rc*0.32,g.h*0.1,1),o:[-170,72]});
+    items.push({t:'Зона II — интенсивная',c:'z2',p:P2(-g.Rmax*0.3,g.h*0.5,1),o:[-180,-42]});
+    items.push({t:'Зона III — растяжение',c:'z3',p:P2(g.Rmax*0.95,g.h*0.5,1),o:[160,56]});
+  } else if(st.eps>4){
+    items.push({t:'Зона III — бочка',c:'z3',p:[g.Rmax*0.7,g.h*0.5,g.Rmax*0.7],o:[132,58]});
+  }
+  var html='';
+  ctx.save(); ctx.strokeStyle='rgba(110,116,124,.8)'; ctx.lineWidth=1;
+  for(var i=0;i<items.length;i++){
+    var it=items[i], s=project(it.p);
+    if(s[0]<-60||s[0]>W+60||s[1]<-40||s[1]>H+40) continue;
+    var lx=s[0]+it.o[0]*fit, ly=s[1]+it.o[1]*fit;
+    lx=Math.max(80,Math.min(W-80,lx)); ly=Math.max(18,Math.min(H-18,ly));
+    ctx.beginPath(); ctx.moveTo(s[0],s[1]); ctx.lineTo(lx,ly); ctx.stroke();
+    ctx.beginPath(); ctx.arc(s[0],s[1],2.5,0,TAU); ctx.fillStyle='rgba(60,60,60,.85)'; ctx.fill();
+    html+='<div class="lab '+it.c+'" style="left:'+lx.toFixed(1)+'px;top:'+ly.toFixed(1)+'px">'+it.t+'</div>';
+  }
+  ctx.restore();
+  labelsEl.innerHTML=html;
+}
+
+/* ---- HUD ---- */
+var SEQ=[
+  {id:'setup',   n:'Установка образца',  d:1.0},
+  {id:'approach',n:'Подвод бойка',       d:1.6},
+  {id:'load',    n:'Осадка (нагружение)',d:5.0},
+  {id:'hold',    n:'Выдержка',           d:1.0},
+  {id:'unload',  n:'Разгрузка',          d:1.6},
+  {id:'measure', n:'Замер размеров',     d:0}
+];
+function drawPhases(){
+  var html='';
+  for(var i=0;i<SEQ.length;i++){
+    var cls = i<st.phase?'chip done':(i===st.phase?'chip act':'chip');
+    html+='<span class="'+cls+'">'+(i+1)+'. '+SEQ[i].n+'</span>';
+  }
+  barEl.innerHTML=html;
+}
+function drawHud(g){
+  var f=forceNow(g);
+  hudEl.innerHTML=
+    '<div class="hud-title">Показания опыта</div>'+
+    '<div class="hud-phase">'+(st.manual?'Ручной режим':SEQ[st.phase].n)+'</div>'+
+    'ε = <b>'+st.eps.toFixed(1)+' %</b><br>'+
+    'H = <b>'+g.h.toFixed(1)+'</b> мм<br>'+
+    'd<sub>ср</sub> = <b>'+f.d.toFixed(1)+'</b> мм<br>'+
+    'D<sub>max</sub> = <b>'+(2*g.Rmax).toFixed(1)+'</b> мм<br>'+
+    'd/h = <b>'+(f.d/g.h).toFixed(2)+'</b><br>'+
+    '<hr>'+
+    'μ = <b>'+st.mu.toFixed(2)+'</b><br>'+
+    'p = <b>'+f.p.toFixed(1)+'</b> МПа<br>'+
+    'P = <b>'+f.P.toFixed(1)+'</b> кН';
+}
+
+/* ======================= АНИМАЦИЯ ОПЫТА ======================= */
+var raf=null, lastTs=0;
+var btnPlay=document.getElementById('btnPlay');
+function setPlay(on){
+  st.playing=on;
+  btnPlay.textContent = on?'❚❚ Пауза':'▶︎ Пуск пресса';
+  btnPlay.classList.toggle('primary',true);
+  if(on){ lastTs=0; raf=requestAnimationFrame(tick); }
+  else if(raf){ cancelAnimationFrame(raf); raf=null; }
+}
+function enterPhase(i){
+  st.phase=Math.max(0,Math.min(SEQ.length-1,i)); st.pt=0; st.manual=false;
+  var id=SEQ[st.phase].id;
+  if(id==='setup'){ st.eps=0; st.spring=0; st.gap=34; st.load=0; }
+  if(id==='approach'){ st.eps=0; st.spring=0; st.load=0; }
+  if(id==='load'){ st.gap=0; st.spring=0; }
+  if(id==='hold'){ st.gap=0; st.eps=EPS_MAX; st.load=1; st.spring=0; }
+  if(id==='unload'){ st.eps=EPS_MAX; }
+  if(id==='measure'){ st.eps=EPS_MAX; st.spring=SPRINGBACK; st.gap=34; st.load=0; st.dims=true; syncBtn('btnDims','dims'); }
+  syncSliders();
+}
+function tick(ts){
+  if(!st.playing) return;
+  if(!lastTs) lastTs=ts;
+  var dt=Math.min(0.05,(ts-lastTs)/1000)*st.speed; lastTs=ts;
+  var ph=SEQ[st.phase];
+  st.pt+=dt;
+  var t=ph.d>0?Math.min(1,st.pt/ph.d):1;
+  if(ph.id==='setup'){ st.gap=34; st.load=0; }
+  if(ph.id==='approach'){ st.gap=34*(1-t); st.load=0; }
+  if(ph.id==='load'){ st.gap=0; st.eps=EPS_MAX*t; st.load=t; }
+  if(ph.id==='hold'){ st.load=1; }
+  if(ph.id==='unload'){ st.load=1-t; st.spring=SPRINGBACK*t; st.gap=34*t; }
+  syncSliders();
+  render();
+  if(st.pt>=ph.d){
+    if(st.phase<SEQ.length-1) enterPhase(st.phase+1);
+    else { setPlay(false); enterPhase(SEQ.length-1); render(); return; }
+  }
+  raf=requestAnimationFrame(tick);
+}
+function resetExp(){
+  setPlay(false); st.manual=false; st.spring=0; st.load=0; st.dims=false; syncBtn('btnDims','dims');
+  enterPhase(0); render();
+}
+function syncSliders(){
+  var sDef=document.getElementById('sDef');
+  sDef.value=st.eps.toFixed(1);
+  document.getElementById('vDef').textContent=st.eps.toFixed(1);
+}
+
+/* ======================= УПРАВЛЕНИЕ ======================= */
+var drag=0, lx=0, ly=0, pinch=0, pinchC=null, moved=0;
+function pos(e){var r=canvas.getBoundingClientRect();return [e.clientX-r.left,e.clientY-r.top];}
+canvas.addEventListener('contextmenu',function(e){e.preventDefault();});
+canvas.addEventListener('pointerdown',function(e){
+  canvas.focus();
+  drag=(e.button===2||e.button===1||e.shiftKey)?2:1; moved=0;
+  canvas.classList.toggle('dragging',drag===1);
+  canvas.classList.toggle('panning',drag===2);
+  var p=pos(e); lx=p[0]; ly=p[1];
+  try{canvas.setPointerCapture(e.pointerId);}catch(err){}
+});
+canvas.addEventListener('pointermove',function(e){
+  if(!drag) return;
+  var p=pos(e), dx=p[0]-lx, dy=p[1]-ly;
+  moved+=Math.abs(dx)+Math.abs(dy);
+  if(drag===1){
+    cam.yaw+=dx*0.009;
+    cam.pitch=Math.max(-1.25,Math.min(1.35,cam.pitch+dy*0.007));
+  }else{
+    cam.px+=dx; cam.py+=dy;
+  }
+  lx=p[0]; ly=p[1];
+  render();
+});
+function endDrag(){drag=0;canvas.classList.remove('dragging');canvas.classList.remove('panning');}
+canvas.addEventListener('pointerup',endDrag);
+canvas.addEventListener('pointercancel',endDrag);
+canvas.addEventListener('pointerleave',endDrag);
+canvas.addEventListener('dblclick',function(){resetView();});
+canvas.addEventListener('wheel',function(e){
+  e.preventDefault();
+  cam.zoom=Math.max(0.35,Math.min(4.5,cam.zoom*Math.exp(-e.deltaY*0.0012)));
+  render();
+},{passive:false});
+canvas.addEventListener('touchmove',function(e){
+  if(e.touches.length===2){
+    e.preventDefault();
+    var t0=e.touches[0], t1=e.touches[1];
+    var d=Math.hypot(t0.clientX-t1.clientX,t0.clientY-t1.clientY);
+    var c=[(t0.clientX+t1.clientX)/2,(t0.clientY+t1.clientY)/2];
+    if(pinch){
+      cam.zoom=Math.max(0.35,Math.min(4.5,cam.zoom*d/pinch));
+      if(pinchC){cam.px+=c[0]-pinchC[0]; cam.py+=c[1]-pinchC[1];}
+      render();
+    }
+    pinch=d; pinchC=c;
+  }
+},{passive:false});
+canvas.addEventListener('touchend',function(){pinch=0;pinchC=null;});
+
+function resetView(){
+  cam.yaw=HOME.yaw; cam.pitch=HOME.pitch; cam.zoom=HOME.zoom;
+  cam.tx=HOME.tx; cam.ty=st.press?HOME.ty:geom().h/2; cam.px=HOME.px; cam.py=HOME.py;
+  render();
+}
+function fitView(){
+  var g=geom();
+  cam.px=0; cam.py=0; cam.tx=0; cam.tz=0;
+  if(!st.press){ cam.ty=g.h/2; cam.zoom=2.4; }
+  else if(cam.zoom>0.9){ cam.ty=46; cam.zoom=0.58; }   /* весь пресс */
+  else { cam.ty=12; cam.zoom=(W<620?2.1:1.75); }        /* рабочая зона */
+  render();
+}
+
+/* кнопки-переключатели */
+function syncBtn(id,key){var b=document.getElementById(id); if(b) b.classList.toggle('on',!!st[key]);}
+function toggle(id,key,extra){
+  var b=document.getElementById(id);
+  b.addEventListener('click',function(){
+    st[key]=!st[key];
+    if(extra) extra();
+    syncBtn(id,key); render();
+  });
+}
+toggle('btnCut','cut');
+toggle('btnZones','zones',function(){ if(st.zones && st.fric){st.fric=false;syncBtn('btnFric','fric');} });
+toggle('btnFric','fric',function(){ if(st.fric && st.zones){st.zones=false;syncBtn('btnZones','zones');} });
+toggle('btnGrid','grid',function(){ if(st.grid && !st.cut){st.cut=true;syncBtn('btnCut','cut');} });
+toggle('btnFlow','flow',function(){ if(st.flow && !st.cut){st.cut=true;syncBtn('btnCut','cut');} });
+toggle('btnDims','dims');
+toggle('btnLabels','labels');
+toggle('btnPress','press',function(){ fitView(); });
+
+/* ползунки */
+var sDef=document.getElementById('sDef'), vDef=document.getElementById('vDef');
+var sMu=document.getElementById('sMu'), vMu=document.getElementById('vMu');
+sDef.addEventListener('input',function(){
+  setPlay(false); st.manual=true; st.spring=0;
+  st.eps=parseFloat(sDef.value); vDef.textContent=st.eps.toFixed(1);
+  st.gap=0; st.load=st.eps>0.2?1:0;
+  render();
+});
+function setMu(v){
+  st.mu=v; sMu.value=v; vMu.textContent=v.toFixed(2);
+  ['muLub','muMid','muDry'].forEach(function(id){document.getElementById(id).classList.remove('on');});
+  if(Math.abs(v-0.15)<0.001) document.getElementById('muLub').classList.add('on');
+  if(Math.abs(v-0.40)<0.001) document.getElementById('muMid').classList.add('on');
+  if(Math.abs(v-0.80)<0.001) document.getElementById('muDry').classList.add('on');
+  render();
+}
+sMu.addEventListener('input',function(){setMu(parseFloat(sMu.value));});
+document.getElementById('muLub').addEventListener('click',function(){setMu(0.15);});
+document.getElementById('muMid').addEventListener('click',function(){setMu(0.40);});
+document.getElementById('muDry').addEventListener('click',function(){setMu(0.80);});
+
+/* скорость */
+[].slice.call(document.querySelectorAll('.seg [data-sp]')).forEach(function(b){
+  b.addEventListener('click',function(){
+    st.speed=parseFloat(b.getAttribute('data-sp'));
+    document.querySelectorAll('.seg [data-sp]').forEach(function(x){x.classList.remove('on');});
+    b.classList.add('on');
+  });
+});
+
+/* пуск / этапы / сброс */
+btnPlay.addEventListener('click',function(){
+  if(st.playing){setPlay(false); return;}
+  if(st.manual || st.phase>=SEQ.length-1) enterPhase(0);
+  setPlay(true);
+});
+document.getElementById('btnStep').addEventListener('click',function(){
+  setPlay(false);
+  var next=st.manual?0:st.phase+1;
+  enterPhase(next>=SEQ.length?SEQ.length-1:next);
+  var id=SEQ[st.phase].id;
+  if(id==='approach') st.gap=0;
+  if(id==='load'){ st.eps=EPS_MAX; st.load=1; }
+  syncSliders(); render();
+});
+document.getElementById('btnReset').addEventListener('click',resetExp);
+
+/* камера */
+document.getElementById('btnFront').addEventListener('click',function(){cam.yaw=0;cam.pitch=0.03;render();});
+document.getElementById('btnIso').addEventListener('click',function(){cam.yaw=-0.7;cam.pitch=0.32;render();});
+document.getElementById('btnTop').addEventListener('click',function(){cam.yaw=0;cam.pitch=1.32;cam.ty=geom().h/2;cam.px=0;cam.py=0;cam.zoom=Math.max(cam.zoom,1.6);render();});
+document.getElementById('btnZoomIn').addEventListener('click',function(){cam.zoom=Math.min(4.5,cam.zoom*1.2);render();});
+document.getElementById('btnZoomOut').addEventListener('click',function(){cam.zoom=Math.max(0.35,cam.zoom/1.2);render();});
+document.getElementById('btnFit').addEventListener('click',fitView);
+document.getElementById('btnFull').addEventListener('click',function(){
+  if(document.fullscreenElement) document.exitFullscreen();
+  else if(stageEl.requestFullscreen) stageEl.requestFullscreen();
+});
+document.addEventListener('fullscreenchange',function(){setTimeout(function(){resize();render();},60);});
+
+/* клавиатура */
+function key(e){
+  var k=e.key.toLowerCase(), used=true;
+  if(k===' '){ st.playing?setPlay(false):(function(){if(st.manual||st.phase>=SEQ.length-1)enterPhase(0);setPlay(true);})(); }
+  else if(k==='arrowleft') cam.yaw-=0.09;
+  else if(k==='arrowright') cam.yaw+=0.09;
+  else if(k==='arrowup') cam.pitch=Math.min(1.35,cam.pitch+0.07);
+  else if(k==='arrowdown') cam.pitch=Math.max(-1.25,cam.pitch-0.07);
+  else if(k==='+'||k==='=') cam.zoom=Math.min(4.5,cam.zoom*1.15);
+  else if(k==='-'||k==='_') cam.zoom=Math.max(0.35,cam.zoom/1.15);
+  else if(k==='c'){st.cut=!st.cut;syncBtn('btnCut','cut');}
+  else if(k==='z'){st.zones=!st.zones; if(st.zones&&st.fric){st.fric=false;syncBtn('btnFric','fric');} syncBtn('btnZones','zones');}
+  else if(k==='g'){st.grid=!st.grid; if(st.grid&&!st.cut){st.cut=true;syncBtn('btnCut','cut');} syncBtn('btnGrid','grid');}
+  else if(k==='v'){st.flow=!st.flow; if(st.flow&&!st.cut){st.cut=true;syncBtn('btnCut','cut');} syncBtn('btnFlow','flow');}
+  else if(k==='d'){st.dims=!st.dims;syncBtn('btnDims','dims');}
+  else if(k==='r') resetExp();
+  else if(k==='f') fitView();
+  else used=false;
+  if(used){e.preventDefault(); render();}
+}
+canvas.addEventListener('keydown',key);
+window.addEventListener('keydown',function(e){
+  if(document.activeElement===canvas) return;
+  if(document.fullscreenElement===stageEl) key(e);
+});
+
+/* следим за размером сцены */
+if(window.ResizeObserver){
+  new ResizeObserver(function(){resize();render();}).observe(stageEl);
+}
+window.addEventListener('resize',function(){resize();render();});
+
+/* ---------------- Calculator ---------------- */
+function num(id){var v=parseFloat(document.getElementById(id).value);return isFinite(v)?v:0;}
+function calc(){
+  var h0=num('iH0'), d0=num('iD0'), hk=num('iHk'), dk=num('iDk'), st=num('iSt'), mu=num('iMu');
+  var eps = h0>0 ? (h0-hk)/h0*100 : 0;
+  var p = st*(1+mu*dk/(3*hk||1));
+  var S = Math.PI*dk*dk/4;
+  var F = p*S/1000;
+  var V0=Math.PI*d0*d0/4*h0, Vk=Math.PI*dk*dk/4*hk;
+  var dTheory = Math.sqrt(4*V0/(Math.PI*(hk||1)));
+  document.getElementById('outEps').innerHTML=
+    '<div class="formula">ε = ('+h0+' − '+hk+') / '+h0+' · 100 % = <b>'+eps.toFixed(2)+' %</b></div>'+
+    '<p style="margin:0">Образец стал ниже на <b>'+(h0-hk).toFixed(1)+' мм</b>, то есть на <b>'+eps.toFixed(2)+' %</b> начальной высоты.</p>';
+  document.getElementById('outP').innerHTML=
+    '<div class="formula">p = '+st+' · [1 + '+mu+'·'+dk+' / (3·'+hk+')] = '+st+' · '+(1+mu*dk/(3*(hk||1))).toFixed(3)+' = <b>'+p.toFixed(2)+' МПа</b></div>'+
+    '<p style="margin:0">Без трения хватило бы '+st+' МПа. Трение подняло нужное давление на <b>'+((p/st-1)*100).toFixed(0)+' %</b> — вот цена «липкого» контакта.</p>';
+  document.getElementById('outF').innerHTML=
+    '<div class="formula">S = π·'+dk+'²/4 = '+S.toFixed(0)+' мм² &nbsp;→&nbsp; P = '+p.toFixed(2)+' · '+S.toFixed(0)+' = <b>'+(F).toFixed(1)+' кН</b></div>'+
+    '<p style="margin:0">Это примерно вес <b>'+(F*102).toFixed(0)+' кг</b> — столько должен «выжать» пресс.</p>';
+  document.getElementById('outV').innerHTML=
+    '<p>V₀ = π·D₀²/4·H₀ = <b>'+V0.toFixed(0)+' мм³</b>, V<sub>к</sub> = π·D<sub>к</sub>²/4·H<sub>к</sub> = <b>'+Vk.toFixed(0)+' мм³</b> (расхождение '+Math.abs((Vk/V0-1)*100).toFixed(1)+' %).</p>'+
+    '<p style="margin:0">Расчётный диаметр из условия V = const: d = √(4V₀/πH<sub>к</sub>) = <b>'+dTheory.toFixed(1)+' мм</b> против замеренного '+dk+' мм.</p>';
+}
+['iH0','iD0','iHk','iDk','iSt','iMu'].forEach(function(id){document.getElementById(id).addEventListener('input',calc);});
+
+/* ---------------- Init ---------------- */
+function init(){
+  resize();
+  if(W<620){ cam.zoom=2.1; cam.ty=12; cam.pitch=0.14; HOME.zoom=2.1; HOME.ty=12; HOME.pitch=0.14; }
+  calc(); render();
+}
+if(document.readyState==='complete'||document.readyState==='interactive') setTimeout(init,0);
+else window.addEventListener('DOMContentLoaded',init);
+window.addEventListener('resize',function(){render();});
+})();
+</script>
+</body>
+</html>

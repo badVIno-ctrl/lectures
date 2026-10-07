@@ -1,0 +1,2278 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Лекция 4 + Практика 4: метод Гаусса, ранг, матричные уравнения — интерактивно</title>
+<meta name="description" content="Метод Гаусса, теорема Кронекера–Капелли, однородные системы, ранг матрицы, матричные уравнения. Каждое число объяснено: откуда берётся и почему так.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0d13; --panel:#11141d; --panel2:#161a25; --panel3:#1d2230;
+  --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.14);
+  --text:#e9ecf4; --muted:#9aa2b5; --muted2:#6c7487;
+  --acc:#8f86ff; --acc2:#4cc9f0; --ok:#5ad49a; --warn:#ffc15e; --bad:#ff6b81; --pink:#ff7ab6;
+  --tgt:#8f86ff; --src:#ffc15e;
+  --tgtbg:rgba(143,134,255,.16); --srcbg:rgba(255,193,94,.16);
+  --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:'Manrope',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+  --r:12px; --toc:270px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:20px;-webkit-text-size-adjust:100%}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;
+  background:radial-gradient(900px 600px at 85% -10%,rgba(143,134,255,.12),transparent 60%),radial-gradient(700px 500px at -10% 40%,rgba(76,201,240,.06),transparent 60%)}
+::selection{background:rgba(143,134,255,.35)}
+a{color:var(--acc2);text-decoration:none} a:hover{text-decoration:underline}
+b,strong{font-weight:700;color:#fff}
+i.v,.v{font-family:'Times New Roman',Georgia,serif;font-style:italic;font-size:1.12em}
+sub,sup{font-size:.7em;line-height:0}
+code,.mono{font-family:var(--mono);font-size:.9em}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--acc2);outline-offset:2px;border-radius:6px}
+
+/* ---------- layout ---------- */
+.toc{position:fixed;left:0;top:0;bottom:0;width:var(--toc);background:rgba(11,13,19,.92);border-right:1px solid var(--line);overflow-y:auto;padding:20px 14px 40px;z-index:40;backdrop-filter:blur(10px)}
+.toc .brand{display:flex;gap:10px;align-items:center;font-weight:800;font-size:15px;margin:0 6px 14px}
+.toc .brand .logo{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--acc),var(--acc2));display:grid;place-items:center;font-weight:800;color:#0b0d13}
+.toc .prog{margin:0 6px 16px;font-size:13px;color:var(--muted)}
+.toc .bar{height:6px;border-radius:4px;background:var(--panel3);margin-top:6px;overflow:hidden}
+.toc .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--acc),var(--ok));transition:width .4s}
+.toc .grp{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted2);margin:16px 8px 6px}
+.toc a{display:flex;gap:10px;align-items:center;padding:7px 8px;border-radius:8px;color:var(--muted);font-size:14px;line-height:1.3;text-decoration:none;min-height:36px}
+.toc a:hover{background:var(--panel2);color:var(--text)}
+.toc a.on{background:var(--panel3);color:#fff}
+.toc a .no{flex:none;min-width:30px;height:24px;padding:0 4px;border-radius:6px;border:1px solid var(--line2);display:grid;place-items:center;font:600 11px var(--mono);color:var(--muted)}
+.toc a.done .no{border-color:rgba(90,212,154,.5);color:var(--ok)}
+.toc a.done .no::after{content:" ✓"}
+main{margin-left:var(--toc);padding:0 40px 120px;max-width:calc(var(--toc) + 1000px)}
+.wrap{max-width:900px;margin:0 auto}
+.mtop{display:none}
+@media (max-width:1000px){
+  .toc{transform:translateX(-100%);transition:transform .25s;width:min(300px,86vw)}
+  body.tocopen .toc{transform:none;box-shadow:0 0 0 100vmax rgba(0,0,0,.5)}
+  main{margin-left:0;padding:0 16px 100px}
+  .mtop{display:flex;position:sticky;top:0;z-index:30;align-items:center;gap:10px;padding:10px 4px;background:rgba(11,13,19,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);margin:0;padding-left:16px;padding-right:16px}
+  .mtop button{display:grid;place-items:center;color:#fff;min-width:44px;min-height:44px;border-radius:10px;border:1px solid var(--line2);background:var(--panel2);cursor:pointer;font-size:18px}
+  .mtop .t{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+}
+
+/* ---------- hero ---------- */
+.hero{padding:64px 0 32px}
+.tag{display:inline-flex;gap:8px;align-items:center;font:600 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--acc2);border:1px solid rgba(76,201,240,.35);border-radius:999px;padding:5px 12px}
+.hero h1{font-size:clamp(34px,5.4vw,56px);line-height:1.06;margin:18px 0 16px;letter-spacing:-.02em;font-weight:800}
+.hero h1 em{font-style:normal;background:linear-gradient(90deg,var(--acc),var(--acc2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p.lead{font-size:18px;color:var(--muted);max-width:680px;margin:0 0 24px}
+.promise{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:28px 0 8px}
+.promise div{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.promise b{display:block;margin-bottom:4px;font-size:15px}
+.promise span{color:var(--muted);font-size:14px;line-height:1.5;display:block}
+@media (max-width:700px){.promise{grid-template-columns:1fr}}
+.btns{display:flex;gap:10px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:10px;border:1px solid var(--line2);background:var(--panel2);cursor:pointer;font-weight:700;font-size:15px;color:var(--text);text-decoration:none;transition:background .15s,border-color .15s,transform .1s}
+.btn:hover{background:var(--panel3);text-decoration:none}
+.btn:active{transform:translateY(1px)}
+.btn.pri{background:linear-gradient(135deg,var(--acc),#6d63f0);border-color:transparent;color:#fff}
+.btn.pri:hover{filter:brightness(1.08)}
+.btn.ok{background:rgba(90,212,154,.14);border-color:rgba(90,212,154,.45);color:#c9f5df}
+.btn.sm{min-height:36px;padding:0 12px;font-size:14px;border-radius:8px}
+.btn[disabled]{opacity:.4;cursor:not-allowed}
+
+/* ---------- sections ---------- */
+.sec{padding:56px 0 8px;border-top:1px solid var(--line);margin-top:24px}
+.part{margin:72px 0 0;padding:28px;border-radius:16px;background:linear-gradient(135deg,rgba(143,134,255,.14),rgba(76,201,240,.06));border:1px solid rgba(143,134,255,.25)}
+.part .k{font:600 12px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--acc2)}
+.part h2{margin:6px 0 4px;font-size:28px}
+.part p{margin:0;color:var(--muted)}
+.sh{display:flex;gap:14px;align-items:flex-start;margin-bottom:18px}
+.sh .no{flex:none;min-width:48px;height:48px;padding:0 6px;border-radius:12px;background:var(--panel2);border:1px solid var(--line2);display:grid;place-items:center;font:700 15px var(--mono);color:var(--acc)}
+.sh h2{margin:0;font-size:25px;line-height:1.25;letter-spacing:-.01em}
+.sh .sub{margin:4px 0 0;color:var(--muted);font-size:15px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:22px}
+.sec li{margin:4px 0}
+h3{font-size:18px;margin:28px 0 10px}
+
+/* boxes */
+.box{border-radius:var(--r);padding:16px 18px;margin:16px 0;border:1px solid var(--line);background:var(--panel)}
+.box>:last-child{margin-bottom:0}
+.box .bt{font-weight:800;display:block;margin-bottom:6px}
+.box.idea{border-color:rgba(76,201,240,.35);background:rgba(76,201,240,.06)}
+.box.mem{border-color:rgba(255,122,182,.4);background:rgba(255,122,182,.07)}
+.box.mem .bt{color:#ffc2dd}
+.box.warn{border-color:rgba(255,193,94,.45);background:rgba(255,193,94,.07)}
+.box.bad{border-color:rgba(255,107,129,.45);background:rgba(255,107,129,.07)}
+.box.okb{border-color:rgba(90,212,154,.4);background:rgba(90,212,154,.07)}
+.box.why{border-color:rgba(143,134,255,.4);background:rgba(143,134,255,.07)}
+.cols2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:700px){.cols2{grid-template-columns:1fr}}
+.mini{font-size:14px;color:var(--muted)}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:2px 10px;border-radius:999px;font-size:13px;font-weight:700;border:1px solid var(--line2);background:var(--panel2);white-space:nowrap}
+.formula{font-family:var(--mono);background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:2px 8px;white-space:nowrap}
+.big{font-size:20px;font-weight:800}
+.center{text-align:center}
+.ok-t{color:var(--ok)} .bad-t{color:var(--bad)} .warn-t{color:var(--warn)} .acc-t{color:var(--acc)} .src-t{color:var(--src)} .tgt-t{color:var(--tgt)}
+.mut{color:var(--muted)}
+details.alt{margin:12px 0;border:1px dashed var(--line2);border-radius:10px;padding:0 14px;background:rgba(255,255,255,.02)}
+details.alt>summary{cursor:pointer;padding:12px 0;font-weight:700;color:var(--warn);list-style:none;min-height:44px;display:flex;align-items:center;gap:8px}
+details.alt>summary::-webkit-details-marker{display:none}
+details.alt>summary::before{content:"▸";transition:transform .15s}
+details.alt[open]>summary::before{transform:rotate(90deg)}
+details.alt>div{padding:0 0 14px}
+
+/* ---------- fractions ---------- */
+.fr{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.05;font-size:.82em;margin:0 1px}
+.fr>span:first-child{border-bottom:1.5px solid currentColor;padding:0 2px 1px}
+.fr>span:last-child{padding:1px 2px 0}
+
+/* ---------- matrix ---------- */
+.mxw{display:inline-flex;align-items:stretch;gap:4px;vertical-align:middle;max-width:100%}
+.mxl{display:flex;flex-direction:column;padding:4px 0}
+.mxl span{height:40px;display:flex;align-items:center;justify-content:flex-end;font:600 11px var(--mono);color:var(--muted2);padding-right:2px;white-space:nowrap}
+.mxl span.tgt{color:var(--tgt)} .mxl span.src{color:var(--src)}
+.mx{position:relative;display:inline-grid;padding:4px 9px;font-family:var(--mono);font-size:15px}
+.mx::before,.mx::after{content:"";position:absolute;top:0;bottom:0;width:8px;border:2px solid var(--muted)}
+.mx::before{left:0;border-right:0;border-radius:9px 0 0 9px}
+.mx::after{right:0;border-left:0;border-radius:0 9px 9px 0}
+.mx.det::before,.mx.det::after{border-radius:0;width:0;border-width:0 0 0 2px}
+.mx.det::after{border-width:0 2px 0 0}
+.mx .c{height:40px;min-width:40px;padding:0 7px;display:flex;align-items:center;justify-content:center;border-radius:7px;transition:background .15s,box-shadow .15s;white-space:nowrap}
+.mx .c.bar{border-left:2px solid var(--muted);border-radius:0 7px 7px 0;margin-left:4px}
+.mx .rowt{background:var(--tgtbg)} .mx .rows{background:var(--srcbg)}
+.mx .c.hl-t{box-shadow:inset 0 0 0 2px var(--tgt);background:var(--tgtbg)}
+.mx .c.hl-s{box-shadow:inset 0 0 0 2px var(--src);background:var(--srcbg)}
+.mx .c.piv{color:#fff;font-weight:700;box-shadow:inset 0 0 0 1.5px rgba(90,212,154,.75);background:rgba(90,212,154,.12)}
+.mx .c.zero0{color:var(--muted2)}
+.mx .c.newz{color:var(--ok);font-weight:700}
+.mx .c.click{cursor:pointer}
+.mx .c.click:hover{background:rgba(255,255,255,.08)}
+.mx .c.dim{opacity:.22}
+.mx .c.cross{opacity:.3;text-decoration:line-through;text-decoration-color:var(--bad)}
+.mx .c.sel{box-shadow:inset 0 0 0 2px var(--acc2);background:rgba(76,201,240,.12)}
+.mx .c.bad{box-shadow:inset 0 0 0 2px var(--bad);background:rgba(255,107,129,.14)}
+.mx .c.good{box-shadow:inset 0 0 0 2px var(--ok);background:rgba(90,212,154,.12)}
+.mx input{width:62px;height:34px;background:var(--panel3);border:1px solid var(--line2);border-radius:7px;color:#fff;text-align:center;font:600 15px var(--mono);padding:0 4px}
+.mx input:focus{border-color:var(--acc2);outline:none}
+.mx .c.delrow{text-decoration:line-through;opacity:.35}
+.mx.sm{font-size:13px} .mx.sm .c{height:30px;min-width:30px;padding:0 5px}
+.mxl.sm span{height:30px}
+.mxpair{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+.mxpair .lab{font:600 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);text-align:center;margin-bottom:4px}
+.mxpair .arrow{display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--muted);font-size:13px;max-width:200px;text-align:center}
+.mxpair .arrow .ar{font-size:26px;line-height:1;color:var(--acc)}
+.scrollx{overflow-x:auto;max-width:100%;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+.eqsys{display:inline-flex;align-items:center;gap:8px;font-family:'Times New Roman',Georgia,serif;font-size:19px;vertical-align:middle}
+.eqsys .brace{font-size:3.4em;line-height:.8;font-weight:200;color:var(--muted);transform:scaleX(.6)}
+.eqsys .rows{display:flex;flex-direction:column;gap:4px}
+.eqsys .rows>div{white-space:nowrap}
+.eqsys .rows>div.hl{background:var(--tgtbg);border-radius:6px;padding:0 6px;margin:0 -6px}
+.term{border-radius:5px;padding:0 2px;transition:background .15s}
+.term.hl{background:rgba(76,201,240,.25)}
+
+/* ---------- walkthrough ---------- */
+.walk{border:1px solid var(--line2);border-radius:16px;background:var(--panel);margin:18px 0;overflow:hidden}
+.wk-head{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--panel2)}
+.wk-title{font-weight:800;font-size:15px}
+.wk-tools{display:flex;gap:6px;flex-wrap:wrap}
+.tog{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 10px;border-radius:8px;border:1px solid var(--line2);background:transparent;cursor:pointer;font-size:13px;font-weight:700;color:var(--muted)}
+.tog[aria-pressed="true"]{color:#fff;border-color:rgba(143,134,255,.6);background:rgba(143,134,255,.16)}
+.wk-dots{display:flex;gap:4px;padding:10px 16px 0;flex-wrap:wrap}
+.wk-dots button{flex:1;min-width:14px;height:8px;border:0;border-radius:4px;background:var(--panel3);cursor:pointer;padding:0}
+.wk-dots button.past{background:rgba(143,134,255,.5)}
+.wk-dots button.cur{background:var(--acc2)}
+.wk-body{padding:14px 18px 6px;min-height:260px}
+.wk-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.wk-meta .cnt{font:600 12px var(--mono);color:var(--muted)}
+.phase{font-size:12px;font-weight:800;padding:2px 10px;border-radius:999px;background:rgba(76,201,240,.12);color:var(--acc2);border:1px solid rgba(76,201,240,.3)}
+.phase.back{background:rgba(255,122,182,.12);color:var(--pink);border-color:rgba(255,122,182,.35)}
+.phase.fin{background:rgba(90,212,154,.12);color:var(--ok);border-color:rgba(90,212,154,.35)}
+.goal{font-size:15px;margin:0 0 8px;color:var(--text)}
+.goal::before{content:"🎯 Цель: ";font-weight:800;color:var(--acc2)}
+.opline{display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;margin:6px 0 2px}
+.opl{font:700 18px var(--mono);color:#fff;background:rgba(143,134,255,.14);border:1px solid rgba(143,134,255,.4);padding:4px 12px;border-radius:9px}
+.opw{color:var(--muted);font-size:14px}
+.prov{margin:10px 0;padding:12px 14px;border-radius:10px;background:var(--panel2);border:1px solid var(--line)}
+.prov .pt{font-weight:800;font-size:14px;margin-bottom:8px;display:block}
+.prov .pt::before{content:"📍 "}
+.prov .fl{display:flex;flex-wrap:wrap;gap:6px}
+.prov .f{font:500 14px var(--mono);padding:4px 9px;border-radius:7px;background:var(--panel3);border:1px solid var(--line);cursor:default;white-space:nowrap}
+.prov .f:hover,.prov .f.on{border-color:var(--acc2);background:rgba(76,201,240,.12)}
+.prov .f .s{color:var(--src)} .prov .f .t{color:#c9c4ff} .prov .f .k{color:var(--pink)} .prov .f .r{color:var(--ok);font-weight:700}
+.whyb{margin:10px 0;padding:12px 14px;border-radius:10px;background:rgba(143,134,255,.07);border:1px solid rgba(143,134,255,.3);font-size:15px}
+.whyb>b:first-child{color:#cfcaff}
+.whyb p{margin:0 0 8px}.whyb p:last-child{margin:0}
+.wk-foot{display:flex;gap:8px;justify-content:space-between;align-items:center;padding:12px 16px;border-top:1px solid var(--line);background:var(--panel2);flex-wrap:wrap}
+.wk-foot .hint{font-size:12px;color:var(--muted2)}
+.pred{margin:14px 0;padding:16px;border-radius:12px;border:1px dashed rgba(255,122,182,.55);background:rgba(255,122,182,.06)}
+.pred .q{font-weight:700;margin-bottom:10px}
+.pred .q::before{content:"🔮 Сначала угадай: "}
+.pred .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.inp{height:44px;min-width:90px;width:120px;background:var(--panel3);border:1px solid var(--line2);border-radius:9px;color:#fff;font:600 16px var(--mono);padding:0 10px;text-align:center}
+.inp:focus{outline:none;border-color:var(--acc2)}
+.inp.good{border-color:var(--ok);background:rgba(90,212,154,.12)}
+.inp.bad{border-color:var(--bad);background:rgba(255,107,129,.12)}
+.fb{margin-top:8px;font-size:14px;min-height:1px}
+.fb.ok{color:var(--ok)} .fb.no{color:var(--bad)}
+.walk.list .wk-dots,.walk.list .wk-foot .nav{display:none}
+.wk-list .lstep{border-top:1px solid var(--line);padding:14px 0}
+.wk-list .lstep:first-child{border-top:0}
+.pop{position:fixed;z-index:100;max-width:320px;background:#1f2433;border:1px solid var(--acc2);border-radius:10px;padding:10px 12px;font-size:14px;box-shadow:0 10px 30px rgba(0,0,0,.5);pointer-events:none}
+.pop .ff{font:600 15px var(--mono);margin-top:4px}
+
+/* ---------- step equations ---------- */
+.eqs{font-family:'Times New Roman',Georgia,serif;font-size:19px;line-height:1.9;margin:8px 0}
+.eqs .ln{display:block}
+.eqs .ln.res{color:var(--ok);font-weight:700}
+.sub-hl{background:rgba(255,193,94,.18);border-radius:5px;padding:0 3px;color:#ffe2ad}
+.new-hl{background:rgba(90,212,154,.16);border-radius:5px;padding:0 3px;color:#c9f5df}
+
+/* ---------- cards / tasks ---------- */
+.card{border:1px solid var(--line2);border-radius:14px;background:var(--panel);padding:18px;margin:16px 0}
+.card .ct{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.card .ct b{font-size:16px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.tabs button{min-height:40px;padding:0 14px;border-radius:9px;border:1px solid var(--line2);background:var(--panel2);cursor:pointer;font-weight:700;font-size:14px;color:var(--muted)}
+.tabs button[aria-selected="true"]{color:#fff;background:rgba(143,134,255,.18);border-color:rgba(143,134,255,.55)}
+.opts{display:grid;gap:8px;margin:10px 0}
+.opt{text-align:left;min-height:44px;padding:10px 14px;border-radius:10px;border:1px solid var(--line2);background:var(--panel2);cursor:pointer;font-size:15px;line-height:1.45}
+.opt:hover{background:var(--panel3)}
+.opt.good{border-color:var(--ok);background:rgba(90,212,154,.12)}
+.opt.bad{border-color:var(--bad);background:rgba(255,107,129,.12)}
+.opt[disabled]{cursor:default}
+.expl{margin-top:10px;padding:12px 14px;border-radius:10px;background:var(--panel2);border:1px solid var(--line);font-size:15px}
+.conf{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--muted);margin:6px 0}
+.conf button{min-height:34px;padding:0 10px;border-radius:8px;border:1px solid var(--line2);background:transparent;cursor:pointer;font-size:13px;color:var(--muted)}
+.conf button[aria-pressed="true"]{color:#fff;border-color:var(--acc2);background:rgba(76,201,240,.14)}
+.yn{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;margin:12px 0}
+.yn .it{border:1px solid var(--line2);border-radius:12px;padding:14px;background:var(--panel)}
+.yn .it .q{font-weight:700;margin-bottom:10px;min-height:48px}
+.yn .it .b{display:flex;gap:6px}
+.yn .it .b button{flex:1}
+.yn .it.good{border-color:rgba(90,212,154,.6)} .yn .it.bad{border-color:rgba(255,107,129,.6)}
+.yn .it .e{font-size:14px;color:var(--muted);margin-top:10px}
+.slider{display:flex;align-items:center;gap:10px;margin:8px 0;flex-wrap:wrap}
+.slider input[type=range]{flex:1;min-width:160px;accent-color:var(--acc);height:28px}
+.slider .val{font:700 16px var(--mono);min-width:44px;text-align:center;color:#fff}
+.chk{display:grid;gap:6px;margin:10px 0}
+.chk div{font-family:var(--mono);font-size:14px;padding:8px 10px;border-radius:8px;background:var(--panel2);border:1px solid var(--line);overflow-x:auto;white-space:nowrap}
+.chk div.ok{border-color:rgba(90,212,154,.5)} .chk div.no{border-color:rgba(255,107,129,.6)}
+.errl{display:grid;gap:6px;margin:10px 0}
+.errl button{text-align:left;padding:10px 14px;border-radius:9px;border:1px solid var(--line2);background:var(--panel2);cursor:pointer;font-size:15px;min-height:44px;line-height:1.5}
+.errl button:hover{background:var(--panel3)}
+.errl button .n{font:700 12px var(--mono);color:var(--muted2);margin-right:8px}
+.errl button.good{border-color:var(--ok);background:rgba(90,212,154,.12)}
+.errl button.bad{border-color:var(--bad);background:rgba(255,107,129,.1)}
+.cofg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0}
+.cofg.n2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.cofg .cc{border:1px solid var(--line);border-radius:10px;padding:8px;background:var(--panel2);text-align:center;font-size:14px;overflow-x:auto}
+.cofg .cc .ff{font-family:var(--mono);font-size:13px;margin-top:6px;line-height:1.5}
+.cofg .cc .rv{font-weight:800;color:var(--ok)}
+@media (max-width:640px){.cofg{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.flash{border:1px solid var(--line2);border-radius:16px;background:var(--panel2);min-height:200px;padding:24px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:12px}
+.flash .fq{font-size:19px;font-weight:700;max-width:560px}
+.flash .fa{font-size:16px;color:#d6dbea;max-width:560px;border-top:1px solid var(--line);padding-top:12px}
+.boxes{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.boxes span{font:600 12px var(--mono);padding:4px 10px;border-radius:8px;background:var(--panel2);border:1px solid var(--line)}
+.cheat{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.cheat div{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--panel)}
+.cheat b{display:block;margin-bottom:4px;color:var(--acc2)}
+.cheat span{font-size:14px;color:#d3d8e6}
+.types{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;margin:14px 0}
+.types a{display:block;border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--panel);color:var(--text);text-decoration:none}
+.types a:hover{border-color:rgba(143,134,255,.5);background:var(--panel2)}
+.types a .k{font:700 11px var(--mono);color:var(--acc);letter-spacing:.1em}
+.types a b{display:block;margin:2px 0 4px}
+.types a span{font-size:13.5px;color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);opacity:0;background:#1f2433;border:1px solid rgba(90,212,154,.5);color:#d6f7e6;padding:10px 16px;border-radius:10px;font-weight:700;z-index:200;transition:all .25s;pointer-events:none;max-width:90vw}
+.toast.on{opacity:1;transform:translateX(-50%)}
+.solv textarea{width:100%;min-height:130px;background:var(--panel3);border:1px solid var(--line2);border-radius:10px;color:#fff;font:15px/1.6 var(--mono);padding:10px 12px;resize:vertical}
+.solv textarea:focus{outline:none;border-color:var(--acc2)}
+.row-f{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0}
+.err-msg{color:var(--bad);font-size:14px;margin-top:6px}
+.score{font-size:42px;font-weight:800;text-align:center}
+.foot{margin-top:64px;padding-top:20px;border-top:1px solid var(--line);color:var(--muted2);font-size:13px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin:6px 0}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:5px}
+.ladder{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.hintbox{margin-top:10px}
+.hintbox .h{padding:10px 12px;border-radius:9px;background:rgba(76,201,240,.07);border:1px solid rgba(76,201,240,.3);margin-top:8px;font-size:15px}
+.kbd{font:600 12px var(--mono);padding:1px 6px;border-radius:5px;border:1px solid var(--line2);border-bottom-width:2px}
+.stairs{display:flex;justify-content:center;margin:10px 0}
+
+</style>
+</head>
+<body>
+<div class="mtop"><button type="button" id="tocbtn" aria-label="Оглавление"><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button><span class="t">Лекция 4 + Практика 4</span></div>
+<nav class="toc" id="toc" aria-label="Оглавление">
+  <div class="brand"><span class="logo">4</span>Лекция 4 + Практика 4</div>
+  <div class="prog"><span id="progt">Пройдено: 0</span><div class="bar"><i id="progb"></i></div></div>
+  <div id="toclinks"></div>
+</nav>
+<main><div class="wrap">
+
+<header class="hero" id="top">
+  <span class="tag">● Линейная алгебра · лекция 4 + практика 4</span>
+  <h1>Метод Гаусса,<br><em>и откуда что берётся</em></h1>
+  <p class="lead">Лекция 4 (метод Гаусса, теорема Кронекера–Капелли, однородные системы) и практика 4 (ранг, матричные уравнения) из твоей тетради. Разобрано так, чтобы не оставалось вопроса «а это число откуда?».</p>
+  <div class="btns"><a class="btn pri" href="#s0">С чего начать →</a><a class="btn" href="#P0">🎯 Сразу практика</a><a class="btn" href="#T5">🧮 Проверялка</a></div>
+  <div class="promise">
+    <div><b>📍 Каждое число объяснено</b><span>Нажми на любое число в разборе — увидишь формулу, по которой оно получилось, и подсвеченные исходные клетки.</span></div>
+    <div><b>❓ «Почему так» и «а если иначе»</b><span>У каждого шага — зачем он нужен и что было бы при другом выборе. Без «так принято».</span></div>
+    <div><b>🔮 Сначала угадай</b><span>Перед ответом попробуй угадать число сам. Даже ошибка помогает запомнить.</span></div>
+  </div>
+</header>
+
+<section class="sec" id="s0" data-toc="С чего начать" data-grp="Старт" data-no="0">
+  <div class="sh"><div class="no">00</div><div><h2>Как с этим работать, чтобы запомнилось</h2><p class="sub">Пять приёмов, которые проверены исследованиями памяти</p></div></div>
+  <ol>
+    <li><b>Сначала угадай, потом смотри.</b> В разборах включён режим «🔮 Сначала угадай»: перед каждым ключевым числом тебя спросят ответ. Попытка вспомнить или угадать закрепляет материал сильнее, чем повторное чтение (это называют «эффектом тестирования»).</li>
+    <li><b>Спрашивай «почему?».</b> В каждом шаге есть блок <span class="chip">❓ Почему так</span>, а часто ещё и <span class="chip">🔀 А если по-другому?</span>. Понятое «почему» держится в памяти дольше, чем выученное «как».</li>
+    <li><b>Подсказки убираются постепенно.</b> В «Собери сам» первый шаг сделан за тебя, во втором ты считаешь сам, а в третьем ещё и сам подбираешь множитель. Так ты переходишь от готового решения к самостоятельному.</li>
+    <li><b>Задачи вперемешку.</b> В тренажёре типы задач идут вперемешку. Так тяжелее, но на контрольной ты сам решаешь, какой метод нужен, и этот навык как раз тренируется.</li>
+    <li><b>Повторение с паузами.</b> Карточки сами покажут, что пора повторить через 1, 3, 7 и 16 дней. Пять минут через день дают больше, чем час подряд накануне контрольной.</li>
+  </ol>
+  <div class="box idea"><span class="bt">🧭 Маршрут на сегодня (≈ 60–90 минут)</span>Лекция A1→A7 (с угадыванием) → практика B1→B8 → «Собери сам» → 10 задач в тренажёре → мини-контрольная. Завтра — карточки (5 минут).</div>
+  <h3>🔮 Разминка до чтения: 3 вопроса</h3>
+  <p class="mini">Не страшно, если не знаешь: попытка ответить заранее помогает лучше запомнить правильный ответ, когда ты его прочитаешь.</p>
+  <div data-mount="warmup"></div>
+</section>
+
+<div class="part" id="partA"><div class="k">Часть A</div><h2>Лекция 4</h2><p>Равносильные системы · метод Гаусса · Кронекер–Капелли · однородные системы</p></div>
+
+<section class="sec" id="L1" data-toc="3 разрешённых действия" data-grp="Лекция 4" data-no="A1">
+  <div class="sh"><div class="no">A1</div><div><h2>Равносильные системы и три разрешённых действия</h2><p class="sub">Что можно делать с уравнениями, чтобы ответ не изменился</p></div></div>
+  <p><b>Равносильные системы</b> — это системы с одними и теми же решениями. Метод Гаусса — это цепочка шагов, на каждом из которых система меняется на <b>равносильную</b>, но более простую. В конце получается система, у которой ответ виден сразу.</p>
+  <div class="box idea"><span class="bt">⚖️ Образ: весы</span>Уравнение — это весы в равновесии. Если с обеими чашами сделать одно и то же (умножить на число, добавить равные грузы), равновесие сохранится. Если сделать что-то только с одной чашей или умножить всё на 0, весы «сломаются», и решения поменяются.</div>
+  <p>Элементарные преобразования, после которых система остаётся <b>равносильной</b> исходной:</p>
+  <ol>
+    <li><b>Умножить</b> уравнение на число <b>≠ 0</b>.</li>
+    <li><b>Прибавить</b> к одному уравнению другое, умноженное на число.</li>
+    <li><b>Переставить</b> два уравнения местами.</li>
+  </ol>
+  <div class="box mem"><span class="bt">🧠 Запоминалка: «П-У-П»</span><b>П</b>ереставь · <b>У</b>множь (только не на ноль!) · <b>П</b>рибавь другую строку × k. Других действий в методе Гаусса нет.</div>
+  <details class="alt"><summary>❓ Почему умножать на 0 нельзя, а на любое другое число можно?</summary><div>Умножение на k ≠ 0 можно <b>отменить</b>: поделить обратно на k. Значит, никакая информация не теряется. Умножение на 0 отменить нельзя: уравнение 2x + y = 5 превращается в 0 = 0, и его условие пропадает. Например, система {x + y = 2, x − y = 0} имеет одно решение (1; 1). Если умножить второе уравнение на 0, останется только x + y = 2, а у него решений бесконечно много. Система стала <b>не</b> равносильной.<br><br>По той же причине разрешено прибавление: его можно отменить вычитанием той же строки.</div></details>
+  <h3>Проверь себя: можно или нельзя?</h3>
+  <div data-mount="yn"></div>
+</section>
+
+<section class="sec" id="L2" data-toc="Расширенная матрица" data-grp="Лекция 4" data-no="A2">
+  <div class="sh"><div class="no">A2</div><div><h2>Расширенная матрица: откуда она берётся</h2><p class="sub">Убираем иксы — остаются только числа</p></div></div>
+  <p>Пока мы преобразуем систему, иксы и знаки «=» просто переписываются без изменений. Важны только <b>коэффициенты</b> и <b>свободные члены</b> (числа справа). Поэтому систему заменяют таблицей чисел — <b>расширенной матрицей</b>: слева коэффициенты, после вертикальной черты — правые части.</p>
+  <p class="mini">Наведи (или нажми) на член уравнения или клетку матрицы — подсветится пара.</p>
+  <div data-mount="sysmap"></div>
+  <div class="box warn"><span class="bt">⚠️ Три правила записи — здесь чаще всего ошибаются</span>
+    <ul style="margin:0"><li>Каждый <b>столбец</b> — это одна переменная. Порядок одинаковый во всех строках: x<sub>1</sub>, x<sub>2</sub>, x<sub>3</sub>…</li>
+    <li>Переменной нет в уравнении → пишем <b>0</b>. Иначе числа «съедут» в чужой столбец.</li>
+    <li>x без числа — это <b>1</b>, а −x — это <b>−1</b>.</li></ul></div>
+  <h3>Как читать пометки в тетради</h3>
+  <div class="cols2">
+    <div class="box"><span class="bt">«×(−2), ×(−4)» у строки 1 и стрелки вниз</span>Строку 1 умножаем на −2 и <b>прибавляем</b> к строке, куда указывает стрелка, а потом так же на −4 и к следующей. Сама строка 1 не меняется. Здесь это записано как <span class="formula">С₂ → С₂ − 2·С₁</span>.</div>
+    <div class="box"><span class="bt">«:3» или «:(−27)» справа от строки</span>Вся строка делится на это число. Это тоже действие «умножь на число ≠ 0» (на 1/3).</div>
+    <div class="box"><span class="bt">Дуга со стрелками между строками</span>Строки меняются местами: <span class="formula">С₁ ↔ С₃</span>.</div>
+    <div class="box"><span class="bt">⊖ между двумя одинаковыми строками</span>Вычитаем одну из другой. Получается нулевая строка, и её вычёркивают.</div>
+  </div>
+  <h3>✍️ Сам: запиши систему в расширенную матрицу</h3>
+  <div data-mount="sysfill"></div>
+</section>
+
+<section class="sec" id="L3" data-toc="Метод Гаусса: пример 1" data-grp="Лекция 4" data-no="A3">
+  <div class="sh"><div class="no">A3</div><div><h2>Метод Гаусса: прямой и обратный ход</h2><p class="sub">Пример 1 из лекции: решение одно</p></div></div>
+  <div class="box idea"><span class="bt">🪜 Идея одной картинкой: лестница</span>
+    <b>Прямой ход</b> — спускаемся сверху вниз и делаем нули <b>под</b> «ступеньками», пока матрица не станет ступенчатой (треугольной).<br>
+    <b>Обратный ход</b> — поднимаемся снизу вверх: из последней строки находим последнюю неизвестную, подставляем её выше и так далее.</div>
+  <div class="stairs" data-mount="stairs"></div>
+  <p><b>Ступенька</b> (ведущий элемент) — первое ненулевое число строки. В ступенчатом виде каждая следующая ступенька стоит <b>правее</b> предыдущей, а под ступеньками только нули.</p>
+  <div class="box mem"><span class="bt">🧠 Правило множителя: «минус жертва на ступеньку»</span>Чтобы получить 0 вместо числа <i class="v">a</i> под ступенькой <i class="v">p</i>, к строке с <i class="v">a</i> прибавляем строку ступеньки, умноженную на <b>k = −a / p</b>. Проверка: a + k·p = a − a = 0.<br>Поэтому удобнее всего ступенька <b>1</b> или <b>−1</b>: тогда k — это просто число <i class="v">a</i> с обратным знаком (или само <i class="v">a</i>), без дробей.</div>
+  <p>Система: &nbsp;<span data-mount="sys1"></span></p>
+  <div data-mount="walk1"></div>
+  <div class="box okb"><span class="bt">Что запомнить из примера 1</span>1) Наверх ставим строку со ступенькой ±1, чтобы не было дробей. 2) Нули в столбце делаем только строкой с его ступенькой. 3) Обратный ход идёт снизу вверх. 4) Ответ проверяем подстановкой в <b>исходную</b> систему.</div>
+</section>
+
+<section class="sec" id="L4" data-toc="Пример 2: ∞ решений" data-grp="Лекция 4" data-no="A4">
+  <div class="sh"><div class="no">A4</div><div><h2>Когда решений бесконечно много</h2><p class="sub">Пример 2 из лекции: 4 уравнения, 5 неизвестных</p></div></div>
+  <p>Тот же алгоритм, но в конце ступенек (3) меньше, чем неизвестных (5). Переменные без ступенек становятся <b>свободными</b>: им можно давать любые значения, а остальные выражаются через них.</p>
+  <p>Система: &nbsp;<span data-mount="sys2"></span></p>
+  <div data-mount="walk2"></div>
+  <h3>🎛 Потрогай ответ: подвигай t и v</h3>
+  <p class="mini">«Бесконечно много решений» значит: при <b>любых</b> t и v получается решение. Двигай ползунки и смотри, что все 4 исходных уравнения выполняются. А потом «испорть» x₁ и посмотри, что будет.</p>
+  <div data-mount="explore2"></div>
+</section>
+
+<section class="sec" id="L5" data-toc="Кронекер–Капелли" data-grp="Лекция 4" data-no="A5">
+  <div class="sh"><div class="no">A5</div><div><h2>Сколько решений: теорема Кронекера–Капелли</h2><p class="sub">Ответ виден по рангам ещё до обратного хода</p></div></div>
+  <p><b>Теорема.</b> Система линейных уравнений <b>совместна</b> (имеет хотя бы одно решение) <b>тогда и только тогда</b>, когда ранг основной матрицы <i class="v">r</i> равен рангу расширенной <i class="v" style="text-decoration:overline">r</i>. Обозначения: <i class="v">r</i> — ранг матрицы коэффициентов (до черты), <i class="v" style="text-decoration:overline">r</i> — ранг с учётом столбца правых частей, <i class="v">n</i> — число неизвестных.</p>
+  <div class="cols2">
+    <div class="box okb"><span class="bt">r = r̄ = n → одно решение</span>Ступенька есть у каждой неизвестной.</div>
+    <div class="box warn"><span class="bt">r = r̄ &lt; n → бесконечно много</span>Есть n − r свободных переменных.</div>
+  </div>
+  <div class="box bad"><span class="bt">r ≠ r̄ (то есть r &lt; r̄) → решений нет</span>В ступенчатом виде появилась строка <span class="formula">0 0 … 0 | b</span> с b ≠ 0. Это уравнение <b>0 = b</b>, а оно неверно ни при каких иксах.</div>
+  <details class="alt"><summary>❓ Откуда это, в двух фразах</summary><div>После прямого хода каждая ненулевая строка — это «настоящее» уравнение, и их число равно рангу. Если какая-то строка обнулилась слева, а справа осталось число, то слева ранг на 1 меньше, чем с правой частью (r &lt; r̄), и эта строка говорит «0 = b» → противоречие. Если противоречий нет (r = r̄), то каждая ступенька определяет свою переменную. Ступенек n → всё определено однозначно. Ступенек меньше n → лишние переменные свободны → решений бесконечно много.<br><br>И ещё: r̄ никогда не бывает меньше r. В расширенной матрице на один столбец больше, а от лишнего столбца ранг может только вырасти.</div></details>
+  <div class="box mem"><span class="bt">🧠 Запоминалка</span>«<b>Ранги равны — решения есть</b>. Ступенек столько же, сколько неизвестных, — решение одно, меньше — бесконечно. <b>Ноль равно пяти — решений нет</b>».</div>
+  <h3>Три исхода на примерах</h3>
+  <div data-mount="kk3"></div>
+  <h3>Пример из лекции</h3>
+  <p>Система: &nbsp;<span data-mount="sys3"></span></p>
+  <div data-mount="walk3"></div>
+</section>
+
+<section class="sec" id="L6" data-toc="Однородные системы" data-grp="Лекция 4" data-no="A6">
+  <div class="sh"><div class="no">A6</div><div><h2>Однородные системы: A·X = 0</h2><p class="sub">Все правые части — нули</p></div></div>
+  <p>Система называется <b>однородной</b>, если все её свободные члены равны нулю: a<sub>11</sub>x<sub>1</sub> + … + a<sub>1n</sub>x<sub>n</sub> = 0, …, a<sub>m1</sub>x<sub>1</sub> + … + a<sub>mn</sub>x<sub>n</sub> = 0. В матричном виде: <b>A·X = O</b>, где A — матрица системы, X — столбец неизвестных, O — нулевой столбец.</p>
+  <div class="cols2">
+    <div class="box okb"><span class="bt">Она всегда совместна</span>Дописать к A нулевой столбец — ранг не изменится, значит r = r̄. Проще говоря, X = 0 (все иксы нули) подходит всегда: 0 = 0 в каждой строке. Это <b>нулевое (тривиальное)</b> решение.</div>
+    <div class="box"><span class="bt">Интересный вопрос — есть ли ненулевые?</span>По Кронекеру–Капелли: если r = n, решение одно, и это ноль. Если r &lt; n, решений бесконечно много, в том числе ненулевые (свободных переменных n − r).</div>
+  </div>
+  <h3>Свойства решений (и почему они верны)</h3>
+  <div class="eqs" style="font-size:17px">
+    <span class="ln">1) X — решение ⇒ α·X — тоже решение: &nbsp;A(αX) = α·(AX) = α·0 = 0</span>
+    <span class="ln">2) X₁, X₂ — решения ⇒ X₁ ± X₂ — тоже: &nbsp;A(X₁ ± X₂) = AX₁ ± AX₂ = 0 ± 0 = 0</span>
+  </div>
+  <p><b>Линейная комбинация решений</b> X₁, …, X<sub>l</sub> с любыми числами α₁, …, α<sub>l</sub> — это X = α₁X₁ + α₂X₂ + … + α<sub>l</sub>X<sub>l</sub>. Из свойств 1 и 2 следует, что <b>линейная комбинация решений однородной системы — тоже решение</b>.</p>
+  <p><b>Линейно зависимые решения:</b> X₁, …, X<sub>l</sub> линейно зависимы, если найдутся α₁, …, α<sub>l</sub>, <b>не все равные нулю</b>, такие что α₁X₁ + … + α<sub>l</sub>X<sub>l</sub> = 0. Тогда одно решение выражается через остальные: при α₁ ≠ 0 получаем X₁ = −(α₂/α₁)X₂ − … − (α<sub>l</sub>/α₁)X<sub>l</sub>.</p>
+  <div class="box warn"><span class="bt">⚠️ Опечатка в конспекте</span>В тетради записано X₁ = (α₂/α₁)X₂ − …, а нужен минус и перед первым слагаемым: <b>X₁ = −(α₂/α₁)X₂ − … − (α<sub>l</sub>/α₁)X<sub>l</sub></b>. Он появляется, когда переносишь α₂X₂ + … в другую часть равенства.</div>
+  <h3>🎛 Потрогай: комбинация решений остаётся решением</h3>
+  <div data-mount="explore6"></div>
+</section>
+
+<section class="sec" id="L7" data-toc="Квиз по лекции" data-grp="Лекция 4" data-no="A7">
+  <div class="sh"><div class="no">A7</div><div><h2>Квиз по лекции 4</h2><p class="sub">12 вопросов на понимание. Отметь уверенность — так легче запомнить свои ошибки</p></div></div>
+  <div data-mount="quiz"></div>
+</section>
+
+<div class="part" id="partB"><div class="k">Часть B</div><h2>Практика 4 (6.10)</h2><p>Ранг матрицы · ранг с параметром · A·X = B · X·A = B · система матричных уравнений · A·X·B·C = E</p></div>
+
+<section class="sec" id="P0" data-toc="Что было на практике" data-grp="Практика 4" data-no="B0">
+  <div class="sh"><div class="no">B0</div><div><h2>Что было на практике 4</h2><p class="sub">7 задач из тетради. В двух из них я нашёл ошибки — они разобраны ниже</p></div></div>
+  <div class="types">
+    <a href="#P1"><span class="k">B1 · РАНГ</span><b>Ранг 4×4 методом Гаусса</b><span>rg = 3: одна строка оказалась «лишней»</span></a>
+    <a href="#P2"><span class="k">B2 · РАНГ</span><b>Ранг 3×2 и дробный множитель</b><span>k = −7/5: как обойтись без дробей</span></a>
+    <a href="#P3"><span class="k">B3 · ПАРАМЕТР</span><b>Ранг при разных α</b><span>α = 0 → rg = 2, иначе rg = 3</span></a>
+    <a href="#P4"><span class="k">B4 · A·X = B</span><b>X = A⁻¹·B</b><span>⚠️ в тетради ошибка в ответе</span></a>
+    <a href="#P5"><span class="k">B5 · X·A = B</span><b>X = B·A⁻¹</b><span>⚠️ в тетради описка в дроби</span></a>
+    <a href="#P6"><span class="k">B6 · СИСТЕМА</span><b>X + Y = …, 2X + 3Y = …</b><span>решаем как обычную систему</span></a>
+    <a href="#P7"><span class="k">B7 · ЦЕПОЧКА</span><b>A·X·B·C = E</b><span>снимаем множители «как одежду»</span></a>
+    <a href="#P8"><span class="k">B8 · БОНУС</span><b>Найди ошибку</b><span>14 ловушек, включая 2 из тетради</span></a>
+  </div>
+  <div class="box why"><span class="bt">🔗 Как это связано с лекцией</span>Ранг ищут тем же прямым ходом Гаусса, только без столбца правых частей. Ранг = число ненулевых строк ступенчатой матрицы. А матричные уравнения — это лекция 3 (обратная матрица), которую тут применяют.</div>
+</section>
+
+<section class="sec" id="P1" data-toc="Ранг 4×4" data-grp="Практика 4" data-no="B1">
+  <div class="sh"><div class="no">B1</div><div><h2>Ранг матрицы 4×4</h2><p class="sub">Тот же прямой ход Гаусса, только без столбца правых частей</p></div></div>
+  <p><b>Ранг</b> — это число «по-настоящему разных» строк: тех, которые нельзя получить из других. Элементарные преобразования ранг не меняют. Поэтому приводим матрицу к ступенчатому виду и считаем <b>ненулевые строки</b>.</p>
+  <div data-mount="walkP1"></div>
+  <div class="box why"><span class="bt">🔍 Почему ранг именно 3, а не 4</span>Строка 4 исходной матрицы (0 4 3 0) — это сумма строк 2 и 3: (−1 1 1 1) + (1 3 2 −1) = (0 4 3 0). Она ничего нового не добавляет, поэтому в ходе Гаусса она и обнулилась. Независимых строк 3 → rg = 3.</div>
+</section>
+
+<section class="sec" id="P2" data-toc="Ранг 3×2" data-grp="Практика 4" data-no="B2">
+  <div class="sh"><div class="no">B2</div><div><h2>Ранг 3×2 и дробный множитель</h2><p class="sub">Как в тетради (с дробью −7/5) и как можно без дробей</p></div></div>
+  <div data-mount="walkP2"></div>
+  <div class="box mem"><span class="bt">🧠 Быстрая оценка: ранг ≤ min(строк, столбцов)</span>У матрицы 3×2 ранг не больше 2: независимых столбцов всего 2. Значит, хватит найти две непропорциональные строки, например (1 2) и (3 1): 1/3 ≠ 2/1. Отсюда rg = 2 без всякого Гаусса.</div>
+</section>
+
+<section class="sec" id="P3" data-toc="Ранг с параметром α" data-grp="Практика 4" data-no="B3">
+  <div class="sh"><div class="no">B3</div><div><h2>Ранг при разных значениях α</h2><p class="sub">Главная ловушка: на α делить можно, только если α ≠ 0</p></div></div>
+  <div class="box warn"><span class="bt">📷 Про условие</span>В тетради здесь записано только условие, без решения, и последняя строка читается плохо. Я прочитал её как <b>(α α α)</b>, а пометку «α = 0» — как ответ-подсказку. Если у тебя в тетради другие числа, вбей их в <a href="#T5">проверялку</a> (вкладка «Ранг»).</div>
+  <p>A = <span data-mount="matP3"></span></p>
+  <div data-mount="walkP3"></div>
+  <h3>🎛 Подвигай α</h3>
+  <div data-mount="exploreP3"></div>
+</section>
+
+<section class="sec" id="P4" data-toc="A·X = B" data-grp="Практика 4" data-no="B4">
+  <div class="sh"><div class="no">B4</div><div><h2>Матричное уравнение A·X = B</h2><p class="sub">Задача 1 из тетради · X = A⁻¹·B</p></div></div>
+  <p>A = <span data-mount="matP4A"></span>, &nbsp; B = <span data-mount="matP4B"></span></p>
+  <div data-mount="walkP4"></div>
+  <div class="box bad" id="P4err"><span class="bt">🔎 В тетради ошибка — и проверка её ловит</span>
+    <p>В тетради получилось X = −1/30·(19; −26; 17). Верный ответ: <b>X = −1/30·(17; −28; 1) = (−17/30; 14/15; −1/30)</b>.</p>
+    <p><b>Где ошибка:</b> при умножении A⁻¹ на B вторым числом столбца B взято <b>−1</b> вместо <b>1</b>. Поэтому все три средних слагаемых получились с неправильным знаком: «0 + 1 + 18» вместо «0 − 1 + 18», «0 + 1 − 27» вместо «0 − 1 − 27», «0 + 8 + 9» вместо «0 − 8 + 9».</p>
+    <p><b>Как поймать:</b> подставь ответ тетради во второе уравнение: −2·(−19/30) + 0 + 4·(−17/30) = (38 − 68)/30 = <b>−1</b>, а должно быть <b>1</b>. Справа получилось −1, ровно тот перепутанный знак. Проверка A·X = B занимает минуту и спасает задачу.</p></div>
+  <details class="alt"><summary>🔁 Второй способ: та же задача методом Гаусса (как в домашке «двумя способами»)</summary><div><p>A·X = B с X = (x₁; x₂; x₃) — это обычная система 3×3. Её можно решить Гауссом, не ища A⁻¹. Ответ получается тот же.</p><div data-mount="walkP4g"></div></div></details>
+</section>
+
+<section class="sec" id="P5" data-toc="X·A = B" data-grp="Практика 4" data-no="B5">
+  <div class="sh"><div class="no">B5</div><div><h2>Матричное уравнение X·A = B</h2><p class="sub">Задача 3 из тетради · X = B·A⁻¹ (A справа → и A⁻¹ справа)</p></div></div>
+  <p>A = <span data-mount="matP5A"></span>, &nbsp; B = <span data-mount="matP5B"></span></p>
+  <div data-mount="walkP5"></div>
+  <div class="box warn"><span class="bt">🔎 Описка в тетради</span>В конце записано (−51/27; 33/27; <b>33/27</b>), но 111/81 = <b>37/27</b> (111 = 3·37, 81 = 3·27). К тому же дроби можно сократить сильнее: −153/81 = −17/9, 99/81 = 11/9. Итог: <b>X = (−17/9; 11/9; 37/27)</b>. Проверка X·A = B это подтверждает (шаг «Проверка» выше).</div>
+  <div class="box mem"><span class="bt">🧠 «Где A, там и A⁻¹»</span>A·X = B → A слева → X = A⁻¹·B. &nbsp; X·A = B → A справа → X = B·A⁻¹. Обратную матрицу ставят с той стороны, где стоит A, иначе A и A⁻¹ не встретятся и не превратятся в E.</div>
+</section>
+
+<section class="sec" id="P6" data-toc="Система матр. уравнений" data-grp="Практика 4" data-no="B6">
+  <div class="sh"><div class="no">B6</div><div><h2>Система матричных уравнений</h2><p class="sub">X + Y = P, &nbsp;2X + 3Y = E</p></div></div>
+  <div data-mount="walkP6"></div>
+</section>
+
+<section class="sec" id="P7" data-toc="A·X·B·C = E" data-grp="Практика 4" data-no="B7">
+  <div class="sh"><div class="no">B7</div><div><h2>Цепочка: A·X·B·C = E</h2><p class="sub">Снимаем лишние множители, как одежду: сначала то, что снаружи</p></div></div>
+  <div class="box warn"><span class="bt">📷 Про условие</span>В тетради знак числа в строке 2, столбце 1 матрицы A читается неуверенно (−1 или 1). На метод это не влияет: в обоих случаях X = A⁻¹. Переключи вариант, и разбор пересчитается.</div>
+  <div class="tabs" role="tablist" data-mount="p7tabs"></div>
+  <div data-mount="walkP7"></div>
+</section>
+
+<section class="sec" id="P8" data-toc="Найди ошибку" data-grp="Практика 4" data-no="B8">
+  <div class="sh"><div class="no">B8</div><div><h2>Найди ошибку в решении</h2><p class="sub">Найти ошибку в чужом решении — один из лучших способов не сделать её самому</p></div></div>
+  <p>В каждом «решении» одна строка неверная. Нажми на неё. Потом прочитай, <b>почему</b> это ошибка и как правильно.</p>
+  <div data-mount="errs"></div>
+</section>
+
+<div class="part" id="partT"><div class="k">Часть C</div><h2>Тренировка</h2><p>От решения с подсказками к самостоятельному · вперемешку · с повторением через паузы</p></div>
+
+<section class="sec" id="T1" data-toc="Собери сам" data-grp="Тренировка" data-no="✍️">
+  <div class="sh"><div class="no">✍️</div><div><h2>Собери сам: Гаусс с убывающими подсказками</h2><p class="sub">Шаг 1 сделан за тебя → на шаге 2 ты считаешь строку → на шаге 3 ещё и сам подбираешь k</p></div></div>
+  <div data-mount="faded"></div>
+</section>
+
+<section class="sec" id="T2" data-toc="Тренажёр" data-grp="Тренировка" data-no="∞">
+  <div class="sh"><div class="no">∞</div><div><h2>Бесконечный тренажёр</h2><p class="sub">7 типов задач, по умолчанию вперемешку. Подсказки открываются по одной</p></div></div>
+  <div data-mount="trainer"></div>
+</section>
+
+<section class="sec" id="T3" data-toc="Мини-контрольная" data-grp="Тренировка" data-no="📝">
+  <div class="sh"><div class="no">📝</div><div><h2>Мини-контрольная</h2><p class="sub">8 задач разных типов, без подсказок, как на настоящей. Разбор в конце</p></div></div>
+  <div data-mount="test"></div>
+</section>
+
+<section class="sec" id="T4" data-toc="Карточки" data-grp="Тренировка" data-no="🔁">
+  <div class="sh"><div class="no">🔁</div><div><h2>Карточки с интервальным повторением</h2><p class="sub">Система Лейтнера: что помнишь — увидишь реже, что забыл — завтра снова</p></div></div>
+  <div data-mount="cards"></div>
+</section>
+
+<section class="sec" id="T5" data-toc="Проверялка" data-grp="Тренировка" data-no="🧮">
+  <div class="sh"><div class="no">🧮</div><div><h2>Проверялка для домашки</h2><p class="sub">Вбей свою систему или матрицу и получи такой же подробный разбор</p></div></div>
+  <div data-mount="solver"></div>
+</section>
+
+<section class="sec" id="T6" data-toc="Шпаргалка и ДЗ" data-grp="Тренировка" data-no="📌">
+  <div class="sh"><div class="no">📌</div><div><h2>Шпаргалка и домашнее задание</h2><p class="sub">Лекция 4 и практика 4 на одном экране</p></div></div>
+  <div class="cheat">
+    <div><b>3 разрешённых действия</b><span>П-У-П: переставить строки; умножить строку на число ≠ 0; прибавить к строке другую × k.</span></div>
+    <div><b>Множитель</b><span>k = −(убиваемое число) / (ступенька). Ступенька ±1 → без дробей.</span></div>
+    <div><b>Прямой ход</b><span>Нули под ступеньками, сверху вниз. Столбец обнуляем только строкой его ступеньки.</span></div>
+    <div><b>Обратный ход</b><span>Снизу вверх: нашли последнюю неизвестную → подставили выше.</span></div>
+    <div><b>Лишние строки</b><span>0 0 … 0 | 0 — вычеркнуть. Две одинаковые — вычесть и вычеркнуть.</span></div>
+    <div><b>Противоречие</b><span>0 0 … 0 | b, b ≠ 0 → «0 = b» → решений нет.</span></div>
+    <div><b>Кронекер–Капелли</b><span>r ≠ r̄ → нет решений; r = r̄ = n → одно; r = r̄ &lt; n → ∞, свободных n − r.</span></div>
+    <div><b>Свободные переменные</b><span>Те, у которых нет ступеньки. Пишем x₄ = t, x₅ = v (любые числа).</span></div>
+    <div><b>Ранг</b><span>Привести к ступенчатому виду → число ненулевых строк. rg ≤ min(m, n).</span></div>
+    <div><b>Параметр</b><span>Делить на α только при α ≠ 0. Случай α = 0 разбирать отдельно.</span></div>
+    <div><b>Однородная A·X = 0</b><span>Всегда есть X = 0. Ненулевые решения ⇔ r &lt; n. Комбинации решений — тоже решения.</span></div>
+    <div><b>A·X = B</b><span>X = A⁻¹·B (A слева → A⁻¹ слева).</span></div>
+    <div><b>X·A = B</b><span>X = B·A⁻¹ (A справа → A⁻¹ справа).</span></div>
+    <div><b>A·X·B = C</b><span>X = A⁻¹·C·B⁻¹. Снимаем снаружи: слева A⁻¹, справа B⁻¹.</span></div>
+    <div><b>Обратная</b><span>A⁻¹ = (1/|A|)·A*, где в A* дополнения A<sub>ij</sub> стоят на местах (j, i).</span></div>
+    <div><b>Проверка</b><span>Всегда подставляй ответ в исходное уравнение. Так находятся ошибки знака.</span></div>
+  </div>
+  <div class="box idea" style="margin-top:18px"><span class="bt">📚 Домашнее задание (как записано в тетради после лекции 4)</span>В тетр. 121; 3.1 — систему В7 решить двумя способами; 3.2 — 2.7, 2.7, 3.7. <span class="mini">(«2.7» записано дважды — уточни номер.) Подсказка: «двумя способами» обычно значит Гаусс и обратная матрица (или Крамер). Сравни ответы в <a href="#T5">проверялке</a>.</span></div>
+  <div class="foot"><span>По лекции 4 и практике 4 (6.10) из тетради. Прогресс хранится только в этом браузере.</span><button class="btn sm" type="button" id="reset">Сбросить прогресс</button></div>
+</section>
+
+</div></main>
+
+<script>
+'use strict';
+/* ====================== базовые помощники ====================== */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+function el(tag, cls, html) { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
+function toast(msg) { let t = $('.toast'); if (!t) { t = el('div', 'toast'); document.body.appendChild(t); } t.innerHTML = msg; t.classList.add('on'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('on'), 2200); }
+const ri = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+const rnz = (a, b) => { let x; do x = ri(a, b); while (x === 0); return x; };
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+/* ====================== рациональные числа ====================== */
+function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) [a, b] = [b, a % b]; return a; }
+class Q {
+  constructor(n, d = 1) {
+    if (d === 0) throw new Error('деление на ноль');
+    if (!Number.isFinite(n) || !Number.isFinite(d)) throw new Error('не число');
+    if (d < 0) { n = -n; d = -d; }
+    const g = gcd(n, d) || 1; this.n = n / g || 0; this.d = d / g;
+  }
+  static of(x) {
+    if (x instanceof Q) return x;
+    if (typeof x === 'number') {
+      if (Number.isInteger(x)) return new Q(x, 1);
+      let d = 1; while (!Number.isInteger(Math.round(x * d * 1e9) / 1e9) && d < 1e6) d *= 10; return new Q(Math.round(x * d), d);
+    }
+    const p = parseQ(x); if (!p) throw new Error('не число: ' + x); return p;
+  }
+  add(o) { o = Q.of(o); return new Q(this.n * o.d + o.n * this.d, this.d * o.d); }
+  sub(o) { o = Q.of(o); return new Q(this.n * o.d - o.n * this.d, this.d * o.d); }
+  mul(o) { o = Q.of(o); return new Q(this.n * o.n, this.d * o.d); }
+  div(o) { o = Q.of(o); if (o.n === 0) throw new Error('деление на ноль'); return new Q(this.n * o.d, this.d * o.n); }
+  neg() { return new Q(-this.n, this.d); }
+  abs() { return new Q(Math.abs(this.n), this.d); }
+  get z() { return this.n === 0; }
+  get isInt() { return this.d === 1; }
+  get sgn() { return Math.sign(this.n); }
+  get unit() { return this.d === 1 && Math.abs(this.n) === 1; }
+  eq(o) { o = Q.of(o); return this.n === o.n && this.d === o.d; }
+  valueOf() { return this.n / this.d; }
+  toString() { return T(this); }
+}
+const q = x => Q.of(x);
+function parseQ(s) {
+  if (s == null) return null;
+  s = String(s).trim().replace(/[−–—]/g, '-').replace(/,/g, '.').replace(/\s+/g, '').replace(/^\+/, '');
+  if (!s) return null;
+  const m = s.match(/^(-?\d+(?:\.\d+)?|-?\.\d+)(?:\/(-?\d+(?:\.\d+)?))?$/);
+  if (!m) return null;
+  const a = Q.of(parseFloat(m[1]));
+  if (m[2] === undefined) return a;
+  const b = Q.of(parseFloat(m[2])); if (b.z) return null;
+  return a.div(b);
+}
+
+/* ====================== форматирование ====================== */
+const MINUS = '−';
+const isQ = v => v instanceof Q || typeof v === 'number';
+function T(v) { if (!isQ(v)) return String(v); v = q(v); const s = v.n < 0 ? MINUS : '', a = Math.abs(v.n); return v.d === 1 ? s + a : s + a + '/' + v.d; }
+function H(v) { if (!isQ(v)) return String(v); v = q(v); const s = v.n < 0 ? MINUS : '', a = Math.abs(v.n); return v.d === 1 ? s + a : s + `<span class="fr"><span>${a}</span><span>${v.d}</span></span>`; }
+/* в скобках, если отрицательное */
+function P(v) { v = q(v); return v.n < 0 ? '(' + H(v) + ')' : H(v); }
+const sb = n => `<sub>${n}</sub>`;
+const xv = j => `<i class="v">x</i>${sb(j + 1)}`;
+const Rl = i => `С${sb(i + 1)}`; // строка
+const Aij = (i, j, ch = 'A') => `<i class="v">${ch}</i>${sb('' + (i + 1) + (j + 1))}`;
+/* «+ k·x» внутри суммы. first — первый член */
+function termH(k, name, first) {
+  k = q(k); if (k.z) return '';
+  const neg = k.n < 0, a = k.abs();
+  const coef = name ? (a.eq(1) ? '' : H(a)) : H(a);
+  const body = coef + (name || '');
+  if (first) return (neg ? MINUS : '') + body;
+  return (neg ? ' ' + MINUS + ' ' : ' + ') + body;
+}
+/* уравнение строки: a1x1+...=b */
+function eqH(row, nc, vars = xv) {
+  let s = '', first = true;
+  for (let j = 0; j < nc; j++) { const t = termH(row[j], vars(j), first); if (t) { s += t; first = false; } }
+  if (first) s = '0';
+  return s + ' = ' + H(row[nc]);
+}
+
+/* ====================== матрицы ====================== */
+function M(str) { return str.trim().split(/\s*;\s*/).map(r => r.trim().split(/[\s,]+/).map(x => q(x))); }
+const clone = A => A.map(r => r.slice());
+const mmul = (A, B) => A.map(r => B[0].map((_, j) => r.reduce((s, x, k) => s.add(q(x).mul(B[k][j])), q(0))));
+const mscale = (k, A) => A.map(r => r.map(x => q(x).mul(k)));
+const madd = (A, B) => A.map((r, i) => r.map((x, j) => q(x).add(B[i][j])));
+const msub = (A, B) => A.map((r, i) => r.map((x, j) => q(x).sub(B[i][j])));
+const meq = (A, B) => A.length === B.length && A[0].length === B[0].length && A.every((r, i) => r.every((x, j) => q(x).eq(B[i][j])));
+const minorM = (A, i, j) => A.filter((_, r) => r !== i).map(r => r.filter((_, c) => c !== j));
+function det(A) {
+  const n = A.length; if (n === 1) return q(A[0][0]);
+  if (n === 2) return q(A[0][0]).mul(A[1][1]).sub(q(A[0][1]).mul(A[1][0]));
+  let s = q(0); for (let j = 0; j < n; j++) { const t = q(A[0][j]).mul(det(minorM(A, 0, j))); s = j % 2 ? s.sub(t) : s.add(t); } return s;
+}
+const cofV = (A, i, j) => ((i + j) % 2 ? det(minorM(A, i, j)).neg() : det(minorM(A, i, j)));
+function adjM(A) { const n = A.length; if (n === 1) return [[q(1)]]; return A[0].map((_, i) => A.map((_, j) => cofV(A, j, i))); }
+function invM(A) { const d = det(A); if (d.z) return null; return mscale(q(1).div(d), adjM(A)); }
+const eye = n => Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => q(i === j ? 1 : 0)));
+function rankOf(A0) {
+  const A = clone(A0); const m = A.length, n = A[0].length; let r = 0;
+  for (let c = 0; c < n && r < m; c++) {
+    let p = -1; for (let i = r; i < m; i++) if (!A[i][c].z) { p = i; break; }
+    if (p < 0) continue; [A[r], A[p]] = [A[p], A[r]];
+    for (let i = r + 1; i < m; i++) { const k = A[i][c].div(A[r][c]); A[i] = A[i].map((x, j) => x.sub(k.mul(A[r][j]))); }
+    r++;
+  }
+  return r;
+}
+const allInt = A => A.every(r => r.every(x => x.isInt));
+const rowZero = (row, upto) => row.slice(0, upto == null ? row.length : upto).every(x => x.z);
+const rowGcd = row => row.reduce((g, x) => (x.isInt ? gcd(g, x.n) : -1e9), 0);
+
+/* ====================== отрисовка матрицы ======================
+   o: aug — индекс столбца с чертой; labels — подписи строк; rowCls(i); cellCls(i,j); cell(i,j) — html вместо числа; sm */
+function matEl(A, o = {}) {
+  const w = el('span', 'mxw');
+  const m = A.length, n = m ? A[0].length : 0;
+  if (o.labels) {
+    const L = el('span', 'mxl' + (o.sm ? ' sm' : ''));
+    for (let i = 0; i < m; i++) { const s = el('span', o.labelCls ? o.labelCls(i) || '' : '', o.labels === true ? Rl(i) : o.labels[i]); L.appendChild(s); }
+    w.appendChild(L);
+  }
+  const g = el('span', 'mx' + (o.det ? ' det' : '') + (o.sm ? ' sm' : ''));
+  g.style.gridTemplateColumns = `repeat(${n},auto)`;
+  for (let i = 0; i < m; i++) for (let j = 0; j < n; j++) {
+    const v = A[i][j];
+    const c = el('span', 'c');
+    if (o.aug != null && j === o.aug) c.classList.add('bar');
+    const rc = o.rowCls && o.rowCls(i); if (rc) rc.split(' ').forEach(x => x && c.classList.add(x));
+    const cc = o.cellCls && o.cellCls(i, j); if (cc) cc.split(' ').forEach(x => x && c.classList.add(x));
+    c.dataset.r = i; c.dataset.c = j;
+    c.innerHTML = o.cell ? o.cell(i, j, v) : (isQ(v) ? H(v) : String(v));
+    g.appendChild(c);
+  }
+  w.appendChild(g);
+  return w;
+}
+const mxH = (A, o) => matEl(A, o).outerHTML;
+const cellOf = (wrap, i, j) => wrap.querySelector(`.c[data-r="${i}"][data-c="${j}"]`);
+
+/* ====================== всплывашка «откуда» ====================== */
+let popEl = null;
+function showPop(target, html) {
+  if (!popEl) { popEl = el('div', 'pop'); document.body.appendChild(popEl); }
+  popEl.innerHTML = html; popEl.style.display = 'block';
+  const r = target.getBoundingClientRect(); const pw = popEl.offsetWidth, ph = popEl.offsetHeight;
+  let x = r.left + r.width / 2 - pw / 2; x = Math.max(8, Math.min(x, innerWidth - pw - 8));
+  let y = r.top - ph - 10; if (y < 8) y = r.bottom + 10;
+  popEl.style.left = x + 'px'; popEl.style.top = y + 'px';
+}
+function hidePop() { if (popEl) popEl.style.display = 'none'; }
+addEventListener('scroll', hidePop, { passive: true });
+
+/* ====================== элементарные преобразования ====================== */
+function kTerm(k, j) { // «− 2·С1» без первого знака-пробела
+  k = q(k); const a = k.abs();
+  return (k.n < 0 ? MINUS : '+') + ' ' + (a.eq(1) ? '' : H(a) + '·') + Rl(j);
+}
+function opLabel(op) {
+  switch (op.t) {
+    case 'swap': return `${Rl(op.i)} ↔ ${Rl(op.j)}`;
+    case 'add': return `${Rl(op.i)} → ${Rl(op.i)} ${kTerm(op.k, op.j)}`;
+    case 'combo': { const a = q(op.a); return `${Rl(op.i)} → ${a.eq(1) ? '' : (a.eq(-1) ? MINUS : H(a) + '·')}${Rl(op.i)} ${kTerm(op.b, op.j)}`; }
+    case 'scale': { const k = q(op.k); const inv = q(1).div(k); if (inv.isInt && !k.isInt) return `${Rl(op.i)} → ${Rl(op.i)} : ${P(inv)}`; return `${Rl(op.i)} → ${P(k)}·${Rl(op.i)}`; }
+    case 'del': return 'вычёркиваем ' + op.rows.map(Rl).join(', ');
+  }
+  return '';
+}
+function opWords(op) {
+  switch (op.t) {
+    case 'swap': return `меняем местами строки ${op.i + 1} и ${op.j + 1}`;
+    case 'add': { const k = q(op.k); return k.n < 0 ? `из строки ${op.i + 1} вычитаем строку ${op.j + 1}${k.eq(-1) ? '' : ', умноженную на ' + H(k.abs())}` : `к строке ${op.i + 1} прибавляем строку ${op.j + 1}${k.eq(1) ? '' : ', умноженную на ' + H(k)}`; }
+    case 'combo': return `строку ${op.i + 1} умножаем на ${P(op.a)} и прибавляем строку ${op.j + 1}, умноженную на ${P(op.b)}`;
+    case 'scale': { const k = q(op.k); const inv = q(1).div(k); return inv.isInt && !k.isInt ? `делим строку ${op.i + 1} на ${P(inv)}` : `умножаем строку ${op.i + 1} на ${P(k)}`; }
+    case 'del': return op.rows.length > 1 ? 'эти строки больше не нужны' : 'эта строка больше не нужна';
+  }
+  return '';
+}
+/* применяет преобразование; возвращает новую матрицу и «паспорт» каждой изменённой клетки */
+function applyOp(A, op) {
+  const B = clone(A); const prov = {}; const n = A[0].length;
+  const res = { B, prov, tgtAfter: [], tgtBefore: [], srcBefore: [], changed: [] };
+  const sp = (c, s) => `<span class="${c}">${s}</span>`;
+  if (op.t === 'swap') {
+    B[op.i] = A[op.j]; B[op.j] = A[op.i];
+    res.tgtAfter = [op.i, op.j]; res.tgtBefore = [op.i, op.j];
+    for (let c = 0; c < n; c++) {
+      prov[op.i + ',' + c] = { f: `${H(A[op.j][c])} — это число из строки ${op.j + 1}: строка переехала целиком`, src: [[op.j, c, 's']] };
+      prov[op.j + ',' + c] = { f: `${H(A[op.i][c])} — это число из строки ${op.i + 1}: строка переехала целиком`, src: [[op.i, c, 's']] };
+    }
+  } else if (op.t === 'add' || op.t === 'combo') {
+    const a = op.t === 'add' ? q(1) : q(op.a), k = op.t === 'add' ? q(op.k) : q(op.b);
+    res.tgtAfter = [op.i]; res.tgtBefore = [op.i]; res.srcBefore = [op.j];
+    for (let c = 0; c < n; c++) {
+      const t = A[op.i][c], s = A[op.j][c]; const v = a.mul(t).add(k.mul(s)); B[op.i][c] = v;
+      const left = a.eq(1) ? sp('t', H(t)) : (a.eq(-1) ? MINUS + sp('t', P(t)) : sp('k', H(a)) + '·' + sp('t', P(t)));
+      const kk = k.abs();
+      const right = (k.n < 0 ? ' − ' : ' + ') + (kk.eq(1) ? '' : sp('k', H(kk)) + '·') + sp('s', P(s));
+      prov[op.i + ',' + c] = { f: left + right + ' = ' + sp('r', H(v)), src: [[op.i, c, 't'], [op.j, c, 's']] };
+      res.changed.push([op.i, c]);
+    }
+  } else if (op.t === 'scale') {
+    const k = q(op.k), inv = q(1).div(k); const div = inv.isInt && !k.isInt;
+    res.tgtAfter = [op.i]; res.tgtBefore = [op.i];
+    for (let c = 0; c < n; c++) {
+      const t = A[op.i][c]; const v = t.mul(k); B[op.i][c] = v;
+      prov[op.i + ',' + c] = { f: (div ? sp('t', H(t)) + ' : ' + sp('k', P(inv)) : sp('k', P(k)) + '·' + sp('t', P(t))) + ' = ' + sp('r', H(v)), src: [[op.i, c, 't']] };
+      res.changed.push([op.i, c]);
+    }
+  } else if (op.t === 'del') {
+    const rs = op.rows.slice().sort((x, y) => y - x); rs.forEach(i => B.splice(i, 1));
+    res.tgtBefore = op.rows.slice(); res.deleted = op.rows.slice();
+  }
+  return res;
+}
+
+/* ====================== хранилище прогресса ====================== */
+const STORE = 'l4p4.v1';
+const store = (() => { try { return Object.assign({ done: {}, solved: {}, cards: {}, pred: true, stats: {} }, JSON.parse(localStorage.getItem(STORE)) || {}); } catch (e) { return { done: {}, solved: {}, cards: {}, pred: true, stats: {} }; } })();
+function save() { try { localStorage.setItem(STORE, JSON.stringify(store)); } catch (e) { } }
+const doneHooks = [];
+function markDone(id) { if (!id || store.done[id]) return; store.done[id] = 1; save(); doneHooks.forEach(f => f(id)); }
+function markSolved(id) { store.solved[id] = (store.solved[id] || 0) + 1; save(); doneHooks.forEach(f => f()); }
+
+/* ====================== проверка ввода ====================== */
+function checkInput(inp, expect) {
+  const v = parseQ(inp.value);
+  const ok = v != null && v.eq(expect);
+  inp.classList.toggle('good', ok); inp.classList.toggle('bad', !ok);
+  return { ok, v, empty: !inp.value.trim(), invalid: v == null && !!inp.value.trim() };
+}
+function inputEl(ph = '?', w) { const i = el('input', 'inp'); i.type = 'text'; i.inputMode = 'text'; i.autocomplete = 'off'; i.spellcheck = false; i.placeholder = ph; if (w) i.style.width = w; return i; }
+
+/* ====================== пошаговый плеер ======================
+   step: {phase:'fwd'|'back'|'fin'|'prep', goal, op, why, alt, predict:{q, a, hint} | false, html, mat:true, note}
+*/
+const PH = { prep: ['Подготовка', ''], fwd: ['Прямой ход', ''], back: ['Обратный ход', 'back'], fin: ['Итог', 'fin'], idea: ['Идея', ''], calc: ['Вычисления', ''], chk: ['Проверка', 'fin'] };
+class Walk {
+  constructor(host, cfg) {
+    this.cfg = cfg; this.i = 0; this.revealed = {}; this.list = false;
+    this.aug = cfg.aug; this.labels = cfg.labels !== false;
+    // предвычисляем состояния
+    let A = cfg.M0 ? clone(cfg.M0) : null; this.S = [];
+    cfg.steps.forEach(st => {
+      const rec = { st, before: A };
+      if (st.op) { const r = applyOp(A, st.op); rec.res = r; A = r.B; }
+      if (st.setM) A = st.setM;
+      rec.after = A; this.S.push(rec);
+      if (st.op && st.op.t === 'add' && st.predict === undefined) {
+        const piv = st.pivCol != null ? st.pivCol : null;
+        st.predict = { q: `Какое число <b>k</b> нужно в действии ${Rl(st.op.i)} → ${Rl(st.op.i)} + k·${Rl(st.op.j)}${piv != null ? `, чтобы в столбце ${cfg.aug != null ? xv(piv) : piv + 1} получился 0` : ''}?`, a: q(st.op.k), hint: 'k = −(число, которое убиваем) / (ступенька)' };
+      }
+    });
+    this.final = A;
+    this.root = el('div', 'walk'); this.root.tabIndex = 0;
+    if (cfg.id) this.root.id = 'w-' + cfg.id;
+    host.appendChild(this.root); this.root._walk = this;
+    this.build();
+  }
+  build() {
+    const r = this.root; r.innerHTML = '';
+    const head = el('div', 'wk-head');
+    head.appendChild(el('div', 'wk-title', this.cfg.title || 'Пошаговый разбор'));
+    const tools = el('div', 'wk-tools');
+    const hasPred = this.cfg.steps.some(s => s.predict);
+    if (hasPred) {
+      const tp = el('button', 'tog', '🔮 Сначала угадай'); tp.type = 'button'; tp.setAttribute('aria-pressed', store.pred ? 'true' : 'false');
+      tp.title = 'Перед показом шага попробуй сам угадать число — так запоминается в разы лучше';
+      tp.onclick = () => { store.pred = !store.pred; save(); $$('.tog.predt').forEach(b => b.setAttribute('aria-pressed', store.pred ? 'true' : 'false')); this.render(); };
+      tp.classList.add('predt'); tools.appendChild(tp);
+    }
+    const tl = el('button', 'tog', '📜 Всё решение списком'); tl.type = 'button'; tl.setAttribute('aria-pressed', 'false');
+    tl.onclick = () => { this.list = !this.list; tl.setAttribute('aria-pressed', this.list ? 'true' : 'false'); r.classList.toggle('list', this.list); this.render(); };
+    tools.appendChild(tl); head.appendChild(tools); r.appendChild(head);
+    this.dots = el('div', 'wk-dots'); r.appendChild(this.dots);
+    this.S.forEach((_, k) => { const b = el('button'); b.type = 'button'; b.setAttribute('aria-label', 'Шаг ' + (k + 1)); b.onclick = () => this.go(k); this.dots.appendChild(b); });
+    this.body = el('div', 'wk-body'); r.appendChild(this.body);
+    const foot = el('div', 'wk-foot');
+    const nav = el('div', 'nav btns');
+    this.bPrev = el('button', 'btn sm', '← Назад'); this.bPrev.type = 'button'; this.bPrev.onclick = () => this.go(this.i - 1);
+    this.bNext = el('button', 'btn sm pri', 'Дальше →'); this.bNext.type = 'button'; this.bNext.onclick = () => this.next();
+    nav.append(this.bPrev, this.bNext);
+    foot.append(el('span', 'hint', 'Клавиши <span class="kbd">←</span> <span class="kbd">→</span> · нажми на любое число, чтобы увидеть, откуда оно'), nav);
+    r.appendChild(foot);
+    r.addEventListener('keydown', e => { if (e.target.tagName === 'INPUT' || this.list) return; if (e.key === 'ArrowRight') { e.preventDefault(); this.next(); } if (e.key === 'ArrowLeft') { e.preventDefault(); this.go(this.i - 1); } });
+    this.render();
+  }
+  needPredict(k) { const st = this.S[k].st; return store.pred && st.predict && !this.revealed[k] && !this.list; }
+  next() {
+    if (this.needPredict(this.i)) { this.revealed[this.i] = true; this.render(); return; }
+    this.go(this.i + 1);
+  }
+  go(k) {
+    k = Math.max(0, Math.min(this.S.length - 1, k)); this.i = k; this.render();
+    if (k === this.S.length - 1 && this.cfg.onEnd) this.cfg.onEnd();
+    if (k === this.S.length - 1 && this.cfg.sec) markDone(this.cfg.sec);
+  }
+  render() {
+    hidePop();
+    this.body.innerHTML = '';
+    [...this.dots.children].forEach((b, k) => { b.className = k < this.i ? 'past' : (k === this.i ? 'cur' : ''); });
+    if (this.list) {
+      const L = el('div', 'wk-list');
+      this.S.forEach((_, k) => { const d = el('div', 'lstep'); this.renderStep(k, d, true); L.appendChild(d); });
+      this.body.appendChild(L); if (this.cfg.sec) markDone(this.cfg.sec); return;
+    }
+    this.renderStep(this.i, this.body, false);
+    this.bPrev.disabled = this.i === 0;
+    const last = this.i === this.S.length - 1;
+    this.bNext.disabled = last && !this.needPredict(this.i);
+    this.bNext.innerHTML = this.needPredict(this.i) ? 'Покажи ответ' : (last ? 'Конец ✓' : 'Дальше →');
+  }
+  renderStep(k, host, compact) {
+    const { st, before, after, res } = this.S[k];
+    const meta = el('div', 'wk-meta');
+    const ph = PH[st.phase || (st.op ? 'fwd' : 'idea')] || PH.idea;
+    meta.innerHTML = `<span class="cnt">Шаг ${k + 1} / ${this.S.length}</span><span class="phase ${ph[1]}">${st.phaseName || ph[0]}</span>`;
+    host.appendChild(meta);
+    if (st.goal) host.appendChild(el('p', 'goal', st.goal));
+    if (st.op) {
+      const ol = el('div', 'opline'); ol.innerHTML = `<span class="opl">${opLabel(st.op)}</span><span class="opw">${opWords(st.op)}${st.opNote ? ' · ' + st.opNote : ''}</span>`;
+      host.appendChild(ol);
+    }
+    const hide = !compact && this.needPredict(k);
+    if (hide) host.appendChild(this.predictBox(k));
+    if (st.op && before) {
+      host.appendChild(this.pairEl(before, after, res, st, hide));
+      if (!hide && (res.changed.length || st.op.t === 'swap' || st.op.t === 'del')) host.appendChild(this.provEl(res, st, host));
+    } else if (st.mat && after) {
+      const wrap = el('div', 'mxpair'); const d = el('div');
+      d.appendChild(matEl(after, { aug: this.aug, labels: this.labels, cellCls: st.cellCls, rowCls: st.rowCls }));
+      wrap.appendChild(d); host.appendChild(el('div', 'scrollx')).appendChild(wrap);
+    }
+    if (st.html && !(hide && st.hideHtml)) { const d = el('div', 'stephtml'); d.innerHTML = typeof st.html === 'function' ? st.html() : st.html; host.appendChild(d); if (st.mount) st.mount(d); }
+    if (st.why && !hide) { const w = el('div', 'whyb'); w.innerHTML = '<b>❓ Почему так.</b> ' + st.why; host.appendChild(w); }
+    if (st.alt && !hide) { const d = el('details', 'alt'); d.innerHTML = `<summary>${st.altTitle || '🔀 А если сделать по-другому?'}</summary><div>${st.alt}</div>`; host.appendChild(d); }
+  }
+  predictBox(k) {
+    const st = this.S[k].st, p = st.predict;
+    const box = el('div', 'pred');
+    box.appendChild(el('div', 'q', p.q));
+    const row = el('div', 'row'); const inp = inputEl('?');
+    const bc = el('button', 'btn sm ok', 'Проверить'); bc.type = 'button';
+    const bs = el('button', 'btn sm', 'Не знаю — покажи'); bs.type = 'button';
+    const fb = el('div', 'fb');
+    const reveal = () => { this.revealed[k] = true; this.render(); };
+    bc.onclick = () => {
+      let ok;
+      if (p.check) ok = p.check(inp.value);
+      else { const r = checkInput(inp, p.a); ok = r.ok; if (r.invalid) { fb.className = 'fb no'; fb.textContent = 'Не понял число. Пиши так: −2, 3/5, 0.5'; return; } }
+      if (ok) { fb.className = 'fb ok'; fb.innerHTML = '✓ Верно! Смотри, что получилось.'; setTimeout(reveal, 650); }
+      else { fb.className = 'fb no'; fb.innerHTML = '✗ Пока нет. ' + (p.hint ? 'Подсказка: ' + p.hint.replace(/[.\s]+$/, '') + '. ' : '') + 'Попробуй ещё раз или нажми «покажи».'; }
+    };
+    bs.onclick = reveal;
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') bc.click(); });
+    row.append(inp, bc, bs); box.append(row, fb);
+    setTimeout(() => { if (document.activeElement === this.root || this.root.contains(document.activeElement)) inp.focus({ preventScroll: true }); }, 0);
+    return box;
+  }
+  pairEl(before, after, res, st, hide) {
+    const sx = el('div', 'scrollx'); const pair = el('div', 'mxpair'); sx.appendChild(pair);
+    const op = st.op;
+    const bset = new Set(res.tgtBefore), sset = new Set(res.srcBefore), del = new Set(res.deleted || []);
+    const bd = el('div'); bd.appendChild(el('div', 'lab', 'было'));
+    const bm = matEl(before, {
+      aug: this.aug, labels: this.labels,
+      labelCls: i => (sset.has(i) ? 'src' : (bset.has(i) ? 'tgt' : '')),
+      rowCls: i => (del.has(i) ? 'delrow' : (op.t === 'swap' && bset.has(i) ? 'rows' : (sset.has(i) ? 'rows' : (bset.has(i) ? 'rowt' : '')))),
+      cellCls: (i, j) => (st.pivCell && st.pivCell[0] === i && st.pivCell[1] === j ? 'piv' : '')
+    });
+    bd.appendChild(bm); pair.appendChild(bd);
+    const ar = el('div', 'arrow', `<span class="ar">→</span><span>${opLabel(op)}</span>`); pair.appendChild(ar);
+    const ad = el('div'); ad.appendChild(el('div', 'lab', 'стало'));
+    const tset = new Set(res.tgtAfter);
+    if (hide) {
+      const hidden = after.map((r, i) => r.map(x => (tset.has(i) ? '?' : x)));
+      ad.appendChild(matEl(hidden, { aug: this.aug, labels: this.labels, rowCls: i => (tset.has(i) ? 'rowt' : '') }));
+      pair.appendChild(ad); return sx;
+    }
+    const am = matEl(after, {
+      aug: this.aug, labels: this.labels,
+      labelCls: i => (tset.has(i) ? 'tgt' : ''),
+      rowCls: i => (tset.has(i) ? 'rowt' : ''),
+      cellCls: (i, j) => { let c = res.prov[i + ',' + j] ? 'click' : ''; if (tset.has(i) && op.t !== 'swap' && after[i][j] && after[i][j].z && before[i] && !before[i][j].z) c += ' newz'; return c; }
+    });
+    ad.appendChild(am); pair.appendChild(ad);
+    const clear = () => { $$('.hl-t,.hl-s,.sel', pair).forEach(c => c.classList.remove('hl-t', 'hl-s', 'sel')); };
+    const show = (cell, pv, i, j) => {
+      clear(); cell.classList.add('sel');
+      pv.src.forEach(([r, c, kind]) => { const x = cellOf(bm, r, c); if (x) x.classList.add(kind === 't' ? 'hl-t' : 'hl-s'); });
+      showPop(cell, `<div class="mut">Откуда ${H(after[i][j])}:</div><div class="ff">${pv.f}</div>`);
+      const f = this.root.querySelector(`.prov .f[data-k="${i},${j}"]`); $$('.prov .f.on', this.root).forEach(x => x.classList.remove('on')); if (f) f.classList.add('on');
+    };
+    $$('.c.click', am).forEach(cell => {
+      const i = +cell.dataset.r, j = +cell.dataset.c, pv = res.prov[i + ',' + j];
+      cell.addEventListener('mouseenter', () => show(cell, pv, i, j));
+      cell.addEventListener('mouseleave', () => { clear(); hidePop(); });
+      cell.addEventListener('click', e => { e.stopPropagation(); show(cell, pv, i, j); });
+    });
+    this._am = am; this._bm = bm; this._clear = clear;
+    return sx;
+  }
+  provEl(res, st) {
+    const box = el('div', 'prov');
+    const op = st.op;
+    if (op.t === 'swap') { box.innerHTML = `<span class="pt">Откуда числа</span>Ни одно число не изменилось — строки ${op.i + 1} и ${op.j + 1} просто поменялись местами (как два уравнения в системе: от перестановки ответ не меняется).`; return box; }
+    if (op.t === 'del') { box.innerHTML = `<span class="pt">Что произошло</span>${st.delWhy || 'Строка удалена.'}`; return box; }
+    box.appendChild(el('span', 'pt', `Откуда числа в новой строке ${op.i + 1}`));
+    const leg = el('div', 'legend');
+    if (op.t === 'add' || op.t === 'combo') leg.innerHTML = `<span><i style="background:var(--tgt)"></i>старая строка ${op.i + 1}</span><span><i style="background:var(--src)"></i>строка ${op.j + 1}</span><span><i style="background:var(--pink)"></i>множитель</span>`;
+    else leg.innerHTML = `<span><i style="background:var(--tgt)"></i>старая строка ${op.i + 1}</span><span><i style="background:var(--pink)"></i>${op.t === 'scale' ? 'на что делим / умножаем' : ''}</span>`;
+    box.appendChild(leg);
+    const fl = el('div', 'fl');
+    res.changed.forEach(([i, j]) => {
+      const f = el('span', 'f', res.prov[i + ',' + j].f); f.dataset.k = i + ',' + j;
+      f.addEventListener('mouseenter', () => { const c = this._am && cellOf(this._am, i, j); if (c) c.dispatchEvent(new Event('mouseenter')); });
+      f.addEventListener('mouseleave', () => { if (this._clear) this._clear(); hidePop(); });
+      fl.appendChild(f);
+    });
+    box.appendChild(fl);
+    return box;
+  }
+}
+document.addEventListener('click', e => { if (!e.target.closest('.c.click')) { hidePop(); } });
+
+/* ====================== линейные выражения (для обратного хода) ====================== */
+class Lin {
+  constructor(c = 0, t = {}) { this.c = q(c); this.t = {}; for (const k in t) if (!q(t[k]).z) this.t[k] = q(t[k]); }
+  static v(name) { return new Lin(0, { [name]: 1 }); }
+  add(o) { const r = new Lin(this.c.add(o.c), this.t); for (const k in o.t) { const v = (r.t[k] || q(0)).add(o.t[k]); if (v.z) delete r.t[k]; else r.t[k] = v; } return r; }
+  mul(k) { k = q(k); const r = new Lin(this.c.mul(k)); for (const x in this.t) { const v = this.t[x].mul(k); if (!v.z) r.t[x] = v; } return r; }
+  sub(o) { return this.add(o.mul(-1)); }
+  get isConst() { return Object.keys(this.t).length === 0; }
+  at(vals) { let s = this.c; for (const k in this.t) s = s.add(this.t[k].mul(vals[k] || 0)); return s; }
+  html(nameH, order, constFirst) {
+    const keys = order ? order.filter(k => this.t[k]) : Object.keys(this.t);
+    let s = '', first = true;
+    const addC = () => { if (!this.c.z || (keys.length === 0)) { s += first ? H(this.c) : (this.c.n < 0 ? ' − ' + H(this.c.abs()) : ' + ' + H(this.c)); first = false; } };
+    if (constFirst) addC();
+    keys.forEach(k => { s += termH(this.t[k], nameH(k), first); first = false; });
+    if (!constFirst) addC();
+    return s;
+  }
+}
+
+'use strict';
+/* ====================== авто-Гаусс с объяснениями ====================== */
+const PARAMS = ['t', 'v', 'w', 's', 'u', 'p'];
+function colName(c, aug) { return aug ? 'столбце ' + xv(c) : 'столбце ' + (c + 1); }
+/* выбор ступеньки: ±1 → без дробей; делитель всех → целые множители; иначе — что есть */
+function choosePivot(A, r, c) {
+  const m = A.length, cand = [];
+  for (let i = r; i < m; i++) if (!A[i][c].z) cand.push(i);
+  if (!cand.length) return null;
+  const cur = A[r][c];
+  if (!cur.z && cur.unit) return { p: r, reason: 'here-unit' };
+  const u = cand.find(i => A[i][c].unit); if (u != null) return { p: u, reason: 'unit' };
+  const divAll = i => cand.every(j => j === i || A[j][c].div(A[i][c]).isInt);
+  if (!cur.z && divAll(r)) return { p: r, reason: 'here-div' };
+  const d = cand.filter(divAll).sort((x, y) => A[x][c].abs() - A[y][c].abs())[0];
+  if (d != null) return { p: d, reason: 'div' };
+  if (!cur.z) return { p: r, reason: 'keep' };
+  const s = cand.slice().sort((x, y) => A[x][c].abs() - A[y][c].abs())[0];
+  return { p: s, reason: 'nonzero' };
+}
+function autoGauss(M0, o = {}) {
+  const aug = !!o.aug; let A = clone(M0);
+  const nc = aug ? A[0].length - 1 : A[0].length;
+  const steps = []; const pivots = []; let status = null;
+  const push = (op, extra) => { const r = applyOp(A, op); steps.push(Object.assign({ op, phase: 'fwd' }, extra)); A = r.B; };
+  const cn = c => colName(c, aug);
+  // нулевые строки и противоречия среди строк >= from
+  function cleanup(from) {
+    for (let i = A.length - 1; i >= from; i--) {
+      if (rowZero(A[i], nc)) {
+        if (aug && !A[i][nc].z) {
+          steps.push({ phase: 'fin', goal: 'Прочитать строку ' + (i + 1), mat: true, setM: clone(A), rowCls: x => (x === i ? 'rowt' : ''),
+            html: `<div class="box bad"><span class="bt">Строка ${i + 1} — это уравнение 0 = ${H(A[i][nc])}</span>Слева все коэффициенты нули: 0·${xv(0)} + … = 0 при любых иксах. А справа ${H(A[i][nc])}. Равенство 0 = ${H(A[i][nc])} неверно никогда → <b>система несовместна, решений нет</b>. Дальше считать нет смысла.</div>`,
+            why: `Ранг основной матрицы (до черты) меньше ранга расширенной: строка ${i + 1} нулевая слева, но не нулевая справа. По теореме Кронекера–Капелли это ровно случай «r ≠ r̄ → решений нет».` });
+          status = 'none'; return false;
+        }
+        push({ t: 'del', rows: [i] }, { goal: 'Убрать пустую строку', delWhy: `Строка ${i + 1} целиком из нулей${aug ? ': это уравнение 0 = 0' : ''}. Оно верно всегда и ничего не сообщает — вычёркиваем.`, why: 'Нулевая строка не влияет ни на ранг, ни на решения: «0 = 0» выполняется при любых значениях неизвестных.' });
+      }
+    }
+    // одинаковые / противоположные строки
+    for (let i = A.length - 1; i > from; i--) for (let j = from; j < i; j++) {
+      const same = A[i].every((x, c) => x.eq(A[j][c])), opp = !same && A[i].every((x, c) => x.eq(A[j][c].neg()));
+      if (same || opp) {
+        push({ t: 'add', i, j, k: same ? -1 : 1 }, { predict: false, goal: `Строка ${i + 1} ${same ? 'совпадает' : 'противоположна'} со строкой ${j + 1} — сделать её нулевой`, why: `Строки ${j + 1} и ${i + 1} ${same ? 'одинаковые' : 'отличаются только знаком'} — это одно и то же уравнение, записанное дважды. ${same ? 'Вычтем' : 'Сложим'} их: получится строка из нулей, и её можно вычеркнуть.` });
+        push({ t: 'del', rows: [i] }, { goal: 'Убрать пустую строку', delWhy: `После ${same ? 'вычитания' : 'сложения'} строка ${i + 1} стала нулевой — вычёркиваем.`, why: 'Лишняя копия уравнения не добавляет информации: ранг и решения не меняются.' });
+        return cleanup(from);
+      }
+    }
+    return true;
+  }
+  function reduce(i) {
+    const g = rowGcd(A[i]);
+    const lead = A[i].find(x => !x.z);
+    if (g > 1 && lead) {
+      const sg = lead.n < 0 ? -g : g;
+      const nz = A[i].filter(x => !x.z).map(x => T(x)).join(', ');
+      push({ t: 'scale', i, k: q(1).div(sg) }, { goal: `Упростить строку ${i + 1}`, why: `Все числа строки (${nz}) делятся на ${g}. Делим${sg < 0 ? ' на ' + sg + ' (с минусом — чтобы первое число стало положительным)' : ''} — числа становятся меньше, считать легче и меньше шансов ошибиться. Это разрешено: деление на ${sg < 0 ? '(' + sg + ')' : g} — то же, что умножение на число ≠ 0.` });
+    }
+  }
+  if (!cleanup(0)) return finish();
+  let r = 0;
+  for (let c = 0; c < nc && r < A.length; c++) {
+    const ch = choosePivot(A, r, c);
+    if (!ch) {
+      steps.push({ phase: 'fwd', goal: `Найти ступеньку в ${cn(c)}`, mat: true, setM: clone(A), cellCls: (i, j) => (j === c && i >= r ? 'hl-s' : ''),
+        why: `В ${cn(c)} на местах ${r + 1}…${A.length} одни нули — обнулять нечего, ступеньки здесь не будет. ${aug ? `Значит, ${xv(c)} станет <b>свободной</b> переменной (ей можно дать любое значение).` : ''} Сдвигаемся вправо, к следующему столбцу.` });
+      continue;
+    }
+    if (ch.p !== r) {
+      const v = A[ch.p][c], cur = A[r][c];
+      const reason = ch.reason === 'unit' ? `В ${cn(c)} у строки ${ch.p + 1} стоит ${H(v)}. Ступенька ±1 — самая удобная: множители будут целыми (это просто числа под ней со сменой знака), дробей не появится.`
+        : ch.reason === 'div' ? `Число ${H(v)} из строки ${ch.p + 1} делит все остальные числа ${cn(c)} — значит, все множители будут целыми.`
+          : `Сейчас на месте ступеньки стоит 0 — нулём ничего не обнулишь (на 0 делить нельзя). Берём строку ${ch.p + 1}, где в ${cn(c)} не ноль.`;
+      let alt = null;
+      if (!cur.z) {
+        const other = A.findIndex((row, i) => i > r && i !== ch.p && !row[c].z);
+        const vic = other >= 0 ? A[other][c] : v;
+        const kk = vic.div(cur).neg();
+        if (!kk.isInt) alt = `Можно оставить ступенькой ${H(cur)} — это не ошибка. Но тогда, например, чтобы обнулить ${H(vic)}, понадобится множитель k = −${P(vic)}/${P(cur)} = ${H(kk)} — дробь, и вся строка пойдёт в дробях. Перестановка строк ничего не портит (это то же, что поменять местами уравнения), зато экономит силы.`;
+      }
+      push({ t: 'swap', i: r, j: ch.p }, { goal: `Поставить удобную ступеньку в ${cn(c)}`, why: reason + ` Поэтому меняем строки ${r + 1} и ${ch.p + 1} местами.`, alt });
+    }
+    reduce(r);
+    const p = A[r][c];
+    for (let i = r + 1; i < A.length; i++) {
+      const a = A[i][c]; if (a.z) continue;
+      const k = a.div(p).neg();
+      const intMode = allInt(A);
+      const pivCell = [r, c];
+      if (k.isInt || !intMode) {
+        push({ t: 'add', i, j: r, k }, { pivCol: c, pivCell, goal: `Получить 0 вместо ${H(a)} (строка ${i + 1}, ${cn(c)})`,
+          why: `Ищем k из условия ${H(a)} + k·${P(p)} = 0, то есть k = −(убиваемое число)/(ступенька) = −${P(a)}/${P(p)} = <b>${H(k)}</b>. Прибавляем именно строку ${r + 1} — строку со ступенькой: левее ступеньки у неё нули, поэтому уже полученные нули не испортятся.`,
+          alt: r > 0 ? `А почему не взять строку повыше (например, строку 1)? У неё в столбцах левее не нули — прибавив её, мы испортим нули, которые уже получили. Правило: обнуляем столбец только строкой с его ступенькой.` : `Можно прибавить и другую строку, но тогда множитель будет другим и, скорее всего, придётся обнулять ещё раз. Строка со ступенькой — кратчайший путь.` });
+      } else {
+        const g = gcd(p.n, a.n); const al = q(Math.abs(p.n) / g), be = q(-a.n * Math.sign(p.n) / g);
+        push({ t: 'combo', i, a: al, j: r, b: be }, { pivCol: c, pivCell, predict: false, goal: `Получить 0 вместо ${H(a)} (строка ${i + 1}, ${cn(c)})`,
+          why: `Обычный множитель был бы дробью: k = −${P(a)}/${P(p)} = ${H(k)}. Чтобы обойтись без дробей, сначала умножаем строку ${i + 1} на ${H(al)} (можно — это не 0), а потом прибавляем строку ${r + 1}, умноженную на ${P(be)}: ${H(al)}·${P(a)} + ${P(be)}·${P(p)} = 0 ✓. Нули получаются те же, ранг и решения не меняются.`,
+          alt: `Можно и «в лоб» с дробью: ${Rl(i)} → ${Rl(i)} ${kTerm(k, r)}. Ответ будет тем же, но считать придётся с дробями.` });
+      }
+    }
+    pivots.push([r, c]);
+    for (let i = r + 1; i < A.length; i++) reduce(i);
+    if (!cleanup(r + 1)) return finish();
+    r++;
+  }
+  if (!cleanup(r)) return finish();
+  return finish();
+  function finish() {
+    const rank = pivots.length + (status === 'none' ? 0 : 0);
+    const res = { steps, final: A, pivots, aug, nc };
+    if (status === 'none') { res.status = 'none'; res.rank = rankOf(M0.map(r => r.slice(0, nc))); res.rankAug = rankOf(M0); return res; }
+    res.rank = pivots.length; res.rankAug = pivots.length;
+    res.status = !aug ? 'rank' : (pivots.length === nc ? 'unique' : 'inf');
+    // финальный шаг прямого хода
+    const pc = new Set(pivots.map(p => p[0] + ',' + p[1]));
+    steps.push({ phase: aug ? 'fwd' : 'fin', goal: 'Ступенчатый вид получен', mat: true, setM: clone(A), cellCls: (i, j) => (pc.has(i + ',' + j) ? 'piv' : ''),
+      html: aug ? `<p>Ступеньки (зелёные) стоят в столбцах ${pivots.map(p => xv(p[1])).join(', ')}. Ненулевых строк: <b>${pivots.length}</b> → r = r̄ = ${pivots.length}, неизвестных n = ${nc}.</p>` + (res.status === 'unique' ? `<p>r = n → решение <b>одно</b>. Идём обратным ходом.</p>` : `<p>r &lt; n → решений <b>бесконечно много</b>; свободных переменных n − r = ${nc - pivots.length}.</p>`)
+        : `<p>Под каждой ступенькой (зелёные) — нули. Ненулевых строк осталось <b>${pivots.length}</b> → <b>rg = ${pivots.length}</b>.</p>`,
+      why: aug ? 'Каждая ненулевая строка ступенчатого вида — самостоятельное уравнение, которое нельзя получить из других. Их число и есть ранг.' : 'Ранг = число ненулевых строк ступенчатой матрицы. Элементарные преобразования ранг не меняют, поэтому у исходной матрицы ранг тот же.' });
+    if (aug) Object.assign(res, backSub(A, nc, pivots, M0, steps));
+    return res;
+  }
+}
+
+/* ====================== обратный ход ====================== */
+function backSub(E, nc, pivots, M0, steps) {
+  const pivCols = new Set(pivots.map(p => p[1]));
+  const free = []; for (let j = 0; j < nc; j++) if (!pivCols.has(j)) free.push(j);
+  const pname = {}; free.forEach((j, k) => pname['x' + j] = PARAMS[k] || ('t' + k));
+  const nameX = k => xv(+k.slice(1));
+  const order = free.map(j => 'x' + j);
+  const X = {}; free.forEach(j => X[j] = Lin.v('x' + j));
+  if (free.length) steps.push({ phase: 'back', goal: 'Решить, какие переменные свободные', mat: true, setM: clone(E), cellCls: (i, j) => (pivots.some(p => p[0] === i && p[1] === j) ? 'piv' : (free.includes(j) && j < nc ? 'hl-s' : '')),
+    html: `<p>Ступеньки стоят в столбцах ${pivots.map(p => xv(p[1])).join(', ')} — эти переменные будем <b>выражать</b>. В столбцах ${free.map(xv).join(', ')} ступенек нет → это <b>свободные</b> переменные: они могут быть любыми.</p>`,
+    why: `Уравнений-ступенек ${pivots.length}, а неизвестных ${nc}. Каждое уравнение «съедает» одну неизвестную (свою ступеньку). На остальные ${free.length} уравнений не хватает — им можно дать любые значения.` });
+  const known = new Set(free);
+  for (let p = pivots.length - 1; p >= 0; p--) {
+    const [r, c] = pivots[p]; const row = E[r]; const a = row[c];
+    const lines = [];
+    lines.push(`<span class="ln">Строка ${r + 1}: ${eqH(row, nc)}</span>`);
+    let rest = new Lin(0); let subs = [];
+    let sh = termH(a, xv(c), true);
+    for (let j = c + 1; j < nc; j++) {
+      if (row[j].z) continue;
+      rest = rest.add(X[j].mul(row[j]));
+      if (!free.includes(j)) { subs.push(j); const kk = row[j].abs(); sh += (row[j].n < 0 ? ' − ' : ' + ') + (kk.eq(1) ? '' : H(kk) + '·') + `(<span class="sub-hl">${X[j].html(nameX, order)}</span>)`; }
+      else sh += termH(row[j], xv(j), false);
+    }
+    sh += ' = ' + H(row[nc]);
+    if (subs.length) {
+      lines.push(`<span class="ln">Подставляем ${subs.map(j => xv(j) + ' = ' + X[j].html(nameX, order)).join(', ')}:</span>`);
+      lines.push(`<span class="ln">${sh}</span>`);
+    }
+    const rhs = new Lin(row[nc]).sub(rest);
+    if (!rest.isConst || !rest.c.z) {
+      if (subs.length) lines.push(`<span class="ln">Раскрываем скобки: ${termH(a, xv(c), true)} ${rest.isConst && rest.c.z ? '' : (signedLin(rest, nameX, order))} = ${H(row[nc])}</span>`);
+      lines.push(`<span class="ln">Переносим всё, кроме ${xv(c)}, вправо (меняя знак): ${termH(a, xv(c), true)} = ${rhs.html(nameX, order)}</span>`);
+    }
+    const val = rhs.mul(q(1).div(a)); X[c] = val;
+    if (!a.eq(1)) lines.push(`<span class="ln">Делим на ${P(a)}: ${xv(c)} = ${rhs.isConst ? P(rhs.c) : '(' + rhs.html(nameX, order) + ')'} : ${P(a)}</span>`);
+    lines.push(`<span class="ln res">${xv(c)} = ${val.html(nameX, order)}</span>`);
+    const isLast = p === pivots.length - 1;
+    steps.push({ phase: 'back', goal: `Найти ${xv(c)} из строки ${r + 1}`, html: `<div class="eqs">${lines.join('')}</div>`,
+      predict: val.isConst ? { q: `Строка ${r + 1}: ${eqH(row, nc)}${subs.length ? '. Уже знаем: ' + subs.map(j => xv(j) + ' = ' + X[j].html(nameX, order)).join(', ') : ''}. Чему равно ${xv(c)}?`, a: val.c, hint: subs.length ? 'подставь известные значения, перенеси числа вправо и раздели на коэффициент при ' + xv(c) : 'раздели правую часть на коэффициент при ' + xv(c) } : false, hideHtml: val.isConst,
+      why: isLast ? `Начинаем с последней строки: в ней меньше всего неизвестных — ${free.length && row.slice(c + 1, nc).some(x => !x.z) ? 'кроме ' + xv(c) + ' только свободные' : 'только ' + xv(c)}. Поэтому обратный ход идёт <b>снизу вверх</b>.` : `Поднимаемся на строку выше. Новая неизвестная тут одна — ${xv(c)}; всё остальное мы уже знаем${free.length ? ' (или это свободные)' : ''}.` });
+    known.add(c);
+  }
+  // ответ
+  const nameP = k => `<i class="v">${pname[k]}</i>`;
+  let ans;
+  if (!free.length) {
+    ans = `<div class="box okb"><span class="bt">Ответ</span>${Array.from({ length: nc }, (_, j) => xv(j) + ' = ' + H(X[j].c)).join(', ')}</div>`;
+  } else {
+    ans = `<div class="box okb"><span class="bt">Ответ (общее решение)</span>` +
+      `<p>Свободные: ${free.map(j => xv(j) + ' = ' + nameP('x' + j)).join(', ')}, где ${free.map(j => nameP('x' + j)).join(', ')} — любые числа.</p>` +
+      `<p>${Array.from({ length: nc }, (_, j) => xv(j) + ' = ' + X[j].html(nameP, order)).join('<br>')}</p></div>`;
+  }
+  // проверка на исходной системе
+  const vals = {}; free.forEach(j => vals['x' + j] = 1);
+  const xs = Array.from({ length: nc }, (_, j) => X[j].at(vals));
+  const chk = M0.map(row => {
+    const s = row.slice(0, nc).reduce((acc, x, j) => acc.add(x.mul(xs[j])), q(0));
+    const terms = row.slice(0, nc).map((x, j) => (x.z ? null : `${H(x)}·${P(xs[j])}`)).filter(Boolean).join(' + ').replace(/\+ −/g, '− ');
+    const ok = s.eq(row[nc]);
+    return `<div class="${ok ? 'ok' : 'no'}">${terms || '0'} = ${H(s)} ${ok ? '= ' + H(row[nc]) + ' ✓' : '≠ ' + H(row[nc]) + ' ✗'}</div>`;
+  }).join('');
+  steps.push({ phase: 'chk', goal: 'Проверить ответ в исходной системе', html: ans + (free.length ? `<p class="mini">Проверим при ${free.map(j => nameP('x' + j) + ' = 1').join(', ')}: тогда ${Array.from({ length: nc }, (_, j) => xv(j) + ' = ' + H(xs[j])).join(', ')}.</p>` : '') + `<div class="chk">${chk}</div>`,
+    why: 'Подстановка в <b>исходную</b> систему (а не в преобразованную!) ловит любую арифметическую ошибку на любом шаге. Это 1 минута, которая спасает оценку.' });
+  return { X, free, pname };
+}
+function signedLin(L, nameH, order) { const s = L.html(nameH, order); return s.startsWith(MINUS) ? '− ' + s.slice(1) : '+ ' + s; }
+
+/* ====================== определитель, дополнения, обратная ====================== */
+function detHtml(A, name = 'A') {
+  const n = A.length; const a = (i, j) => A[i][j];
+  if (n === 1) return { d: q(a(0, 0)), html: `|${name}| = ${H(a(0, 0))}` };
+  if (n === 2) {
+    const d = det(A); const p1 = a(0, 0).mul(a(1, 1)), p2 = a(0, 1).mul(a(1, 0));
+    return { d, html: `<div class="eqs"><span class="ln">|${name}| = ${Aij(0, 0, 'a')}·${Aij(1, 1, 'a')} − ${Aij(0, 1, 'a')}·${Aij(1, 0, 'a')}</span><span class="ln">= ${P(a(0, 0))}·${P(a(1, 1))} − ${P(a(0, 1))}·${P(a(1, 0))} = ${H(p1)} − ${P(p2)} = <b>${H(d)}</b></span></div>` };
+  }
+  const plus = [[[0, 0], [1, 1], [2, 2]], [[0, 1], [1, 2], [2, 0]], [[0, 2], [1, 0], [2, 1]]];
+  const minus = [[[0, 2], [1, 1], [2, 0]], [[0, 0], [1, 2], [2, 1]], [[0, 1], [1, 0], [2, 2]]];
+  const pr = t => t.reduce((s, [i, j]) => s.mul(a(i, j)), q(1));
+  const line = t => `${t.map(([i, j]) => Aij(i, j, 'a')).join('·')} = ${t.map(([i, j]) => P(a(i, j))).join('·')} = <b>${H(pr(t))}</b>`;
+  const sp = plus.reduce((s, t) => s.add(pr(t)), q(0)), sm = minus.reduce((s, t) => s.add(pr(t)), q(0));
+  const d = sp.sub(sm);
+  const sum = ts => ts.map(t => pr(t)).map((v, k) => (k === 0 ? H(v) : (v.n < 0 ? ' − ' + H(v.abs()) : ' + ' + H(v)))).join('');
+  return { d, plus, minus, html: `<div class="cols2"><div class="box okb"><span class="bt">Со знаком «+»</span><span class="mini">главная диагональ и два «треугольника» вдоль неё</span><div class="eqs" style="font-size:16px">${plus.map(t => `<span class="ln">${line(t)}</span>`).join('')}</div></div><div class="box bad"><span class="bt">Со знаком «−»</span><span class="mini">побочная диагональ и два «треугольника» вдоль неё</span><div class="eqs" style="font-size:16px">${minus.map(t => `<span class="ln">${line(t)}</span>`).join('')}</div></div></div><div class="eqs"><span class="ln">|${name}| = (${sum(plus)}) − (${sum(minus)}) = ${H(sp)} − ${P(sm)} = <b>${H(d)}</b></span></div>` };
+}
+function cofHtml(A, i, j) {
+  const n = A.length; const sign = (i + j) % 2 ? MINUS : '+'; const mn = minorM(A, i, j); const md = det(mn); const v = (i + j) % 2 ? md.neg() : md;
+  const mini = matEl(A, { sm: true, det: false, cellCls: (r, c) => (r === i && c === j ? 'sel' : (r === i || c === j ? 'cross' : '')) }).outerHTML;
+  let f;
+  if (n === 2) f = `${Aij(i, j)} = (−1)<sup>${i + 1}+${j + 1}</sup>·${P(mn[0][0])} = <span class="rv">${H(v)}</span>`;
+  else {
+    const [[p, qq], [r, s]] = mn; const ps = p.mul(s), qr = qq.mul(r);
+    f = `${Aij(i, j)} = (−1)<sup>${i + 1}+${j + 1}</sup>·|${H(p)} ${H(qq)}; ${H(r)} ${H(s)}|<br>= ${sign === '+' ? '' : '−'}(${P(p)}·${P(s)} − ${P(qq)}·${P(r)})<br>= ${sign === '+' ? '' : '−'}(${H(ps)} − ${P(qr)}) = <span class="rv">${H(v)}</span>`;
+  }
+  return { v, html: `<div class="cc">${mini}<div class="ff">${f}</div></div>` };
+}
+/* шаги для A·X = B (side='L') или X·A = B (side='R') */
+function genMatEq(A, B, side = 'L', o = {}) {
+  const n = A.length; const steps = [];
+  const Xs = '<i class="v">X</i>', As = '<i class="v">A</i>', Bs = '<i class="v">B</i>', Ai = '<i class="v">A</i><sup>−1</sup>';
+  const sizes = `${As}: ${n}×${n}, ${Bs}: ${B.length}×${B[0].length}`;
+  if (side === 'L') steps.push({ phase: 'idea', goal: `Выразить ${Xs}`, html: `<div class="eqs"><span class="ln">${As}·${Xs} = ${Bs}</span><span class="ln">${Ai}·${As}·${Xs} = ${Ai}·${Bs} &nbsp;<span class="mini">← умножили обе части СЛЕВА</span></span><span class="ln">${'<i class="v">E</i>'}·${Xs} = ${Ai}·${Bs} &nbsp;<span class="mini">← ${Ai}·${As} = E</span></span><span class="ln res">${Xs} = ${Ai}·${Bs}</span></div><p class="mini">Размеры: ${sizes} → ${Xs}: ${n}×${B[0].length}.</p>`,
+    why: `Делить на матрицу нельзя — вместо этого умножают на обратную. ${As} стоит <b>слева</b> от ${Xs}, поэтому и ${Ai} ставим слева: только так ${As} «встретится» с ${Ai} и превратится в E. Справа нельзя: ${Xs}·${As}·${Ai} — это не то, что написано в условии (матрицы нельзя переставлять: AB ≠ BA).` });
+  else steps.push({ phase: 'idea', goal: `Выразить ${Xs}`, html: `<div class="eqs"><span class="ln">${Xs}·${As} = ${Bs}</span><span class="ln">${Xs}·${As}·${Ai} = ${Bs}·${Ai} &nbsp;<span class="mini">← умножили обе части СПРАВА</span></span><span class="ln">${Xs}·<i class="v">E</i> = ${Bs}·${Ai}</span><span class="ln res">${Xs} = ${Bs}·${Ai}</span></div><p class="mini">Размеры: ${sizes} → ${Xs}: ${B.length}×${n}.</p>`,
+    why: `${As} стоит <b>справа</b> от ${Xs} → ${Ai} ставим тоже справа. Порядок ${Ai}·${Bs} тут даже не посчитать: ${Ai} — ${n}×${n}, а ${Bs} — ${B.length}×${B[0].length}${B.length !== n ? ', такие матрицы в таком порядке не перемножаются' : ' (и он дал бы другой, неверный ответ)'}.` });
+  const D = detHtml(A); const d = D.d;
+  steps.push({ phase: 'calc', goal: `Посчитать |${As}| — есть ли обратная`, html: D.html + (d.z ? `<div class="box bad">|A| = 0 → обратной матрицы нет, этим способом не решить.</div>` : `<p>|A| = ${H(d)} ≠ 0 → обратная существует.</p>`),
+    predict: n <= 3 ? { q: 'Чему равен определитель |A|?', a: d, hint: n === 3 ? 'три произведения со знаком «+» минус три со знаком «−»' : 'ad − bc' } : false, hideHtml: true,
+    why: `${Ai} = (1/|A|)·A*. Если |A| = 0, делить не на что — обратной нет. Поэтому определитель считают <b>первым</b>: ноль — сразу стоп.` });
+  if (d.z) return { steps, X: null };
+  const C = A.map((r, i) => r.map((_, j) => cofHtml(A, i, j)));
+  const Cv = C.map(r => r.map(x => x.v));
+  steps.push({ phase: 'calc', goal: 'Найти все алгебраические дополнения A<sub>ij</sub>', html: `<p class="mini">Для каждой клетки: вычёркиваем её строку и столбец (зачёркнуто), считаем определитель того, что осталось, и ставим знак по «шахматке» + − + / − + − / + − +.</p><div class="cofg ${n === 2 ? 'n2' : ''}">${C.flat().map(x => x.html).join('')}</div>`,
+    why: '(−1)<sup>i+j</sup> даёт «+», когда i+j чётно, и «−», когда нечётно. Отсюда и шахматка знаков. Ошибаются тут чаще всего именно в знаке.' });
+  const adj = adjM(A);
+  steps.push({ phase: 'calc', goal: 'Составить присоединённую матрицу A*', html: `<div class="mxpair"><div><div class="lab">дополнения на своих местах</div>${mxH(Cv)}</div><div class="arrow"><span class="ar">→</span><span>транспонируем</span></div><div><div class="lab">A* — строки стали столбцами</div>${mxH(adj)}</div></div>`,
+    why: `В A* дополнения стоят <b>транспонированно</b>: A<sub>ij</sub> идёт на место (j, i). Первая строка A* — это A<sub>11</sub>, A<sub>21</sub>, A<sub>31</sub> (дополнения первого <b>столбца</b>). Почему так: при умножении A·A* строка i матрицы A встречается со столбцом из её же дополнений и даёт |A| (это разложение определителя по строке), а с «чужими» дополнениями даёт 0. Получается |A|·E.` });
+  let g = 0; adj.flat().forEach(x => { g = x.isInt ? gcd(g, x.n) : 1; });
+  if (!d.isInt) g = 1;
+  const f = g > 1 ? q(g).div(d) : q(1).div(d); const adj2 = g > 1 ? mscale(q(1).div(g), adj) : adj;
+  const inv = mscale(q(1).div(d), adj);
+  steps.push({ phase: 'calc', goal: `Записать ${Ai}`, html: `<div class="mxpair"><div>${Ai} = ${H(q(1).div(d))}·${mxH(adj)}</div>${g > 1 ? `<div class="arrow"><span class="ar">=</span><span>вынесли общий множитель ${g}</span></div><div>${H(f)}·${mxH(adj2)}</div>` : ''}</div>`,
+    why: `${Ai} = (1/|A|)·A* = 1/${P(d)}·A*. ${g > 1 ? `Все числа A* делятся на ${g} — выносим ${g}: 1/${P(d)}·${g} = ${H(f)}. Числа внутри становятся меньше.` : ''} Дробь удобно держать <b>снаружи</b> до конца — так меньше возни.` });
+  const prod = side === 'L' ? mmul(adj2, B) : mmul(B, adj2);
+  const L = side === 'L' ? adj2 : B, R = side === 'L' ? B : adj2;
+  const fm = (Lm, Rm) => (i, j) => Lm[i].map((x, k) => `${P(x)}·${P(Rm[k][j])}`).join(' + ').replace(/\+ \(−/g, '+ (−');
+  const fcell = fm(L, R);
+  const X = mscale(f, prod);
+  steps.push({ phase: 'calc', goal: side === 'L' ? `Перемножить ${Ai}·${Bs}` : `Перемножить ${Bs}·${Ai}`, html: `<p class="mini">Каждая клетка = строка левой матрицы × столбец правой: попарные произведения складываем.</p><div class="chk">${prod.map((r, i) => r.map((v, j) => `<div>(${i + 1},${j + 1}): ${fcell(i, j)} = <b>${H(v)}</b></div>`).join('')).join('')}</div><div class="mxpair"><div>${Xs} = ${H(f)}·${mxH(prod)}</div><div class="arrow"><span class="ar">=</span></div><div>${mxH(X)}</div></div>`,
+    why: side === 'L' ? `Порядок важен: ${Ai} слева, ${Bs} справа — строки берём у ${Ai}, столбцы у ${Bs}. Множитель ${H(f)} умножаем в самом конце.` : `Порядок важен: ${Bs} слева, ${Ai} справа — строки берём у ${Bs}, столбцы у ${Ai}.` });
+  const chkM = side === 'L' ? mmul(A, X) : mmul(X, A);
+  const fc2 = side === 'L' ? fm(A, X) : fm(X, A);
+  const ok = meq(chkM, B);
+  steps.push({ phase: 'chk', goal: side === 'L' ? `Проверка: ${As}·${Xs} = ${Bs}?` : `Проверка: ${Xs}·${As} = ${Bs}?`, html: `<div class="chk">${chkM.map((r, i) => r.map((v, j) => `<div class="${v.eq(B[i][j]) ? 'ok' : 'no'}">(${i + 1},${j + 1}): ${fc2(i, j)} = ${H(v)} ${v.eq(B[i][j]) ? '✓' : '✗'}</div>`).join('')).join('')}</div><div class="box okb"><span class="bt">Ответ</span>${Xs} = ${mxH(X)}</div>`,
+    why: 'Подставляем найденный X в исходное уравнение. Совпало с B — ответ точно верный. Не совпало — ищи ошибку (чаще всего знак в дополнении или транспонирование).' });
+  return { steps, X, inv, adj, d, ok };
+}
+/* для «проверялки»: всплывашки на статичных матрицах */
+function attachPops(wrap, fn) {
+  $$('.c', wrap).forEach(c => {
+    const i = +c.dataset.r, j = +c.dataset.c; const h = fn(i, j); if (!h) return;
+    c.classList.add('click');
+    c.addEventListener('mouseenter', () => showPop(c, h)); c.addEventListener('mouseleave', hidePop);
+    c.addEventListener('click', e => { e.stopPropagation(); showPop(c, h); });
+  });
+}
+
+'use strict';
+/* ====================== контент: помощники ====================== */
+const mnt = n => $(`[data-mount="${n}"]`);
+function sysHtml(A, nc, o = {}) {
+  const rows = A.map((row, i) => {
+    let s = '', first = true;
+    for (let j = 0; j < nc; j++) { const t = termH(row[j], xv(j), first); if (t) { s += `<span class="term" data-r="${i}" data-c="${j}">${t}</span>`; first = false; } }
+    if (first) s = '0';
+    return `<div>${s} = <span class="term" data-r="${i}" data-c="${nc}">${H(row[nc])}</span></div>`;
+  }).join('');
+  return `<span class="eqsys"><span class="brace">{</span><span class="rows">${rows}</span></span>`;
+}
+/* курируемая система: свои шаги прямого хода + авто-итог + авто-обратный ход */
+function curated(M0, fwd, o = {}) {
+  const aug = o.aug !== false; let A = clone(M0);
+  fwd.forEach(s => { if (s.op) A = applyOp(A, s.op).B; if (s.setM) A = s.setM; });
+  const nc = aug ? A[0].length - 1 : A[0].length;
+  const pivots = []; A.forEach((row, i) => { const c = row.slice(0, nc).findIndex(x => !x.z); if (c >= 0) pivots.push([i, c]); });
+  const steps = fwd.slice();
+  const pc = new Set(pivots.map(p => p[0] + ',' + p[1]));
+  const n = nc, r = pivots.length;
+  if (o.finish !== false) {
+    steps.push({ phase: aug ? 'fwd' : 'fin', goal: 'Ступенчатый вид получен', mat: true, setM: clone(A), cellCls: (i, j) => (pc.has(i + ',' + j) ? 'piv' : ''),
+      html: (aug ? `<p>Возвращаем иксы — получилась «лестница» уравнений:</p><div class="eqs">${A.map(row => `<span class="ln">${eqH(row, nc)}</span>`).join('')}</div><p>Ступеньки (зелёные): ${pivots.map(p => xv(p[1])).join(', ')}. Ненулевых строк ${r} → <b>r = r̄ = ${r}</b>, неизвестных <b>n = ${n}</b> → ${r === n ? 'решение <b>одно</b>' : `решений <b>бесконечно много</b>, свободных n − r = ${n - r}`}.</p>`
+        : `<p>Под ступеньками (зелёные) одни нули. Ненулевых строк <b>${r}</b> → <b>rg = ${r}</b>.</p>`) + (o.finHtml || ''),
+      why: o.finWhy || (aug ? 'Каждая следующая строка начинается правее предыдущей — это и есть ступенчатый вид. В последней строке осталось меньше всего неизвестных, с неё и начнём обратный ход.' : 'Ранг = число ненулевых строк ступенчатой матрицы. Элементарные преобразования ранг не меняют, поэтому у исходной матрицы ранг тот же.') });
+  }
+  if (aug && o.back !== false) backSub(A, nc, pivots, M0, steps);
+  return { steps, final: A, pivots, nc };
+}
+function prepStep(txt) { return { phase: 'prep', goal: 'Переписать систему в расширенную матрицу', mat: true, html: `<p>${txt || 'Строка = уравнение. Столбцы = x₁, x₂, … по порядку. После черты — правые части.'}</p>`, why: 'При преобразованиях иксы и знаки «=» не меняются — переписывать их каждый раз долго, и легко сбиться. Работаем только с числами, а в конце вернём иксы.' }; }
+
+/* ====================== A0: разминка, A7: квиз ====================== */
+const WARM = [
+  { q: 'Какое действие НЕ меняет решения системы?', o: [['Умножить уравнение на 0', 'Нельзя: уравнение превратится в 0 = 0 и потеряет своё условие.'], ['Прибавить к уравнению другое, умноженное на 5', 'Да! Это действие №3 («прибавить строку × k»). Его можно отменить, вычтя ту же строку.', 1], ['Прибавить 1 только к левой части', 'Нельзя: «весы» перекосятся, равенство нарушится.'], ['Возвести уравнение в квадрат', 'Нельзя: уравнение перестанет быть линейным, и могут появиться лишние решения.']] },
+  { q: 'После преобразований получилась строка 0 0 0 | 7. Что это значит?', o: [['Её можно вычеркнуть', 'Вычёркивают строку 0 0 0 | 0. Здесь справа 7.'], ['Решений нет', 'Верно: это уравнение 0 = 7. Оно неверно ни при каких иксах.', 1], ['Решений бесконечно много', 'Нет: одна ложная строка делает всю систему несовместной.'], ['x₃ = 7', 'Слева при x₃ стоит 0, а не 1.']] },
+  { q: 'X·A = B. Чему равен X?', o: [['A⁻¹·B', 'A стоит справа от X, поэтому A⁻¹ ставим тоже справа. Слева A⁻¹ не «встретится» с A.'], ['B·A⁻¹', 'Верно: умножаем обе части справа на A⁻¹, и A·A⁻¹ = E.', 1], ['B / A', 'Делить на матрицу нельзя.'], ['A·B⁻¹', 'Здесь перепутаны роли A и B.']] }
+];
+const QUIZ = [
+  { q: 'Какие системы называют равносильными?', o: [['С одинаковым числом уравнений', 'Число уравнений тут ни при чём.'], ['С одинаковыми решениями', 'Да, это определение из лекции.', 1], ['С одинаковыми коэффициентами', 'Тогда это одна и та же система, но равносильными бывают и совсем разные с виду.'], ['Любые, у которых есть решение', 'Нет: решения должны совпадать.']] },
+  { q: 'Зачем переходят к расширенной матрице?', o: [['Так требует теорема', 'Теорема тут ни при чём, это просто удобство.'], ['Иксы не меняются — проще работать только с числами', 'Да. Матрица — это та же система, только записанная короче.', 1], ['Чтобы найти определитель', 'У прямоугольной матрицы определителя вообще нет.'], ['Чтобы система стала однородной', 'Нет, правые части сохраняются после черты.']] },
+  { q: 'Ступенька 1, под ней −4. Какое действие даст 0?', o: [['С₂ → С₂ − 4·С₁', '−4 − 4·1 = −8, не ноль.'], ['С₂ → С₂ + 4·С₁', '−4 + 4·1 = 0 ✓. k = −(−4)/1 = 4.', 1], ['С₂ → 4·С₂', 'Умножение строки ноль не создаст: −4·4 = −16.'], ['С₂ → С₂ + С₁', '−4 + 1 = −3.']] },
+  { q: 'Почему нули в столбце x₂ делают строкой со ступенькой x₂, а не первой строкой?', o: [['Так короче', 'Дело не в краткости.'], ['Первая строка испортит уже полученные нули в столбце x₁', 'Да: у первой строки в столбце x₁ не ноль, и в столбце x₁ снова появится число.', 1], ['Первую строку нельзя трогать по правилам', 'Трогать можно, но это не поможет.'], ['Разницы нет', 'Есть: см. правильный ответ.']] },
+  { q: 'Что такое прямой ход метода Гаусса?', o: [['Нахождение неизвестных снизу вверх', 'Это обратный ход.'], ['Приведение матрицы к ступенчатому виду', 'Да: спускаемся вниз и делаем нули под ступеньками.', 1], ['Подстановка ответа в систему', 'Это проверка.'], ['Вычисление определителя', 'Нет.']] },
+  { q: '3 ненулевые строки, неизвестных 5, противоречий нет. Сколько решений?', o: [['Одно', 'Одно было бы при r = n.'], ['Нет решений', 'Решений нет только при противоречии 0 = b.'], ['Бесконечно много, 2 свободные переменные', 'Да: r = r̄ = 3 < 5, свободных 5 − 3 = 2.', 1], ['Бесконечно много, 3 свободные', 'Свободных n − r = 5 − 3 = 2.']] },
+  { q: 'r = 2, r̄ = 3. Что с системой?', o: [['Одно решение', 'Ранги не равны, так что решений нет вовсе.'], ['Бесконечно много', 'Нет.'], ['Несовместна — решений нет', 'Да: по Кронекеру–Капелли нужно r = r̄.', 1], ['Так не бывает', 'Бывает: это случай строки 0 … 0 | b.']] },
+  { q: 'Может ли r̄ быть меньше r?', o: [['Да, если правые части нули', 'Тогда r̄ = r.'], ['Нет: лишний столбец может только увеличить ранг', 'Верно. Поэтому «r ≠ r̄» на деле всегда значит r < r̄.', 1], ['Да, если n > m', 'Нет.'], ['Только у квадратных матриц', 'Нет.']] },
+  { q: 'Однородная система A·X = 0…', o: [['может не иметь решений', 'Не может: X = 0 подходит всегда.'], ['всегда имеет хотя бы нулевое решение', 'Да: подставь нули — везде 0 = 0.', 1], ['всегда имеет ровно одно решение', 'Если r < n, решений бесконечно много.'], ['совместна, только если |A| ≠ 0', 'Совместна всегда. От |A| зависит только, есть ли ненулевые решения.']] },
+  { q: 'X₁ и X₂ — решения A·X = 0. Что точно тоже решение?', o: [['X₁·X₂', 'Столбцы так не перемножают, и это не линейная комбинация.'], ['3X₁ − 2X₂', 'Да: A(3X₁ − 2X₂) = 3·0 − 2·0 = 0.', 1], ['X₁ + 1', 'A(X₁ + 1) ≠ 0 в общем случае: прибавлять число нельзя.'], ['Только X₁ и X₂', 'Их линейные комбинации — тоже решения.']] },
+  { q: 'Какие переменные становятся свободными?', o: [['Последние по номеру', 'Часто так и бывает, но правило другое.'], ['Те, в столбцах которых нет ступенек', 'Да: на них не хватило уравнений-ступенек.', 1], ['Любые на выбор', 'Выбор определяется ступеньками.'], ['С нулём в первой строке', 'Нет.']] },
+  { q: 'У системы линейных уравнений ровно 2 решения. Возможно?', o: [['Да', 'Нет: если есть два решения X₁ ≠ X₂, то X₁ + t(X₂ − X₁) — тоже решение при любом t. Значит, их бесконечно много.'], ['Нет: бывает 0, 1 или бесконечно много', 'Верно.', 1], ['Только у однородной', 'Нет.'], ['Только при n = 2', 'Нет.']] }
+];
+function quizEl(host, list, opt = {}) {
+  let score = 0, answered = 0;
+  const items = shuffle(list.map((x, i) => ({ ...x, i })));
+  const sc = el('div', 'mini'); host.appendChild(sc);
+  const upd = () => { sc.innerHTML = `Отвечено: ${answered} из ${items.length} · верно: <b>${score}</b>`; };
+  upd();
+  items.forEach((it, n) => {
+    const c = el('div', 'card');
+    c.appendChild(el('div', 'ct', `<b>${n + 1}. ${it.q}</b>`));
+    let conf = null;
+    if (opt.conf) {
+      const cf = el('div', 'conf', 'Насколько уверен? ');
+      ['уверен', 'не очень', 'угадываю'].forEach(t => { const b = el('button', '', t); b.type = 'button'; b.setAttribute('aria-pressed', 'false'); b.onclick = () => { conf = t; $$('button', cf).forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false')); }; cf.appendChild(b); });
+      c.appendChild(cf);
+    }
+    const os = el('div', 'opts');
+    const ex = el('div', 'expl'); ex.style.display = 'none';
+    shuffle(it.o).forEach(([t, e, ok]) => {
+      const b = el('button', 'opt', t); b.type = 'button';
+      b.onclick = () => {
+        $$('.opt', os).forEach(x => (x.disabled = true));
+        b.classList.add(ok ? 'good' : 'bad');
+        if (!ok) { const right = $$('.opt', os).find(x => x.dataset.ok); if (right) right.classList.add('good'); }
+        answered++; if (ok) score++; upd();
+        let extra = '';
+        if (!ok && conf === 'уверен') extra = '<p class="warn-t" style="margin-top:8px">💡 Ты был уверен, но ошибся. Такие ошибки запоминаются лучше всего, так что этот вопрос ты теперь вряд ли забудешь.</p>';
+        ex.innerHTML = (ok ? '<b class="ok-t">✓ Верно.</b> ' : '<b class="bad-t">✗ Не совсем.</b> ') + e + (ok ? '' : '<br><span class="mut">Правильно: ' + it.o.find(x => x[2])[0] + ' — ' + it.o.find(x => x[2])[1] + '</span>') + extra;
+        ex.style.display = 'block';
+        if (answered === items.length) { if (opt.sec) markDone(opt.sec); toast(`Готово: ${score} из ${items.length}`); }
+      };
+      if (ok) b.dataset.ok = 1;
+      os.appendChild(b);
+    });
+    c.append(os, ex); host.appendChild(c);
+  });
+}
+
+/* ====================== A1: можно / нельзя ====================== */
+const YN = [
+  ['Умножить уравнение на −3', 1, 'Можно: −3 ≠ 0. Это действие можно отменить, поделив на −3.'],
+  ['Умножить уравнение на 0', 0, 'Нельзя: уравнение станет 0 = 0, и его условие потеряется. У системы появятся лишние «решения».'],
+  ['Прибавить ко 2-му уравнению 1-е, умноженное на 5', 1, 'Можно: это действие «прибавь строку × k». Отменяется вычитанием той же строки × 5.'],
+  ['Поменять местами 1-е и 3-е уравнения', 1, 'Можно: от порядка уравнений решения не меняются.'],
+  ['Прибавить 3 только к левой части', 0, 'Нельзя: равенство нарушится. С обеими частями нужно делать одно и то же.'],
+  ['Поделить строку на 3', 1, 'Можно: это умножение на 1/3 ≠ 0.'],
+  ['Вычеркнуть строку 0 0 0 | 0', 1, 'Можно: это уравнение 0 = 0, оно верно всегда и ничего не сообщает.'],
+  ['Вычеркнуть строку 0 0 0 | 5', 0, 'Нельзя! Это 0 = 5 — сигнал, что решений нет. Вычеркнув её, ты «потеряешь» противоречие.'],
+  ['Возвести уравнение в квадрат', 0, 'Нельзя: уравнение перестанет быть линейным, и могут появиться лишние решения.']
+];
+function ynEl(host) {
+  const g = el('div', 'yn'); let done = 0;
+  YN.forEach(([t, ok, e]) => {
+    const it = el('div', 'it'); it.appendChild(el('div', 'q', t));
+    const b = el('div', 'b'); const ex = el('div', 'e');
+    [['Можно', 1], ['Нельзя', 0]].forEach(([lab, v]) => {
+      const x = el('button', 'btn sm', lab); x.type = 'button';
+      x.onclick = () => { if (it.dataset.ans) return; it.dataset.ans = 1; const right = v === ok; it.classList.add(right ? 'good' : 'bad'); ex.innerHTML = (right ? '✓ ' : '✗ ') + e; done++; if (done === YN.length) markDone('L1'); $$('button', b).forEach(y => (y.disabled = true)); };
+      b.appendChild(x);
+    });
+    it.append(b, ex); g.appendChild(it);
+  });
+  host.appendChild(g);
+}
+
+/* ====================== A2: система ↔ матрица ====================== */
+function sysMapEl(host) {
+  const A = M('2 -1 2 3;1 1 2 -4;4 1 4 -3');
+  const w = el('div', 'mxpair');
+  const s = el('div'); s.innerHTML = sysHtml(A, 3);
+  const m = el('div'); m.appendChild(matEl(A, { aug: 3 })); m.appendChild(el('div', 'mini center', 'столбцы: x₁ · x₂ · x₃ | правые части'));
+  w.append(s, el('div', 'arrow', '<span class="ar">⇄</span>'), m);
+  host.appendChild(el('div', 'scrollx')).appendChild(w);
+  const info = el('p', 'mini center', '&nbsp;'); host.appendChild(info);
+  const on = (i, j) => {
+    $$('.term.hl', s).forEach(x => x.classList.remove('hl')); $$('.c.sel', m).forEach(x => x.classList.remove('sel'));
+    if (i == null) { info.innerHTML = '&nbsp;'; return; }
+    const t = s.querySelector(`.term[data-r="${i}"][data-c="${j}"]`); if (t) t.classList.add('hl');
+    const c = cellOf(m, i, j); if (c) c.classList.add('sel');
+    const v = A[i][j];
+    info.innerHTML = j === 3 ? `Строка ${i + 1}, после черты: правая часть уравнения ${i + 1} = <b>${H(v)}</b>` : `Строка ${i + 1}, столбец ${j + 1}: коэффициент при ${xv(j)} в уравнении ${i + 1} = <b>${H(v)}</b>${v.unit ? (v.n > 0 ? ' (x без числа — это 1)' : ' (−x — это −1)') : ''}`;
+  };
+  $$('.term', s).forEach(t => { const f = () => on(+t.dataset.r, +t.dataset.c); t.addEventListener('mouseenter', f); t.addEventListener('click', f); });
+  $$('.c', m).forEach(c => { c.classList.add('click'); const f = () => on(+c.dataset.r, +c.dataset.c); c.addEventListener('mouseenter', f); c.addEventListener('click', f); });
+  w.addEventListener('mouseleave', () => on(null));
+}
+function sysFillEl(host) {
+  const A = M('1 0 2 5;0 -1 1 0;3 -1 0 2');
+  host.innerHTML = `<p>Система: &nbsp;<span class="eqsys"><span class="brace">{</span><span class="rows"><div>${xv(0)} + 2${xv(2)} = 5</div><div>−${xv(1)} + ${xv(2)} = 0</div><div>3${xv(0)} − ${xv(1)} = 2</div></span></span></p>`;
+  const wrap = el('div', 'scrollx');
+  const mx = matEl(A, { aug: 3, cell: (i, j) => `<input aria-label="строка ${i + 1}, столбец ${j + 1}" data-i="${i}" data-j="${j}">` });
+  wrap.appendChild(mx); host.appendChild(wrap);
+  const row = el('div', 'row-f'); const b = el('button', 'btn ok', 'Проверить'); b.type = 'button'; const sh = el('button', 'btn sm', 'Показать ответ'); sh.type = 'button';
+  const fb = el('div', 'fb'); row.append(b, sh); host.append(row, fb);
+  b.onclick = () => {
+    let bad = [], empty = 0;
+    $$('input', mx).forEach(inp => { const i = +inp.dataset.i, j = +inp.dataset.j; const r = checkInput(inp, A[i][j]); if (r.empty) empty++; if (!r.ok) bad.push([i, j]); });
+    if (!bad.length) { fb.className = 'fb ok'; fb.innerHTML = '✓ Всё верно! Заметь: пропущенные переменные стали нулями, а −x₂ стал −1.'; markDone('L2'); return; }
+    const hints = [];
+    if (bad.some(([i, j]) => A[i][j].z)) hints.push('где переменной нет — пиши 0');
+    if (bad.some(([i, j]) => A[i][j].unit)) hints.push('x без числа = 1, −x = −1');
+    if (bad.some(([i, j]) => j === 3)) hints.push('после черты — правая часть');
+    fb.className = 'fb no'; fb.innerHTML = `✗ Неверно клеток: ${bad.length}${empty ? ` (пустых ${empty})` : ''}. ${hints.length ? 'Подсказка: ' + hints.join('; ') + '.' : ''}`;
+  };
+  sh.onclick = () => { $$('input', mx).forEach(inp => { inp.value = T(A[+inp.dataset.i][+inp.dataset.j]); }); b.click(); };
+}
+
+/* ====================== A3: пример 1 ====================== */
+function mountL3() {
+  const A = M('2 -1 2 3;1 1 2 -4;4 1 4 -3');
+  mnt('sys1').innerHTML = sysHtml(A, 3);
+  const st = mnt('stairs'); const E = M('1 1 2 -4;0 -3 -2 11;0 0 -2 2');
+  st.appendChild(matEl(E, { aug: 3, cellCls: (i, j) => (i === j ? 'piv' : (j < i ? 'zero0' : '')) }));
+  const fwd = [
+    prepStep(),
+    { op: { t: 'swap', i: 0, j: 1 }, goal: 'Поставить в левый верхний угол ступеньку 1',
+      predict: { q: 'Строку с каким номером выгоднее всего поставить первой? (введи номер)', a: 2, hint: 'ищи в первом столбце 1 или −1' },
+      why: 'Ступенькой первого столбца станет число в левом верхнем углу. Если там 1, множители для обнуления — это просто числа под ней с обратным знаком (−2 и −4). Целые, без дробей. В строке 2 как раз стоит 1, поднимаем её наверх. Переставлять уравнения можно: решения от этого не меняются.',
+      alt: 'Если оставить наверху 2, то для 1 под ней нужен множитель k = −1/2, и строка 2 станет (0; 3/2; 1 | −11/2). Ответ выйдет тот же, но с дробями дольше считать и легче ошибиться.' },
+    { op: { t: 'add', i: 1, j: 0, k: -2 }, pivCol: 0, pivCell: [0, 0], goal: 'Получить 0 вместо 2 в столбце x₁ (строка 2)', opNote: 'в тетради: «×(−2)» у строки 1 и стрелка к строке 2',
+      why: 'Под ступенькой 1 стоит 2. Ищем k: 2 + k·1 = 0 → <b>k = −2</b> (правило «минус жертва на ступеньку»: −2/1). Меняется <b>только строка 2</b>. Строку 1 мы лишь «одалживаем», умноженную на −2, сама она остаётся как была. И умножаем <b>всю</b> строку, включая число после черты.' },
+    { op: { t: 'add', i: 2, j: 0, k: -4 }, pivCol: 0, pivCell: [0, 0], goal: 'Получить 0 вместо 4 в столбце x₁ (строка 3)', opNote: 'в тетради: «×(−4)» у строки 1',
+      why: '4 + k·1 = 0 → <b>k = −4</b>. В тетради шаги 3 и 4 записаны одним переходом (у строки 1 пометки ×(−2), ×(−4)). Так можно, потому что оба действия используют одну и ту же неизменную строку 1.' },
+    { op: { t: 'add', i: 2, j: 1, k: -1 }, pivCol: 1, pivCell: [1, 1], goal: 'Получить 0 под второй ступенькой (−3)',
+      why: 'Столбец x₁ готов. Спускаемся на ступеньку ниже: в строке 2 первое ненулевое число −3, это новая ступенька. Под ней тоже −3: k = −(−3)/(−3) = <b>−1</b>, то есть просто вычитаем строку 2. Берём именно строку 2: у неё в столбце x₁ стоит 0, поэтому ноль строки 3 в столбце x₁ не испортится.',
+      alt: 'Попробуем обнулить −3 строкой 1: С₃ → С₃ + 3·С₁ даёт (3; 0; 2 | 1). В столбце x₂ ноль появился, зато в столбце x₁ снова 3, и работа насмарку. Поэтому каждый столбец обнуляем только строкой его ступеньки.' }
+  ];
+  const c = curated(A, fwd);
+  new Walk(mnt('walk1'), { title: 'Пример 1 · метод Гаусса', M0: A, aug: 3, steps: c.steps, sec: 'L3' });
+}
+
+/* ====================== A4: пример 2 + ползунки ====================== */
+function mountL4() {
+  const A = M('2 3 5 -7 14 19;4 2 3 4 11 28;-1 -3 5 -10 17 7;6 -1 -2 23 1 33');
+  mnt('sys2').innerHTML = sysHtml(A, 5);
+  const fwd = [
+    prepStep(),
+    { op: { t: 'swap', i: 0, j: 2 }, goal: 'Ступенька ±1 в первый столбец', predict: { q: 'Какую строку выгодно поставить первой? (номер)', a: 3, hint: 'в первом столбце есть −1' },
+      why: 'В первом столбце числа 2, 4, −1, 6. Ступенька −1 почти так же хороша, как 1: k = −a/(−1) = a, то есть множители будут 4, 2, 6. Целые! Поднимаем строку 3 наверх.',
+      alt: 'Со ступенькой 2 множители были бы −2, +1/2 и −3, и одна дробь уже есть. Со ступенькой −1 дробей нет совсем.' },
+    { op: { t: 'add', i: 1, j: 0, k: 4 }, pivCol: 0, pivCell: [0, 0], goal: '0 вместо 4 в столбце x₁', why: 'k = −4/(−1) = <b>4</b>. Проверка: 4 + 4·(−1) = 0 ✓.' },
+    { op: { t: 'add', i: 2, j: 0, k: 2 }, pivCol: 0, pivCell: [0, 0], goal: '0 вместо 2 в столбце x₁', why: 'Строка 3 сейчас — это бывшая строка 1 (после перестановки). k = −2/(−1) = <b>2</b>.' },
+    { op: { t: 'add', i: 3, j: 0, k: 6 }, pivCol: 0, pivCell: [0, 0], goal: '0 вместо 6 в столбце x₁', why: 'k = −6/(−1) = <b>6</b>. Столбец x₁ готов.' },
+    { op: { t: 'scale', i: 2, k: q(1).div(3) }, goal: 'Упростить строку 3', opNote: 'в тетради: «:3»', why: 'Все числа строки (−3, 15, −27, 48, 33) делятся на 3. Делим, и числа становятся меньше. Бонус: во втором столбце получается <b>−1</b>, идеальная ступенька.' },
+    { op: { t: 'swap', i: 1, j: 2 }, goal: 'Удобная ступенька во втором столбце', why: 'Во втором столбце (ниже первой строки) стоят −10, −1, −19. Ставим выше строку с −1, тогда множители −10 и −19 будут целыми.', alt: 'Со ступенькой −10 для −1 нужен множитель −1/10, а для −19 — −19/10. Сплошные дроби.' },
+    { op: { t: 'add', i: 2, j: 1, k: -10 }, pivCol: 1, pivCell: [1, 1], goal: '0 вместо −10 в столбце x₂', opNote: 'в тетради: «·(−10)»', why: 'k = −(−10)/(−1) = <b>−10</b>. Проверка: −10 + (−10)·(−1) = 0 ✓. Строку 1 не трогаем: у строки 2 в столбце x₁ стоит 0, поэтому ноль в столбце x₁ сохранится.' },
+    { op: { t: 'add', i: 3, j: 1, k: -19 }, pivCol: 1, pivCell: [1, 1], goal: '0 вместо −19 в столбце x₂', opNote: 'в тетради: «·(−19)»', why: 'k = −(−19)/(−1) = <b>−19</b>. Например, в последнем столбце: 75 − 19·11 = 75 − 209 = −134.' },
+    { op: { t: 'scale', i: 2, k: q(-1).div(27) }, goal: 'Упростить строку 3', opNote: 'в тетради: «:(−27)»', why: 'Числа (−27, 54, −81, −54) все делятся на −27. Получим (0 0 1 −2 3 | 2), где ступенька = 1.' },
+    { op: { t: 'scale', i: 3, k: q(-1).div(67) }, goal: 'Упростить строку 4', opNote: 'в тетради: «:(−67)»', why: 'Числа (−67, 134, −201, −134) делятся на −67 → (0 0 1 −2 3 | 2). Получилась <b>точно такая же</b> строка, как строка 3!' },
+    { op: { t: 'add', i: 3, j: 2, k: -1 }, predict: false, goal: 'Строки 3 и 4 одинаковые — убрать лишнюю', why: 'Одинаковые строки — это одно и то же уравнение, записанное дважды. Вычитаем одну из другой, и строка 4 становится нулевой. В тетради это обозначено ⊖ и «= 0».' },
+    { op: { t: 'del', rows: [3] }, goal: 'Вычеркнуть нулевую строку', delWhy: 'Строка 4 стала 0 0 0 0 0 | 0, то есть 0 = 0. Это верно всегда и ничего не сообщает, поэтому вычёркиваем.', why: 'Уравнений осталось 3, а неизвестных 5. Значит, двум переменным не хватит «своих» уравнений: они будут свободными.' }
+  ];
+  const c = curated(A, fwd);
+  new Walk(mnt('walk2'), { title: 'Пример 2 · бесконечно много решений', M0: A, aug: 5, steps: c.steps, sec: 'L4' });
+  // ползунки
+  const host = mnt('explore2'); const card = el('div', 'card');
+  let t = 1, v = 0, broke = false;
+  const st = el('div'); const vals = el('div', 'eqs'); const chk = el('div', 'chk');
+  const mk = (name, get, set) => { const d = el('div', 'slider'); d.innerHTML = `<b class="v" style="min-width:20px">${name}</b>`; const r = el('input'); r.type = 'range'; r.min = -5; r.max = 5; r.step = 1; r.value = get(); r.setAttribute('aria-label', name); const o = el('span', 'val', '' + get()); r.oninput = () => { set(+r.value); o.textContent = r.value; upd(); markDone('L4'); }; d.append(r, o); return d; };
+  const brk = el('button', 'tog', '🧨 Испортить x₁ (+1)'); brk.type = 'button'; brk.setAttribute('aria-pressed', 'false');
+  brk.onclick = () => { broke = !broke; brk.setAttribute('aria-pressed', broke ? 'true' : 'false'); upd(); };
+  function upd() {
+    const x = [q(-3 * t - v + 6 + (broke ? 1 : 0)), q(t + v - 1), q(2 + 2 * t - 3 * v), q(t), q(v)];
+    vals.innerHTML = `<span class="ln">${xv(3)} = t = ${t}, &nbsp; ${xv(4)} = v = ${v}</span><span class="ln">${xv(0)} = −3t − v + 6 = <b>${H(x[0])}</b>${broke ? ' <span class="bad-t">(+1 — испорчено)</span>' : ''}, &nbsp; ${xv(1)} = t + v − 1 = <b>${H(x[1])}</b>, &nbsp; ${xv(2)} = 2 + 2t − 3v = <b>${H(x[2])}</b></span>`;
+    chk.innerHTML = A.map(row => { const s = row.slice(0, 5).reduce((a, k, j) => a.add(k.mul(x[j])), q(0)); const ok = s.eq(row[5]); return `<div class="${ok ? 'ok' : 'no'}">${row.slice(0, 5).map((k, j) => `${H(k)}·${P(x[j])}`).join(' + ').replace(/\+ −/g, '− ')} = ${H(s)} ${ok ? '✓' : '≠ ' + H(row[5]) + ' ✗'}</div>`; }).join('');
+  }
+  card.append(mk('t', () => t, x => (t = x)), mk('v', () => v, x => (v = x)), brk, vals, chk);
+  card.appendChild(el('p', 'mini', 'Видишь: при любых t и v все 4 уравнения верны. Но стоит сдвинуть x₁ хоть на 1, и уравнения «ломаются». Решений бесконечно много, но это не «любые числа»: они устроены строго по формуле.'));
+  host.appendChild(card); upd();
+}
+
+'use strict';
+/* ====================== общие помощники для части 2 ====================== */
+const fr = (a, b) => `<span class="fr"><span>${a}</span><span>${b}</span></span>`;
+/* шаг «прибавить строку» для ранга (столбцы без иксов) */
+function rAdd(i, j, k, c, ex = {}) {
+  const kq = q(k);
+  return Object.assign({ op: { t: 'add', i, j, k: kq }, pivCol: c, pivCell: [j, c],
+    predict: { q: `Какое k в действии ${Rl(i)} → ${Rl(i)} + k·${Rl(j)} даст 0 в столбце ${c + 1}?`, a: kq, hint: 'k = −(число, которое убиваем) / (ступенька)' } }, ex);
+}
+function tabsEl(host, names, onPick, start = 0) {
+  host.setAttribute('role', 'tablist');
+  const bs = names.map((n, k) => { const b = el('button', '', n); b.type = 'button'; b.setAttribute('role', 'tab'); b.onclick = () => pickT(k); host.appendChild(b); return b; });
+  function pickT(k) { bs.forEach((b, i) => b.setAttribute('aria-selected', i === k ? 'true' : 'false')); onPick(k); }
+  pickT(start); return pickT;
+}
+
+/* ====================== A5: Кронекер–Капелли ====================== */
+const KK3 = [
+  { name: 'Случай 1', M: '1 2 -1 3;0 1 2 1;0 0 3 6', a: 0, r: 3, rb: 3, txt: 'Строк-уравнений 3, у каждой своя ступенька, и противоречий нет. <b>r = r̄ = 3 = n</b> → решение <b>одно</b>. Из последней строки 3x₃ = 6 → x₃ = 2, а дальше обратный ход однозначно даёт x₂ и x₁.' },
+  { name: 'Случай 2', M: '1 2 -1 3;0 1 2 1;0 0 0 0', a: 1, r: 2, rb: 2, txt: 'Строка 3 — это 0 = 0, её вычёркиваем. Остались 2 уравнения на 3 неизвестных: <b>r = r̄ = 2 &lt; n = 3</b>. Ступеньки в столбцах x₁ и x₂, у x₃ ступеньки нет → x₃ = t свободная. Решений <b>бесконечно много</b>: по одному на каждое t.' },
+  { name: 'Случай 3', M: '1 2 -1 3;0 1 2 1;0 0 0 4', a: 2, r: 2, rb: 3, txt: 'Строка 3 — это 0·x₁ + 0·x₂ + 0·x₃ = 4, то есть <b>0 = 4</b>. Неверно при любых иксах. Слева (до черты) ненулевых строк 2, а вместе с правой частью — 3: <b>r = 2 ≠ r̄ = 3</b> → решений <b>нет</b>.' }
+];
+function mountL5() {
+  const host = mnt('kk3'); const tb = el('div', 'tabs'); const body = el('div', 'card'); host.append(tb, body);
+  const ans = ['Одно решение', 'Бесконечно много', 'Нет решений'];
+  tabsEl(tb, KK3.map(x => x.name), k => {
+    const c = KK3[k]; const A = M(c.M); body.innerHTML = '';
+    body.appendChild(el('p', 'mini', 'Это уже ступенчатый вид после прямого хода. Сначала реши сам: сколько решений?'));
+    body.appendChild(el('div', 'scrollx')).appendChild(matEl(A, { aug: 3, labels: true, rowCls: i => (i === 2 ? 'rowt' : '') }));
+    const os = el('div', 'btns'); const ex = el('div', 'expl'); ex.style.display = 'none';
+    ans.forEach((t, i) => { const b = el('button', 'btn sm', t); b.type = 'button'; b.onclick = () => { $$('button', os).forEach(x => { x.disabled = true; }); b.classList.add(i === c.a ? 'ok' : 'bad'); ex.innerHTML = (i === c.a ? '<b class="ok-t">✓ Верно.</b> ' : `<b class="bad-t">✗ Правильно: «${ans[c.a]}».</b> `) + c.txt; ex.style.display = 'block'; }; os.appendChild(b); });
+    body.append(os, ex);
+  });
+  const A = M('1 3 -4 -4 -10;2 -1 -1 -1 1;3 -1 -1 -3 2');
+  mnt('sys3').innerHTML = sysHtml(A, 4);
+  const fwd = [
+    prepStep('3 уравнения, 4 неизвестных. Уже видно: ранг не больше 3, а неизвестных 4. Значит, одного решения тут быть не может: либо бесконечно много, либо ни одного.'),
+    { op: { t: 'add', i: 1, j: 0, k: -2 }, pivCol: 0, pivCell: [0, 0], goal: '0 вместо 2 в столбце x₁', why: 'В углу уже стоит 1 — менять строки не нужно. 2 + k·1 = 0 → <b>k = −2</b>.' },
+    { op: { t: 'add', i: 2, j: 0, k: -3 }, pivCol: 0, pivCell: [0, 0], goal: '0 вместо 3 в столбце x₁', why: '3 + k·1 = 0 → <b>k = −3</b>. Столбец x₁ готов.' },
+    { op: { t: 'scale', i: 1, k: q(1).div(7) }, goal: 'Упростить строку 2', opNote: 'в тетради: «:7»', why: 'Числа строки 2 (−7, 7, 7, 21) все делятся на 7. Делим — получаем ступеньку <b>−1</b>, с ней множители будут целыми.', alt: 'Можно было делить и на −7 — тогда ступенька станет 1. Тоже правильно, просто строка будет (0 1 −1 −1 | −3). Дальше всё то же самое.' },
+    { op: { t: 'add', i: 2, j: 1, k: -10 }, pivCol: 1, pivCell: [1, 1], goal: '0 вместо −10 в столбце x₂', why: '−10 + k·(−1) = 0 → <b>k = −10</b>. Проверка в последнем столбце: 32 − 10·3 = 2.' }
+  ];
+  const c = curated(A, fwd, { finHtml: '<div class="box warn"><span class="bt">Кронекер–Капелли</span>Противоречий (0 = b) нет → r = r̄ = 3. Неизвестных 4 → r &lt; n → <b>бесконечно много решений</b>, свободная переменная одна (4 − 3 = 1): это x₄, в её столбце нет ступеньки.</div>' });
+  new Walk(mnt('walk3'), { title: 'Пример из лекции · r = r̄ = 3 < n = 4', M0: A, aug: 4, steps: c.steps, sec: 'L5' });
+}
+
+/* ====================== A6: однородные — ползунки ====================== */
+function mountL6() {
+  const host = mnt('explore6'); const card = el('div', 'card'); host.appendChild(card);
+  card.appendChild(el('p', '', `Уравнение: <b>${xv(0)} + 2${xv(1)} − ${xv(2)} = <span id="e6r">0</span></b>. Два его решения: <b>X₁ = (−2; 1; 0)</b> и <b>X₂ = (1; 0; 1)</b> (проверь: −2 + 2 − 0 = 0 и 1 + 0 − 1 = 0). Двигай числа α₁ и α₂ и смотри на X = α₁X₁ + α₂X₂.`));
+  let a1 = 1, a2 = 1, nh = false;
+  const out = el('div', 'eqs'); const chk = el('div', 'chk');
+  const mk = (name, get, set) => { const d = el('div', 'slider'); d.innerHTML = `<b style="min-width:26px">${name}</b>`; const r = el('input'); r.type = 'range'; r.min = -3; r.max = 3; r.step = 1; r.value = get(); r.setAttribute('aria-label', name); const o = el('span', 'val', '' + get()); r.oninput = () => { set(+r.value); o.textContent = r.value; upd(); markDone('L6'); }; d.append(r, o); return d; };
+  const tg = el('button', 'tog', '🧪 А если справа не 0, а 5?'); tg.type = 'button'; tg.setAttribute('aria-pressed', 'false');
+  tg.onclick = () => { nh = !nh; tg.setAttribute('aria-pressed', nh ? 'true' : 'false'); upd(); markDone('L6'); };
+  const note = el('p', 'mini');
+  function upd() {
+    const X1 = nh ? [5, 0, 0] : [-2, 1, 0], X2 = nh ? [1, 2, 0] : [1, 0, 1], rhs = nh ? 5 : 0;
+    $('#e6r', card).textContent = rhs;
+    const X = X1.map((x, k) => a1 * x + a2 * X2[k]); const s = X[0] + 2 * X[1] - X[2];
+    out.innerHTML = `<span class="ln">X₁ = (${X1.map(T).join('; ')}), X₂ = (${X2.map(T).join('; ')})</span><span class="ln">X = ${a1}·X₁ + ${a2}·X₂ = <b>(${X.map(T).join('; ')})</b></span>`;
+    const ok = s === rhs;
+    chk.innerHTML = `<div class="${ok ? 'ok' : 'no'}">Подставляем: ${T(X[0])} + 2·${P(X[1])} − ${P(X[2])} = ${T(s)} ${ok ? '= ' + rhs + ' ✓ решение' : '≠ ' + rhs + ' ✗ не решение'}</div>`;
+    note.innerHTML = nh ? 'Теперь X₁ = (5; 0; 0) и X₂ = (1; 2; 0) — решения уравнения с правой частью 5. Их комбинация даёт слева 5α₁ + 5α₂ = 5·(α₁ + α₂). Это равно 5 только при α₁ + α₂ = 1. Свойство «комбинация решений — снова решение» работает <b>только для однородных</b> систем: там 0·(что угодно) + 0·(что угодно) = 0.'
+      : 'При любых α₁, α₂ получается решение: A(α₁X₁ + α₂X₂) = α₁·0 + α₂·0 = 0. А при α₁ = α₂ = 0 выходит нулевое решение (0; 0; 0) — оно есть у любой однородной системы.';
+  }
+  card.append(mk('α₁', () => a1, x => (a1 = x)), mk('α₂', () => a2, x => (a2 = x)), tg, out, chk, note); upd();
+}
+
+/* ====================== B1: ранг 4×4 ====================== */
+function mountP1() {
+  const A = M('4 -1 2 0;-1 1 1 1;1 3 2 -1;0 4 3 0');
+  const fwd = [
+    { phase: 'prep', goal: 'План: прямой ход → считаем ненулевые строки', mat: true, html: '<p>Правых частей тут нет, черты нет — просто матрица. Делаем нули под ступеньками, как в методе Гаусса.</p>', why: 'Элементарные преобразования строк не меняют ранг. Ступенчатую матрицу легко «прочитать»: её ранг равен числу ненулевых строк.' },
+    { op: { t: 'swap', i: 0, j: 2 }, goal: 'Ступенька 1 в левый верхний угол',
+      predict: { q: 'В первом столбце 4, −1, 1, 0. Какую строку выгодно поставить первой? (номер)', a: 3, check: v => ['2', '3'].includes(v.trim()), hint: 'нужна ступенька 1 или −1' },
+      why: 'Подойдёт и строка 2 (там −1), и строка 3 (там 1) — ответ будет тот же. В тетради взяли строку 3. Со ступенькой 1 множители — это просто числа под ней с обратным знаком: для −1 → k = 1, для 4 → k = −4.',
+      alt: 'Если оставить наверху 4, для −1 нужен k = 1/4, а для 1 — k = −1/4. Получатся дроби во всей матрице.' },
+    rAdd(1, 0, 1, 0, { goal: '0 вместо −1 в столбце 1', why: '−1 + k·1 = 0 → <b>k = 1</b>: просто складываем строки 2 и 1.' }),
+    rAdd(2, 0, -4, 0, { goal: '0 вместо 4 в столбце 1', why: '4 + k·1 = 0 → <b>k = −4</b>. У строки 4 в первом столбце уже 0, её не трогаем.' }),
+    { op: { t: 'add', i: 3, j: 1, k: -1 }, predict: false, goal: 'Строки 4 и 2 одинаковые — обнулить строку 4', opNote: 'в тетради: строка 4 вычеркнута',
+      why: 'Строка 2 стала (0 4 3 0) — ровно как строка 4. Вычитаем, и строка 4 обнуляется. Это не случайность: новая строка 2 = старая строка 2 + старая строка 3, а исходная строка 4 и была суммой строк 2 и 3. Значит, строка 4 изначально была «лишней».' },
+    { op: { t: 'del', rows: [3] }, goal: 'Вычеркнуть нулевую строку', delWhy: 'Строка из одних нулей ничего не добавляет к рангу — вычёркиваем. Осталось 3 строки.', why: 'Ранг уже не больше 3. Осталось проверить, что три оставшиеся строки «настоящие».' },
+    { op: { t: 'add', i: 2, j: 1, k: 3 }, pivCol: 1, pivCell: [1, 1], goal: 'Хитрость из тетради: сделать во 2-м столбце ступеньку −1',
+      predict: { q: 'Во 2-м столбце сейчас 4 и −13. Какое целое k в действии С₃ → С₃ + k·С₂ превратит −13 в −1?', a: 3, hint: '−13 + k·4 = −1' },
+      why: 'Обнулять −13 ступенькой 4 неудобно: k = 13/4 — дробь. Хитрость: мы не обнуляем, а получаем маленькое число: −13 + 3·4 = <b>−1</b>. Ступенька −1 потом обнулит что угодно целым множителем. Это обычное действие «прибавить строку × k», так что ранг не меняется.',
+      alt: 'Без хитрости: одним действием С₃ → 4·С₃ + 13·С₂ сразу получаем (0 0 15 16) — то же самое, что выйдет в конце. Можно и с дробью: С₃ → С₃ + 13/4·С₂ даёт (0 0 15/4 4). Это тоже верно, просто менее удобно.' },
+    { op: { t: 'swap', i: 1, j: 2 }, goal: 'Поднять строку со ступенькой −1', why: 'Теперь у строки 3 во 2-м столбце −1. Ставим её выше, и она становится ступенькой для числа 4.' },
+    rAdd(2, 1, 4, 1, { goal: '0 вместо 4 в столбце 2', why: '4 + k·(−1) = 0 → <b>k = 4</b>. Например, в последнем столбце: 0 + 4·4 = 16.' })
+  ];
+  const c = curated(A, fwd, { aug: false, finHtml: '<div class="box okb"><span class="bt">Ответ</span>rg A = 3</div>' });
+  new Walk(mnt('walkP1'), { title: 'Ранг 4×4 · как в тетради', M0: A, steps: c.steps, sec: 'P1' });
+}
+
+/* ====================== B2: ранг 3×2 ====================== */
+function mountP2() {
+  const A = M('1 2;3 1;4 1');
+  const fwd = [
+    { phase: 'prep', goal: 'Матрица 3×2: ранг не больше 2', mat: true, html: '<p>Строк 3, столбцов 2 → rg ≤ min(3, 2) = 2.</p>', why: 'Ступенек не может быть больше, чем столбцов: в каждом столбце не больше одной ступеньки.' },
+    rAdd(1, 0, -3, 0, { goal: '0 вместо 3 в столбце 1', why: '3 + k·1 = 0 → <b>k = −3</b>.' }),
+    rAdd(2, 0, -4, 0, { goal: '0 вместо 4 в столбце 1', why: '4 + k·1 = 0 → <b>k = −4</b>.' }),
+    { op: { t: 'add', i: 2, j: 1, k: q(-7).div(5) }, pivCol: 1, pivCell: [1, 1], goal: '0 вместо −7 в столбце 2 (как в тетради)',
+      predict: { q: 'Ступенька −5, под ней −7. Какое k в действии С₃ → С₃ + k·С₂? (дробь пиши через /)', a: q(-7).div(5), hint: 'k = −(−7)/(−5)' },
+      why: '−7 + k·(−5) = 0 → k = −7/5. Проверка: −7 + (−7/5)·(−5) = −7 + 7 = 0 ✓. Здесь дробь безвредна: в строке всего одно ненулевое число.',
+      alt: 'Без дробей: С₃ → 5·С₃ − 7·С₂, тогда 5·(−7) − 7·(−5) = −35 + 35 = 0. Или просто заметить, что (0 −7) и (0 −5) пропорциональны, значит одна из строк лишняя.' },
+    { op: { t: 'del', rows: [2] }, goal: 'Вычеркнуть нулевую строку', delWhy: 'Строка стала (0 0) — вычёркиваем.', why: 'Остались две ненулевые строки со ступеньками в разных столбцах.' }
+  ];
+  const c = curated(A, fwd, { aug: false, finHtml: '<div class="box okb"><span class="bt">Ответ</span>rg A = 2</div>' });
+  new Walk(mnt('walkP2'), { title: 'Ранг 3×2', M0: A, steps: c.steps, sec: 'P2' });
+}
+
+/* ====================== B3: ранг с параметром ====================== */
+const P3A = [['−6', '−4', '0'], ['7', '−5', '3'], ['α', 'α', 'α']];
+function mountP3() {
+  mnt('matP3').appendChild(matEl(P3A, { rowCls: i => (i === 2 ? 'rowt' : '') }));
+  const N = M('-6 -4 0;7 -5 3;1 1 1');
+  const ag = autoGauss(N, { aug: false });
+  const D = detHtml(N, 'A′');
+  const zeroM = [['−6', '−4', '0'], ['7', '−5', '3'], ['0', '0', '0']];
+  const steps = [
+    { phase: 'idea', goal: 'Присмотреться к матрице и составить план', html: `<div class="mxpair"><div>${mxH(P3A, { labels: true, rowCls: i => (i === 2 ? 'rowt' : '') })}</div></div><p>В строке 3 все числа одинаковые — α. Хочется поделить её на α и получить удобную строку (1 1 1). Но делить можно не всегда.</p>`,
+      predict: { q: 'При каком значении α делить строку 3 на α нельзя?', a: 0, hint: 'на что вообще нельзя делить?' },
+      why: 'Делить строку можно только на число ≠ 0. α — неизвестное число, оно может оказаться нулём. Поэтому задача распадается на <b>два случая</b>: α = 0 и α ≠ 0. Это главное правило задач с параметром.' },
+    { phase: 'calc', phaseName: 'Случай α = 0', goal: 'Случай α = 0', html: `<div class="mxpair"><div>${mxH(zeroM, { labels: true, rowCls: i => (i === 2 ? 'delrow' : '') })}</div></div><p>Строка 3 стала нулевой → вычёркиваем. Остались (−6 −4 0) и (7 −5 3). Пропорциональны ли они? −6 : 7 и −4 : (−5) — отношения разные (одно отрицательное, другое положительное) → <b>не пропорциональны</b>, обе строки «настоящие».</p><div class="box okb"><span class="bt">При α = 0</span>rg A = 2</div>`,
+      predict: { q: `При α = 0 матрица такая: ${mxH(zeroM, { sm: true })}. Чему равен ранг?`, a: 2, hint: 'нулевая строка не считается; две оставшиеся пропорциональны?' }, hideHtml: true,
+      why: 'Две непропорциональные строки дают ранг 2 (одна строка — ранг 1, а 3 не может быть: третья строка нулевая).' },
+    { phase: 'calc', phaseName: 'Случай α ≠ 0', goal: 'Случай α ≠ 0: делим строку 3 на α', mat: true, html: '<p>Теперь строка 3 = (1 1 1), и параметра в матрице больше нет. Дальше обычный Гаусс.</p>', why: 'Деление строки на число ≠ 0 — разрешённое действие №2. Ранг от него не меняется.' },
+    ...ag.steps.map(s => Object.assign({}, s, { phaseName: s.phaseName || (s.phase === 'fin' ? 'Случай α ≠ 0' : undefined) })),
+    { phase: 'fin', goal: 'Ответ и быстрая проверка', html: `<div class="box okb"><span class="bt">Ответ</span>α = 0 → rg A = 2; &nbsp; α ≠ 0 → rg A = 3.</div><p class="mini">Проверка через определитель. Вынесем α из строки 3: |A| = α·|A′|, где A′ — матрица со строкой (1 1 1).</p>${D.html}<p>|A| = α·${H(D.d)} = <b>${H(D.d)}α</b>. Он ≠ 0 ровно при α ≠ 0 — тогда ранг полный (3). При α = 0 определитель 0, и ранг меньше 3.</p>`,
+      why: 'Для квадратной матрицы n×n: rg = n ⇔ определитель ≠ 0. Это быстрый способ проверить ответ (или найти «плохие» значения параметра: решить уравнение det = 0).' }
+  ];
+  new Walk(mnt('walkP3'), { title: 'Ранг при разных α', M0: N, steps, sec: 'P3' });
+  // ползунок
+  const host = mnt('exploreP3'); const card = el('div', 'card'); host.appendChild(card);
+  let a = 1; const out = el('div'); const sl = el('div', 'slider'); sl.innerHTML = '<b>α</b>';
+  const r = el('input'); r.type = 'range'; r.min = -3; r.max = 3; r.step = 0.5; r.value = a; r.setAttribute('aria-label', 'α');
+  const o = el('span', 'val', '1'); r.oninput = () => { a = +r.value; o.textContent = T(q(a)); upd(); }; sl.append(r, o);
+  function upd() {
+    const Aa = [N[0], N[1], [q(a), q(a), q(a)]]; const rk = rankOf(Aa); const d = det(Aa);
+    out.innerHTML = `<div class="mxpair"><div>${mxH(Aa, { rowCls: i => (i === 2 ? (a === 0 ? 'delrow' : 'rowt') : '') })}</div><div><p>|A| = 64·α = 64·${P(q(a))} = <b>${H(d)}</b></p><p class="big ${rk === 3 ? 'ok-t' : 'warn-t'}">rg A = ${rk}</p><p class="mini">${a === 0 ? 'Строка 3 нулевая → остаются 2 независимые строки.' : 'Строку 3 можно поделить на α ≠ 0 → (1 1 1), и все три строки независимы.'}</p></div></div>`;
+  }
+  card.append(sl, out); upd();
+}
+
+/* ====================== B4–B5: матричные уравнения ====================== */
+function mountP4() {
+  const A = M('5 3 -1;-2 0 4;3 5 -1'), B = M('0;1;3');
+  mnt('matP4A').appendChild(matEl(A)); mnt('matP4B').appendChild(matEl(B));
+  const g = genMatEq(A, B, 'L');
+  new Walk(mnt('walkP4'), { title: 'A·X = B → X = A⁻¹·B', steps: g.steps, sec: 'P4' });
+  const Ab = M('5 3 -1 0;-2 0 4 1;3 5 -1 3');
+  const ag = autoGauss(Ab, { aug: true });
+  new Walk(mnt('walkP4g'), { title: 'A·X = B методом Гаусса', M0: Ab, aug: 3, steps: [prepStep('Слева — матрица A, после черты — столбец B. Строка = уравнение: например, первая строка — это 5x₁ + 3x₂ − x₃ = 0.'), ...ag.steps] });
+}
+function mountP5() {
+  const A = M('1 4 -2;4 2 7;0 3 -9'), B = M('3 -1 0');
+  mnt('matP5A').appendChild(matEl(A)); mnt('matP5B').appendChild(matEl(B));
+  const g = genMatEq(A, B, 'R');
+  new Walk(mnt('walkP5'), { title: 'X·A = B → X = B·A⁻¹', steps: g.steps, sec: 'P5' });
+}
+
+/* ====================== B6: система матричных уравнений ====================== */
+function mountP6() {
+  const Pm = M('1 1;0 1'), E = eye(2), Y = msub(E, mscale(2, Pm)), X = msub(Pm, Y);
+  const mx = A => mxH(A);
+  const Xs = '<i class="v">X</i>', Ys = '<i class="v">Y</i>';
+  const steps = [
+    { phase: 'idea', goal: 'Увидеть обычную систему', html: `<div class="eqs"><span class="ln">${Xs} + ${Ys} = ${mx(Pm)}</span><span class="ln">2${Xs} + 3${Ys} = ${mx(E)} = E</span></div><p>Это та же система, что x + y = p, 2x + 3y = e, только буквы обозначают матрицы 2×2. Складывать, вычитать и умножать матрицы на число можно так же, как числа.</p>`,
+      why: 'Сложение матриц и умножение на число идут поэлементно, поэтому для них работают привычные правила: можно переносить слагаемые, раскрывать скобки и подставлять. Нельзя только «делить на матрицу», но здесь это и не нужно: коэффициенты при X и Y — обычные числа.' },
+    { phase: 'calc', goal: `Выразить ${Xs} из первого уравнения`, html: `<div class="eqs"><span class="ln res">${Xs} = P − ${Ys}</span></div><p class="mini">P — матрица из правой части первого уравнения.</p>`, why: 'Метод подстановки: выражаем то, что выражается проще всего. В первом уравнении X стоит без множителя.' },
+    { phase: 'calc', goal: `Подставить во второе и найти ${Ys}`, html: `<div class="eqs"><span class="ln">2(P − ${Ys}) + 3${Ys} = E</span><span class="ln">2P − 2${Ys} + 3${Ys} = E</span><span class="ln">2P + ${Ys} = E</span><span class="ln res">${Ys} = E − 2P = ${mx(E)} − ${mx(mscale(2, Pm))} = ${mx(Y)}</span></div>`,
+      predict: { q: `Y = E − 2P. Чему равен элемент Y в левом верхнем углу? (E = ${mx(E)}, P = ${mx(Pm)})`, a: Y[0][0], hint: '1 − 2·1' }, hideHtml: true,
+      why: '2P — это каждое число P, умноженное на 2: (2 2; 0 2). Вычитаем поэлементно: 1 − 2 = −1, 0 − 2 = −2, 0 − 0 = 0, 1 − 2 = −1.' },
+    { phase: 'calc', goal: `Найти ${Xs}`, html: `<div class="eqs"><span class="ln res">${Xs} = P − ${Ys} = ${mx(Pm)} − ${mx(Y)} = ${mx(X)}</span></div>`,
+      predict: { q: `X = P − Y, где P = ${mx(Pm)}, Y = ${mx(Y)}. Чему равен элемент X в правом верхнем углу?`, a: X[0][1], hint: '1 − (−2)' }, hideHtml: true,
+      why: 'Минус на минус: 1 − (−2) = 3. Именно здесь чаще всего теряют знак.',
+      alt: 'Способ сложения: умножим первое уравнение на 2 и вычтем из второго: (2X + 3Y) − 2(X + Y) = E − 2P → Y = E − 2P. Тот же результат без подстановки. А если умножить первое на 3 и вычесть второе: 3X + 3Y − 2X − 3Y = 3P − E → X = 3P − E = (2 3; 0 2) ✓.' },
+    { phase: 'chk', goal: 'Проверка в обоих уравнениях', html: `<div class="chk"><div class="ok">X + Y = ${mx(X)} + ${mx(Y)} = ${mx(madd(X, Y))} = P ✓</div><div class="ok">2X + 3Y = ${mx(mscale(2, X))} + ${mx(mscale(3, Y))} = ${mx(madd(mscale(2, X), mscale(3, Y)))} = E ✓</div></div><div class="box okb"><span class="bt">Ответ</span>X = ${mx(X)}, &nbsp; Y = ${mx(Y)}</div>`,
+      why: 'Проверяем оба уравнения: одного мало. Ошибка в знаке могла попасть в то уравнение, которое мы не проверили.' }
+  ];
+  new Walk(mnt('walkP6'), { title: 'Система матричных уравнений', steps, sec: 'P6' });
+}
+
+/* ====================== B7: A·X·B·C = E ====================== */
+function mountP7() {
+  const s3 = '√3';
+  const Bs = [[s3, '−1', '0'], ['1', s3, '0'], ['0', '0', '2']];
+  const Cs = [[fr(s3, 4), fr(1, 4), '0'], [fr('−1', 4), fr(s3, 4), '0'], ['0', '0', fr(1, 2)]];
+  const BC = [
+    ['(1,1)', `√3·${fr(s3, 4)} + (−1)·(${fr('−1', 4)}) + 0·0 = ${fr(3, 4)} + ${fr(1, 4)} = <b>1</b>`],
+    ['(1,2)', `√3·${fr(1, 4)} + (−1)·${fr(s3, 4)} + 0·0 = ${fr(s3, 4)} − ${fr(s3, 4)} = <b>0</b>`],
+    ['(1,3)', `√3·0 + (−1)·0 + 0·${fr(1, 2)} = <b>0</b>`],
+    ['(2,1)', `1·${fr(s3, 4)} + √3·(${fr('−1', 4)}) + 0·0 = ${fr(s3, 4)} − ${fr(s3, 4)} = <b>0</b>`],
+    ['(2,2)', `1·${fr(1, 4)} + √3·${fr(s3, 4)} + 0·0 = ${fr(1, 4)} + ${fr(3, 4)} = <b>1</b>`],
+    ['(2,3)', `1·0 + √3·0 + 0·${fr(1, 2)} = <b>0</b>`],
+    ['(3,1)', `0 + 0 + 2·0 = <b>0</b>`], ['(3,2)', `0 + 0 + 2·0 = <b>0</b>`], ['(3,3)', `0 + 0 + 2·${fr(1, 2)} = <b>1</b>`]
+  ];
+  const host = mnt('walkP7');
+  const As = '<i class="v">A</i>', Xs = '<i class="v">X</i>', Bv = '<i class="v">B</i>', Cv = '<i class="v">C</i>', Ai = `${As}<sup>−1</sup>`;
+  function build(sg) {
+    host.innerHTML = '';
+    const A = [[q(0), q(-1), q(0)], [q(sg), q(0), q(0)], [q(0), q(0), q(1)]];
+    const inv = invM(A); const g = genMatEq(A, eye(3), 'L');
+    const chk = mmul(A, inv);
+    const steps = [
+      { phase: 'idea', goal: `Выразить ${Xs}: что стоит слева и справа от него`, html: `<p>${As} = ${mxH(A)}, &nbsp; ${Bv} = ${mxH(Bs)}, &nbsp; ${Cv} = ${mxH(Cs)}</p><div class="eqs"><span class="ln">${As}·${Xs}·${Bv}·${Cv} = E</span><span class="ln">${Ai}·${As}·${Xs}·${Bv}·${Cv} = ${Ai} &nbsp;<span class="mini">← слева на ${Ai}</span></span><span class="ln">${Xs}·${Bv}·${Cv}·${Cv}<sup>−1</sup> = ${Ai}·${Cv}<sup>−1</sup> &nbsp;<span class="mini">← справа на ${Cv}<sup>−1</sup> (C — крайний справа)</span></span><span class="ln">${Xs}·${Bv}·${Bv}<sup>−1</sup> = ${Ai}·${Cv}<sup>−1</sup>·${Bv}<sup>−1</sup> &nbsp;<span class="mini">← справа на ${Bv}<sup>−1</sup></span></span><span class="ln res">${Xs} = ${Ai}·${Cv}<sup>−1</sup>·${Bv}<sup>−1</sup></span></div>`,
+        why: `Снимаем множители как одежду: сначала то, что надето последним (снаружи). Справа от ${Xs} крайний — ${Cv}, поэтому его снимаем первым, и ${Cv}<sup>−1</sup> оказывается левее ${Bv}<sup>−1</sup>. Это правило (BC)<sup>−1</sup> = C<sup>−1</sup>B<sup>−1</sup>: «надели носки, потом ботинки → снимаем ботинки, потом носки».`,
+        alt: `Ошибка: написать ${Xs} = ${Ai}·${Bv}<sup>−1</sup>·${Cv}<sup>−1</sup>. Тогда ${Bv}<sup>−1</sup> окажется рядом с ${Cv}, а не с ${Bv}, и ничего не сократится: B·C·B<sup>−1</sup>·C<sup>−1</sup> ≠ E (матрицы нельзя переставлять).` },
+      { phase: 'calc', goal: `Хитрость: сначала посчитать ${Bv}·${Cv}`, html: `<div class="chk">${BC.map(([k, f]) => `<div>${k}: ${f}</div>`).join('')}</div><div class="mxpair"><div>${Bv}·${Cv} = ${mxH(eye(3))} = E</div></div>`,
+        predict: { q: `${Bv} = ${mxH(Bs)}, ${Cv} = ${mxH(Cs)}. Посчитай элемент (1,1) произведения ${Bv}·${Cv}: строка 1 матрицы B на столбец 1 матрицы C.`, a: 1, hint: '√3·√3 = 3; 3/4 + 1/4' }, hideHtml: true,
+        why: `Обращать две матрицы с корнями — долго. Но ${Bv} и ${Cv} стоят рядом, и ${Xs} = ${Ai}·(${Bv}${Cv})<sup>−1</sup>. Если ${Bv}${Cv} окажется простой, работы станет в разы меньше. В учебных задачах такие матрицы почти всегда подобраны специально — проверь это первым делом.` },
+      { phase: 'calc', goal: 'B·C = E — уравнение упрощается', html: `<div class="eqs"><span class="ln">${As}·${Xs}·(${Bv}·${Cv}) = E</span><span class="ln">${As}·${Xs}·E = E</span><span class="ln">${As}·${Xs} = E</span><span class="ln res">${Xs} = ${Ai}</span></div>`,
+        why: `X·E = X (E для матриц — как 1 для чисел). А равенство ${As}·${Xs} = E и означает, что ${Xs} — обратная к ${As}. Осталось найти ${Ai}.` },
+      ...g.steps.slice(1, 5),
+      { phase: 'chk', goal: `Ответ и проверка ${As}·${Xs} = E`, html: `<div class="chk">${chk.map((r, i) => `<div class="ok">строка ${i + 1}: (${r.map(T).join(' ')})</div>`).join('')}</div><div class="box okb"><span class="bt">Ответ</span>${Xs} = ${Ai} = ${mxH(inv)}</div><p class="mini">${sg < 0 ? 'Заметь: здесь A⁻¹ = A, потому что A·A = E (такая матрица «переставляет» x₁ и x₂ со сменой знака, и два раза подряд — это ничего не сделать).' : 'Заметь: здесь A⁻¹ = Aᵀ (транспонированная). A — поворот на 90° в плоскости x₁x₂, а обратный поворот — в другую сторону.'}</p>`,
+        why: 'A·A⁻¹ = E — проверка обратной матрицы. Если получилась единичная матрица, ответ верный.' }
+    ];
+    new Walk(host, { title: `A·X·B·C = E (вариант a₂₁ = ${sg < 0 ? '−1' : '1'})`, steps, sec: 'P7' });
+  }
+  tabsEl(mnt('p7tabs'), ['a₂₁ = −1', 'a₂₁ = 1'], k => build(k === 0 ? -1 : 1));
+}
+
+/* ====================== B8: найди ошибку ====================== */
+const ERRS = [
+  { src: 'из тетради · B4', t: 'A·X = B, ищем x₁: строка 1 матрицы в скобках × столбец B', l: ['A⁻¹ = −1/30·(−10 −1 6; 5 −1 −9; −5 −8 3)', 'B = (0; 1; 3)', '−10·0 + (−1)·(−1) + 6·3 = 19', 'x₁ = −19/30'], w: 2,
+    e: 'Второе число столбца B — <b>1</b>, а не −1. Правильно: −10·0 + (−1)·1 + 6·3 = 17, x₁ = −17/30. Так и случилось в тетради: из-за этого неверен весь ответ.' },
+  { src: 'из тетради · B5', t: 'X·A = B, сокращаем ответ X = 1/81·(−153; 99; 111)', l: ['−153/81 = −51/27', '99/81 = 33/27', '111/81 = 33/27', 'X = (−51/27; 33/27; 33/27)'], w: 2,
+    e: '111 = 3·37, поэтому 111/81 = <b>37/27</b>. В тетради написано 33/27 — видимо, переписалось из соседней дроби. И ещё можно сократить: −51/27 = −17/9, 33/27 = 11/9.' },
+  { src: 'типичная', t: 'Хотим обнулить вторую строку (3 6 | 9)', l: ['Первая строка: (1 2 | 3)', 'С₂ → 0·С₂ = (0 0 | 0)', 'Нулевую строку вычёркиваем', 'Осталось одно уравнение'], w: 1,
+    e: 'Умножать строку на 0 <b>нельзя</b>: так уравнение исчезает, а вместе с ним и его условие. Правильно: С₂ → С₂ − 3·С₁ = (0 0 | 0). Результат тот же, но законный: строка обнулилась потому, что уравнение действительно было лишним.' },
+  { src: 'типичная', t: 'Строки: С₁ = (1 3 | 1), С₂ = (2 1 | 5)', l: ['k = −2/1 = −2', 'Левая часть: (2 1) − 2·(1 3) = (0 −5)', 'Правая часть остаётся 5: (0 −5 | 5)', 'Получаем −5x₂ = 5, x₂ = −1'], w: 2,
+    e: 'Число после черты — часть строки, его тоже преобразуют: 5 − 2·1 = <b>3</b>. Правильно: (0 −5 | 3), x₂ = −3/5.' },
+  { src: 'типичная', t: 'Ступенька 2, под ней 6', l: ['Строки: (2 1 | 4) и (6 5 | 2)', 'С₂ → С₂ + 3·С₁', 'Получаем (12 8 | 14)'], w: 1,
+    e: 'Знак k: 6 + 3·2 = 12 ≠ 0. Нужно k = −6/2 = <b>−3</b>: С₂ → С₂ − 3·С₁ = (0 2 | −10).' },
+  { src: 'типичная', t: 'Матрица (1 2 1; 0 1 3; 0 4 2), обнуляем 4', l: ['Столбец 1 уже готов', 'С₃ → С₃ − 4·С₁', 'Получаем (−4 −4 −2)'], w: 1,
+    e: 'Строкой 1 нельзя: у неё в столбце 1 стоит 1, и ноль в строке 3 испортится (стал −4). Обнулять столбец 2 нужно строкой его ступеньки, то есть строкой 2: С₃ → С₃ − 4·С₂ = (0 0 −10).' },
+  { src: 'типичная', t: 'Ранг ступенчатой матрицы (1 2 3; 0 1 1; 0 0 0)', l: ['Ступенчатый вид получен', 'Строк в матрице 3', 'rg = 3'], w: 2,
+    e: 'Ранг = число <b>ненулевых</b> строк. Третья строка нулевая → rg = 2.' },
+  { src: 'типичная', t: 'Система после прямого хода', l: ['(1 1 2 | 3)', '(0 1 1 | 1)', '(0 0 0 | 0)', 'Строка 0 0 0 | 0 → решений нет'], w: 3,
+    e: '0 0 0 | 0 — это 0 = 0, верно всегда. Её вычёркивают. Решений нет, только когда справа <b>не</b> ноль. Здесь r = r̄ = 2 < 3 → бесконечно много решений.' },
+  { src: 'типичная', t: 'Система после прямого хода', l: ['(1 2 −1 | 0)', '(0 1 1 | 2)', '(0 0 0 | 4)', 'Строку 3 вычёркиваем как нулевую', 'Ответ: бесконечно много решений'], w: 3,
+    e: 'Строка 0 0 0 | 4 — это 0 = 4. Её нельзя вычёркивать: она означает, что <b>решений нет</b> (r = 2, r̄ = 3).' },
+  { src: 'типичная', t: 'Обратный ход', l: ['x₃ = 3', 'Строка 2: x₂ − 2x₃ = 1', 'x₂ = 1 − 2·3 = −5', 'Строка 1: …'], w: 2,
+    e: 'Переносим −2x₃ вправо — знак меняется: x₂ = 1 <b>+</b> 2x₃ = 1 + 6 = 7.' },
+  { src: 'типичная', t: 'Матричное уравнение X·A = B', l: ['|A| ≠ 0, обратная есть', 'Умножаем обе части на A⁻¹', 'X = A⁻¹·B'], w: 2,
+    e: 'A стоит справа от X → умножаем справа: X·A·A⁻¹ = B·A⁻¹ → <b>X = B·A⁻¹</b>. A⁻¹·B — ответ к другому уравнению (A·X = B).' },
+  { src: 'типичная', t: 'Уравнение A·X·B = C', l: ['Слева от X — A, справа — B', 'Умножаем слева на A⁻¹, справа на B⁻¹', 'X = C·A⁻¹·B⁻¹'], w: 2,
+    e: 'A⁻¹ встаёт туда, где была A, — слева: <b>X = A⁻¹·C·B⁻¹</b>. Множители не переставляют.' },
+  { src: 'типичная', t: 'Ранг при параметре: A = (−6 −4 0; 7 −5 3; α α α)', l: ['Делим строку 3 на α → (1 1 1)', 'Гаусс: три ступеньки', 'Ответ: rg A = 3 при любом α'], w: 2,
+    e: 'Делить на α можно только при α ≠ 0. Случай α = 0 нужно разобрать отдельно: строка 3 нулевая → rg = 2. Правильный ответ: α = 0 → 2, α ≠ 0 → 3.' },
+  { src: 'типичная', t: 'Однородная система A·X = 0', l: ['n = 3 неизвестных', 'Прямой ход дал r = 2', 'r ≠ n → решений нет'], w: 2,
+    e: 'У однородной системы всегда есть X = 0, она всегда совместна (r = r̄). r < n → решений <b>бесконечно много</b>, есть и ненулевые; свободная переменная одна.' }
+];
+function mountP8() {
+  const host = mnt('errs'); let found = 0;
+  const sc = el('p', 'mini'); host.appendChild(sc);
+  const upd = () => { sc.innerHTML = `Разобрано: <b>${found}</b> из ${ERRS.length}`; }; upd();
+  ERRS.forEach((it, n) => {
+    const c = el('div', 'card'); c.appendChild(el('div', 'ct', `<b>${n + 1}. ${it.t}</b><span class="chip">${it.src}</span>`));
+    const L = el('div', 'errl'); const ex = el('div', 'expl'); ex.style.display = 'none'; let miss = 0, done = false;
+    const finish = ok => { done = true; found++; upd(); $$('button', L)[it.w].classList.add('good'); ex.innerHTML = (ok ? '<b class="ok-t">✓ Нашёл!</b> ' : '<b class="warn-t">Ошибка вот здесь.</b> ') + it.e; ex.style.display = 'block'; if (found === ERRS.length) { markDone('P8'); toast('Все ловушки разобраны!'); } };
+    it.l.forEach((t, k) => {
+      const b = el('button', '', `<span class="n">${k + 1}</span>${t}`); b.type = 'button';
+      b.onclick = () => { if (done) return; if (k === it.w) finish(miss === 0); else { b.classList.add('bad'); miss++; ex.innerHTML = miss >= 2 ? '' : 'Эта строка верна. Ищи дальше.'; ex.style.display = 'block'; if (miss >= 2) finish(false); } };
+      L.appendChild(b);
+    });
+    c.append(L, ex); host.appendChild(c);
+  });
+}
+
+'use strict';
+/* ====================== генераторы ====================== */
+const QM = A => A.map(r => r.map(x => q(x)));
+const maxAbs = A => Math.max(...A.flat().map(x => Math.abs(+x)));
+function genLU3(o = {}) {
+  for (let t = 0; t < 500; t++) {
+    const l21 = rnz(-3, 3), l31 = rnz(-3, 3), l32 = rnz(-3, 3);
+    const L = QM([[1, 0, 0], [l21, 1, 0], [l31, l32, 1]]);
+    const U = QM([[1, ri(-3, 3), ri(-3, 3)], [0, pick([1, -1]), ri(-3, 3)], [0, 0, pick([1, -1, 2, -2])]]);
+    const x = QM([[ri(-4, 4)], [ri(-4, 4)], [ri(-4, 4)]]);
+    const A = mmul(L, U), b = mmul(A, x);
+    if (maxAbs(A) > (o.lim || 12) || maxAbs(b) > 30) continue;
+    if (A.some(r => r.every(v => v.z))) continue;
+    return { Ab: A.map((r, i) => [...r, b[i][0]]), x: x.map(r => r[0]), k: [-l21, -l31, -l32] };
+  }
+  return { Ab: M('1 2 1 1;2 3 1 2;-1 1 3 0'), x: [q(2), q(-1), q(1)], k: [-2, 1, 3] };
+}
+function genRankM(m, n, r, lim = 12) {
+  for (let t = 0; t < 800; t++) {
+    const L = QM(Array.from({ length: m }, () => Array.from({ length: r }, () => ri(-2, 2))));
+    const U = QM(Array.from({ length: r }, () => Array.from({ length: n }, () => ri(-3, 3))));
+    const A = mmul(L, U);
+    if (rankOf(A) !== r || maxAbs(A) > lim || A.some(row => row.every(v => v.z))) continue;
+    if (!A.some(row => row[0].unit)) continue;
+    return A;
+  }
+  return null;
+}
+function genDet1() {
+  for (;;) {
+    const a = rnz(-4, 4), b = ri(-4, 4), c = ri(-4, 4), s = pick([1, -1]);
+    if ((b * c + s) % a) continue;
+    const d = (b * c + s) / a; if (Math.abs(d) > 6) continue;
+    return QM([[a, b], [c, d]]);
+  }
+}
+const TT = {
+  step: 'Одно действие', mult: 'Множитель k', gauss3: 'Система 3×3', rank: 'Ранг', kk: 'Сколько решений', meq: 'Матр. уравнение', homog: 'Однородная'
+};
+const GEN = {
+  step() {
+    const p = pick([1, -1, 2, -2, 3]), m = rnz(-3, 3);
+    const r1 = [p, ri(-4, 4), ri(-4, 4), ri(-6, 6)].map(q), r2 = [p * m, ri(-5, 5), ri(-5, 5), ri(-9, 9)].map(q);
+    const k = q(-m); const nr = r2.map((x, j) => x.add(k.mul(r1[j])));
+    const A = [r1, r2];
+    const fs = [{ lab: 'k', a: k }, { lab: 'столбец 2', a: nr[1] }, { lab: 'столбец 3', a: nr[2] }, { lab: 'после черты', a: nr[3] }];
+    return { type: 'step', html: `<p>Обнули первое число строки 2 действием ${Rl(1)} → ${Rl(1)} + k·${Rl(0)}. Найди k и новую строку 2.</p><div class="scrollx">${mxH(A, { aug: 3, labels: true })}</div>`, fields: fs,
+      hints: ['k = −(число, которое убиваем) / (ступенька).', `k = −${P(r2[0])}/${P(p)} = ${H(k)}. Каждое новое число = старое + k·(число строки 1 в том же столбце).`, `Столбец 2: ${H(r2[1])} + ${P(k)}·${P(r1[1])}; столбец 3: ${H(r2[2])} + ${P(k)}·${P(r1[2])}; после черты: ${H(r2[3])} + ${P(k)}·${P(r1[3])}.`],
+      walk: () => ({ title: 'Разбор', M0: A, aug: 3, steps: [{ op: { t: 'add', i: 1, j: 0, k }, predict: false, pivCell: [0, 0], goal: 'Обнулить первое число строки 2', why: `${H(r2[0])} + k·${P(p)} = 0 → k = ${H(k)}. Число после черты тоже умножаем и прибавляем.` }] }) };
+  },
+  mult() {
+    const p = pick([1, -1, 2, -2, 3, -3, 4, 5, -5]), v = rnz(-9, 9); const k = q(-v).div(p);
+    return { type: 'mult', html: `<p>Ступенька <b>${H(p)}</b>, под ней <b>${H(v)}</b>. Какое k в действии С<sub>низ</sub> → С<sub>низ</sub> + k·С<sub>ступ</sub> даст 0? <span class="mini">(дробь пиши через /, например −3/2)</span></p>`, fields: [{ lab: 'k', a: k }],
+      hints: [`Нужно ${H(v)} + k·${P(p)} = 0.`, 'k = −(убиваемое)/(ступенька).', `k = −${P(v)}/${P(p)}.`],
+      html2: `k = −${P(v)}/${P(p)} = <b>${H(k)}</b>. Проверка: ${H(v)} + ${P(k)}·${P(p)} = ${H(q(v).add(k.mul(p)))} ✓` };
+  },
+  gauss3() {
+    const g = genLU3(); let Ab = g.Ab; if (Math.random() < 0.5) Ab = shuffle(Ab);
+    return { type: 'gauss3', html: `<p>Реши систему методом Гаусса:</p><p>${sysHtml(Ab, 3)}</p>`, fields: g.x.map((a, j) => ({ lab: 'x' + (j + 1), a })),
+      hints: ['Сначала поставь наверх строку с ±1 в первом столбце.', 'Сделай нули под ступенькой в столбце x₁, потом под ступенькой в столбце x₂.', 'Обратный ход снизу вверх: x₃ из последней строки, потом x₂, потом x₁.'],
+      walk: () => ({ title: 'Разбор', M0: Ab, aug: 3, steps: [prepStep(), ...autoGauss(Ab, { aug: true }).steps] }) };
+  },
+  rank() {
+    const m = pick([3, 3, 4]), n = pick([3, 4, 4]); const r = pick([1, 2, 2, 3, 3].filter(x => x <= Math.min(m, n)));
+    const A = genRankM(m, n, r) || M('1 2 3;2 4 6;1 1 1');
+    const rk = rankOf(A);
+    return { type: 'rank', html: `<p>Найди ранг матрицы:</p><div class="scrollx">${mxH(A, { labels: true })}</div>`, fields: [{ lab: 'rg', a: q(rk) }],
+      hints: [`Ранг не больше min(${m}, ${n}) = ${Math.min(m, n)}.`, 'Приведи к ступенчатому виду: нули под ступеньками.', 'Посчитай ненулевые строки в конце. Пропорциональные строки и суммы других строк обнулятся.'],
+      walk: () => ({ title: 'Разбор', M0: A, steps: autoGauss(A).steps }) };
+  },
+  kk() {
+    const cs = pick(['unique', 'inf', 'none']); let Ab, n;
+    if (cs === 'unique') { Ab = genLU3().Ab; n = 3; }
+    else {
+      n = pick([3, 4]);
+      for (;;) {
+        const A = genRankM(3, n, 2, 9); const x = QM(Array.from({ length: n }, () => [ri(-3, 3)]));
+        const b = mmul(A, x).map(r => r[0]);
+        if (cs === 'none') b[2] = b[2].add(rnz(-3, 3));
+        Ab = A.map((r, i) => [...r, b[i]]);
+        const ok = cs === 'none' ? rankOf(Ab) === 3 : rankOf(Ab) === 2;
+        if (ok && maxAbs(Ab) <= 20) break;
+      }
+    }
+    const ag = autoGauss(Ab, { aug: true });
+    const a = { unique: 0, inf: 1, none: 2 }[ag.status];
+    return { type: 'kk', html: `<p>Сколько решений у системы?</p><div class="scrollx">${mxH(Ab, { aug: n, labels: true })}</div>`, choice: { opts: ['Одно', 'Бесконечно много', 'Нет решений'], a },
+      hints: ['Сделай прямой ход и посмотри на ступенчатый вид.', 'Есть строка 0 … 0 | b с b ≠ 0? Тогда решений нет.', `Если противоречий нет — сравни число ступенек с числом неизвестных (n = ${n}).`],
+      walk: () => ({ title: 'Разбор', M0: Ab, aug: n, steps: ag.steps }) };
+  },
+  meq(side) {
+    side = side || pick(['L', 'R']); const A = genDet1();
+    const B = side === 'L' ? QM([[ri(-5, 5)], [ri(-5, 5)]]) : QM([[ri(-5, 5), ri(-5, 5)]]);
+    const g = genMatEq(A, B, side); const X = g.X;
+    return { type: 'meq', html: `<p>Реши уравнение <b>${side === 'L' ? 'A·X = B' : 'X·A = B'}</b>, где A = ${mxH(A)}, B = ${mxH(B)}.</p>`, fields: X.flat().map((a, k) => ({ lab: X.length > 1 ? 'x' + (k + 1) : 'x' + (k + 1), a })),
+      hints: [side === 'L' ? 'A слева от X → X = A⁻¹·B.' : 'A справа от X → X = B·A⁻¹.', 'Для 2×2: A⁻¹ = (1/|A|)·(d −b; −c a): диагональ меняем местами, у двух других чисел меняем знак.', `|A| = ${H(g.d)}, A⁻¹ = ${mxH(g.inv)}.`],
+      walk: () => ({ title: 'Разбор', steps: g.steps }) };
+  },
+  homog() {
+    const n = pick([3, 4]); const r = pick([1, 2, 2, 3].filter(x => x <= 3));
+    const A = genRankM(3, n, r, 9) || M('1 2 3;2 4 6;1 1 1');
+    const rk = rankOf(A); const Ab = A.map(row => [...row, q(0)]);
+    return { type: 'homog', html: `<p>Однородная система A·X = 0 с матрицей A:</p><div class="scrollx">${mxH(A, { labels: true })}</div><p>Сколько у неё свободных переменных? <span class="mini">(0 — значит, есть только нулевое решение)</span></p>`, fields: [{ lab: 'n − r', a: q(n - rk) }],
+      hints: [`Неизвестных n = ${n}. Нужен ранг r.`, 'Приведи A к ступенчатому виду и посчитай ненулевые строки.', `Свободных = n − r = ${n} − r.`],
+      walk: () => ({ title: 'Разбор', M0: Ab, aug: n, steps: autoGauss(Ab, { aug: true }).steps }) };
+  }
+};
+
+/* ====================== поля ввода задачи ====================== */
+function fieldsEl(host, task) {
+  const box = el('div', 'row-f'); host.appendChild(box); const inps = [];
+  let chosen = null; const cbs = [];
+  if (task.choice) {
+    task.choice.opts.forEach((t, i) => { const b = el('button', 'btn sm', t); b.type = 'button'; b.setAttribute('aria-pressed', 'false'); b.onclick = () => { if (b.disabled) return; chosen = i; cbs.forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false')); cbs.forEach(x => x.classList.toggle('pri', x === b)); }; cbs.push(b); box.appendChild(b); });
+  } else task.fields.forEach(f => {
+    const w = el('label', 'mini'); w.style.display = 'inline-flex'; w.style.alignItems = 'center'; w.style.gap = '6px';
+    w.appendChild(el('span', '', f.lab + ' =')); const i = inputEl('?', '96px'); w.appendChild(i); box.appendChild(w); inps.push(i);
+  });
+  return {
+    inps,
+    check() {
+      if (task.choice) { const ok = chosen === task.choice.a; cbs.forEach((b, i) => { b.classList.toggle('ok', i === task.choice.a && chosen != null); b.classList.toggle('bad', i === chosen && !ok); }); return { ok, empty: chosen == null, invalid: false }; }
+      let ok = true, empty = false, invalid = false;
+      task.fields.forEach((f, k) => { const r = checkInput(inps[k], f.a); ok = ok && r.ok; empty = empty || r.empty; invalid = invalid || r.invalid; });
+      return { ok, empty, invalid };
+    },
+    reveal() { if (task.choice) { cbs.forEach((b, i) => { b.classList.toggle('ok', i === task.choice.a); }); return; } task.fields.forEach((f, k) => { inps[k].value = T(f.a); inps[k].classList.add('good'); }); },
+    lock() { inps.forEach(i => (i.disabled = true)); cbs.forEach(b => (b.disabled = true)); },
+    answerText() { return task.choice ? task.choice.opts[task.choice.a] : task.fields.map(f => `${f.lab} = ${H(f.a)}`).join(', '); }
+  };
+}
+function solEl(task) {
+  const d = el('div');
+  if (task.walk) new Walk(d, task.walk());
+  else d.innerHTML = `<div class="expl">${task.html2}</div>`;
+  return d;
+}
+
+/* ====================== T1: собери сам ====================== */
+const FADED0 = { Ab: M('1 2 1 1;2 3 1 2;-1 1 3 0'), x: [q(2), q(-1), q(1)], k: [-2, 1, 3] };
+function hintLadder(host, hints, onLast) {
+  let lv = 0; const b = el('button', 'btn sm', `💡 Подсказка (0/${hints.length})`); b.type = 'button';
+  const hb = el('div', 'hintbox');
+  b.onclick = () => { if (lv >= hints.length) return; hb.appendChild(el('div', 'h', `<b>${lv + 1}.</b> ${hints[lv]}`)); lv++; b.innerHTML = `💡 Подсказка (${lv}/${hints.length})`; if (lv >= hints.length) { b.disabled = true; if (onLast) onLast(); } };
+  return { btn: b, box: hb, get level() { return lv; } };
+}
+/* ввод строки матрицы прямо в сетку */
+function rowAsk(host, before, op, aug, onOk) {
+  const r = applyOp(before, op); const i = op.i; const exp = r.B[i];
+  const wrap = el('div', 'scrollx'); const pair = el('div', 'mxpair'); wrap.appendChild(pair);
+  const bd = el('div'); bd.appendChild(el('div', 'lab', 'было')); bd.appendChild(matEl(before, { aug, labels: true, labelCls: x => (x === op.j ? 'src' : (x === i ? 'tgt' : '')), rowCls: x => (x === op.j ? 'rows' : (x === i ? 'rowt' : '')) }));
+  const ad = el('div'); ad.appendChild(el('div', 'lab', 'стало — впиши строку ' + (i + 1)));
+  const mx = matEl(r.B, { aug, labels: true, rowCls: x => (x === i ? 'rowt' : ''), cell: (x, y, v) => (x === i ? `<input aria-label="строка ${x + 1}, столбец ${y + 1}" data-j="${y}">` : H(v)) });
+  ad.appendChild(mx);
+  pair.append(bd, el('div', 'arrow', `<span class="ar">→</span><span>${opLabel(op)}</span>`), ad);
+  host.appendChild(wrap);
+  const row = el('div', 'row-f'); const bc = el('button', 'btn ok', 'Проверить'); bc.type = 'button'; const fb = el('div', 'fb');
+  const formulas = exp.map((_, j) => r.prov[i + ',' + j].f.replace(/<span class="r">[^<]*<\/span>/, '?'));
+  const hl = hintLadder(host, ['Меняется только строка ' + (i + 1) + '. Каждое её число = старое число + k·(число строки ' + (op.j + 1) + ' в том же столбце). Не забудь число после черты.', 'Формулы: ' + formulas.map((f, j) => `<span class="formula">${f}</span>`).join(' &nbsp; '), 'Ответ: (' + exp.map(H).join('; ') + ')'], () => { $$('input', mx).forEach(inp => { inp.value = T(exp[+inp.dataset.j]); }); });
+  row.append(bc, hl.btn); host.append(row, hl.box, fb);
+  bc.onclick = () => {
+    let bad = 0, empty = 0;
+    $$('input', mx).forEach(inp => { const c = checkInput(inp, exp[+inp.dataset.j]); if (!c.ok) bad++; if (c.empty) empty++; });
+    if (!bad) { fb.className = 'fb ok'; fb.innerHTML = '✓ Верно!'; bc.disabled = true; hl.btn.disabled = true; $$('input', mx).forEach(x => (x.disabled = true)); onOk(r.B); }
+    else { fb.className = 'fb no'; fb.innerHTML = `✗ Неверных клеток: ${bad}${empty ? ` (пустых ${empty})` : ''}. ${hl.level === 0 ? 'Возьми подсказку, если застрял.' : ''}`; }
+  };
+}
+function fadedEl(host, data) {
+  host.innerHTML = ''; const D = data || FADED0; const A0 = D.Ab;
+  const card = el('div', 'card'); host.appendChild(card);
+  card.appendChild(el('p', '', `Система: ${sysHtml(A0, 3)}`));
+  const ops = [{ t: 'add', i: 1, j: 0, k: q(D.k[0]) }, { t: 'add', i: 2, j: 0, k: q(D.k[1]) }, { t: 'add', i: 2, j: 1, k: q(D.k[2]) }];
+  const A1 = applyOp(A0, ops[0]).B, A2 = applyOp(A1, ops[1]).B, A3 = applyOp(A2, ops[2]).B;
+  // шаг 1 — показан
+  const s1 = el('div'); card.appendChild(s1);
+  s1.appendChild(el('h3', '', 'Шаг 1 · смотри, как это делается'));
+  const W = new Walk(s1, { title: 'Пример', M0: A0, aug: 3, steps: [{ op: ops[0], predict: false, pivCell: [0, 0], goal: `Обнулить ${H(A0[1][0])} в столбце x₁`, why: `${H(A0[1][0])} + k·1 = 0 → k = ${H(ops[0].k)}. Наведи на числа новой строки — увидишь формулы.` }] });
+  ['.wk-foot', '.wk-dots', '.wk-tools'].forEach(c => { W.root.querySelector(c).style.display = 'none'; });
+  // шаг 2
+  const s2 = el('div'); card.appendChild(s2);
+  s2.appendChild(el('h3', '', 'Шаг 2 · действие дано, строку посчитай сам'));
+  s2.appendChild(el('p', 'mini', `Действие: ${opLabel(ops[1])} (${opWords(ops[1])}).`));
+  rowAsk(s2, A1, ops[1], 3, () => step3());
+  function step3() {
+    const s3 = el('div'); card.appendChild(s3);
+    s3.appendChild(el('h3', '', 'Шаг 3 · сам подбери k, потом посчитай строку'));
+    s3.appendChild(el('div', 'scrollx')).appendChild(matEl(A2, { aug: 3, labels: true, cellCls: (i, j) => (i === 1 && j === 1 ? 'piv' : (i === 2 && j === 1 ? 'sel' : '')) }));
+    const row = el('div', 'row-f'); row.appendChild(el('span', '', `${Rl(2)} → ${Rl(2)} + k·${Rl(1)}, &nbsp; k =`)); const ik = inputEl('k'); const bk = el('button', 'btn ok', 'Проверить k'); bk.type = 'button'; const fb = el('div', 'fb');
+    row.append(ik, bk); s3.append(row, fb);
+    const go = () => { const c = checkInput(ik, ops[2].k); if (c.ok) { fb.className = 'fb ok'; fb.innerHTML = `✓ k = ${H(ops[2].k)}. Теперь строка:`; bk.disabled = true; ik.disabled = true; rowAsk(s3, A2, ops[2], 3, () => step4()); } else { fb.className = 'fb no'; fb.innerHTML = `✗ Убиваем ${H(A2[2][1])} ступенькой ${H(A2[1][1])} (зелёная): k = −(${H(A2[2][1])})/(${H(A2[1][1])}).`; } };
+    bk.onclick = go; ik.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+  }
+  function step4() {
+    const s4 = el('div'); card.appendChild(s4);
+    s4.appendChild(el('h3', '', 'Шаг 4 · обратный ход: снизу вверх'));
+    s4.appendChild(el('div', 'eqs', A3.map(r => `<span class="ln">${eqH(r, 3)}</span>`).join('')));
+    const order = [2, 1, 0]; let k = 0; const area = el('div'); s4.appendChild(area);
+    const ask = () => {
+      const j = order[k]; const row = el('div', 'row-f'); row.appendChild(el('span', '', `${xv(j)} =`)); const inp = inputEl('?'); const b = el('button', 'btn ok sm', 'Проверить'); b.type = 'button'; const fb = el('div', 'fb'); row.append(inp, b); area.append(row, fb);
+      const known = order.slice(0, k).map(t => `${xv(t)} = ${H(D.x[t])}`).join(', ');
+      const go = () => { const c = checkInput(inp, D.x[j]); if (c.ok) { b.disabled = true; inp.disabled = true; fb.className = 'fb ok'; fb.textContent = '✓'; k++; if (k < 3) ask(); else done(); } else { fb.className = 'fb no'; fb.innerHTML = `✗ Возьми строку ${j + 1}: ${eqH(A3[j], 3)}${known ? '. Подставь ' + known : ''}, перенеси числа вправо и раздели на коэффициент при ${xv(j)}.`; } };
+      b.onclick = go; inp.addEventListener('keydown', e => { if (e.key === 'Enter') go(); }); inp.focus({ preventScroll: true });
+    };
+    ask();
+  }
+  function done() {
+    const chk = A0.map(r => { const s = r.slice(0, 3).reduce((a, v, j) => a.add(v.mul(D.x[j])), q(0)); return `<div class="ok">${r.slice(0, 3).map((v, j) => `${H(v)}·${P(D.x[j])}`).join(' + ').replace(/\+ −/g, '− ')} = ${H(s)} ✓</div>`; }).join('');
+    const f = el('div', 'box okb', `<span class="bt">🎉 Собрал сам!</span>Ответ: ${D.x.map((v, j) => xv(j) + ' = ' + H(v)).join(', ')}. Проверка в исходной системе:<div class="chk">${chk}</div>`);
+    card.appendChild(f); markDone('T1'); markSolved('faded');
+    const b = el('button', 'btn pri', '🔁 Ещё такую же (новые числа)'); b.type = 'button'; b.onclick = () => { fadedEl(host, genLU3({ lim: 10 })); host.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+    card.appendChild(el('div', 'btns')).appendChild(b);
+  }
+  if (data) { const b = el('button', 'btn sm', '↩ Вернуть исходный пример'); b.type = 'button'; b.onclick = () => fadedEl(host); card.appendChild(el('div', 'btns')).appendChild(b); }
+}
+
+/* ====================== T2: бесконечный тренажёр ====================== */
+function trainerEl(host) {
+  const types = Object.keys(TT); let on = new Set(types); let last = null, num = 0, streak = 0;
+  const card = el('div', 'card'); host.appendChild(card);
+  const chips = el('div', 'tabs'); card.appendChild(chips);
+  const bMix = el('button', '', '🔀 Вперемешку'); bMix.type = 'button';
+  const tb = {}; chips.appendChild(bMix);
+  types.forEach(t => { const b = el('button', '', TT[t]); b.type = 'button'; b.onclick = () => { if (on.size === types.length) on = new Set([t]); else if (on.has(t) && on.size > 1) on.delete(t); else on.add(t); paint(); next(); }; tb[t] = b; chips.appendChild(b); });
+  bMix.onclick = () => { on = new Set(types); paint(); next(); };
+  function paint() { bMix.setAttribute('aria-selected', on.size === types.length ? 'true' : 'false'); types.forEach(t => tb[t].setAttribute('aria-selected', on.size < types.length && on.has(t) ? 'true' : 'false')); }
+  const area = el('div'); card.appendChild(area);
+  const stats = el('p', 'mini'); card.appendChild(stats);
+  function showStats() {
+    const s = store.stats; const parts = types.filter(t => s[t]).map(t => `${TT[t]}: ${s[t].c}/${s[t].a}`);
+    stats.innerHTML = parts.length ? 'Твоя статистика (верно с первой попытки / всего): ' + parts.join(' · ') + (streak > 1 ? ` · серия: ${streak} 🔥` : '') : 'Статистика появится после первой задачи.';
+  }
+  function next() {
+    let pool = [...on]; if (pool.length > 1 && last) pool = pool.filter(t => t !== last);
+    const t = pick(pool); last = t; num++;
+    const task = GEN[t](); area.innerHTML = ''; area._task = task;
+    area.appendChild(el('div', 'ct', `<b>Задача ${num}</b><span class="chip">${TT[t]}</span>`));
+    const st = el('div'); st.innerHTML = task.html; area.appendChild(st);
+    const F = fieldsEl(area, task);
+    let conf = null; const cf = el('div', 'conf', 'Уверенность: ');
+    ['уверен', 'не очень', 'угадываю'].forEach(c => { const b = el('button', '', c); b.type = 'button'; b.setAttribute('aria-pressed', 'false'); b.onclick = () => { conf = c; $$('button', cf).forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false')); }; cf.appendChild(b); });
+    area.appendChild(cf);
+    const row = el('div', 'btns'); const bc = el('button', 'btn ok', 'Проверить'); bc.type = 'button';
+    const hl = hintLadder(area, task.hints);
+    const bs = el('button', 'btn sm', 'Показать решение'); bs.type = 'button';
+    const bn = el('button', 'btn sm pri', 'Следующая →'); bn.type = 'button'; bn.onclick = next;
+    row.append(bc, hl.btn, bs, bn); area.appendChild(row); area.appendChild(hl.box);
+    const fb = el('div', 'fb'); area.appendChild(fb); const sol = el('div'); area.appendChild(sol);
+    let tries = 0, settled = false;
+    const rec = ok => { if (settled) return; settled = true; const s = store.stats[t] || (store.stats[t] = { a: 0, c: 0 }); s.a++; if (ok) s.c++; save(); showStats(); };
+    bc.onclick = () => {
+      const r = F.check();
+      if (r.empty) { fb.className = 'fb no'; fb.textContent = task.choice ? 'Выбери вариант.' : 'Заполни все поля.'; return; }
+      if (r.invalid) { fb.className = 'fb no'; fb.textContent = 'Не понял число. Пиши так: −2, 3/5, 0.5'; return; }
+      tries++;
+      if (r.ok) {
+        const first = tries === 1 && hl.level === 0; rec(first); streak = first ? streak + 1 : 0; showStats();
+        fb.className = 'fb ok'; fb.innerHTML = first ? '✓ Верно с первой попытки!' : '✓ Верно!';
+        F.lock(); bc.disabled = true; markSolved(t);
+        if (Object.values(store.stats).reduce((a, s) => a + (s.c || 0), 0) >= 5) markDone('T2');
+      } else {
+        rec(false); streak = 0; showStats();
+        fb.className = 'fb no'; fb.innerHTML = '✗ Пока неверно. ' + (hl.level < task.hints.length ? 'Возьми подсказку или попробуй ещё раз.' : 'Посмотри решение.') + (conf === 'уверен' && tries === 1 ? '<br><span class="warn-t">💡 Ты был уверен, но ошибся. Как раз такие ошибки запоминаются лучше всего: разберись, и в следующий раз не ошибёшься.</span>' : '');
+      }
+    };
+    bs.onclick = () => { rec(false); F.reveal(); F.lock(); bc.disabled = true; sol.innerHTML = ''; sol.appendChild(solEl(task)); bs.disabled = true; };
+    area.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.tagName === 'INPUT') bc.click(); });
+  }
+  paint(); showStats(); next();
+}
+
+/* ====================== T3: мини-контрольная ====================== */
+function testEl(host) {
+  host.innerHTML = '';
+  const plan = [['step'], ['mult'], ['gauss3'], ['rank'], ['kk'], ['meq', 'L'], ['meq', 'R'], ['homog']];
+  const tasks = plan.map(([t, a]) => GEN[t](a));
+  const card = el('div', 'card'); host.appendChild(card); card._tasks = tasks;
+  card.appendChild(el('p', 'mini', `Без подсказок, как на контрольной. Ответы проверятся все сразу, когда нажмёшь «Сдать». ${store.stats.testBest != null ? `Твой лучший результат: <b>${store.stats.testBest} из 8</b>.` : ''}`));
+  const t0 = Date.now(); const tm = el('span', 'chip', '⏱ 0:00'); card.appendChild(tm);
+  const iv = setInterval(() => { if (!document.body.contains(tm)) return clearInterval(iv); const s = Math.floor((Date.now() - t0) / 1000); tm.textContent = `⏱ ${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; }, 1000);
+  const Fs = [];
+  tasks.forEach((task, k) => {
+    const c = el('div', 'card'); c.appendChild(el('div', 'ct', `<b>${k + 1}.</b><span class="chip">${TT[task.type]}</span>`));
+    const st = el('div'); st.innerHTML = task.html; c.appendChild(st);
+    const F = fieldsEl(c, task); Fs.push({ F, c, task }); card.appendChild(c);
+  });
+  const res = el('div'); const bs = el('button', 'btn pri', 'Сдать'); bs.type = 'button';
+  const bnew = el('button', 'btn sm', '🔁 Новый вариант'); bnew.type = 'button'; bnew.onclick = () => { clearInterval(iv); testEl(host); };
+  card.appendChild(el('div', 'btns')).append(bs, bnew); card.appendChild(res);
+  bs.onclick = () => {
+    clearInterval(iv); let sc = 0;
+    Fs.forEach(({ F, c, task }) => {
+      const r = F.check(); if (r.ok) sc++; F.lock();
+      const d = el('div', 'expl', r.ok ? '<b class="ok-t">✓ Верно</b>' : `<b class="bad-t">✗ Неверно.</b> Правильный ответ: ${F.answerText()}`);
+      const det = el('details', 'alt'); det.innerHTML = '<summary>Подробный разбор</summary>'; const body = el('div'); det.appendChild(body);
+      det.addEventListener('toggle', () => { if (det.open && !body.childNodes.length) body.appendChild(solEl(task)); });
+      c.append(d, det);
+    });
+    bs.disabled = true; store.stats.testBest = Math.max(store.stats.testBest || 0, sc); save();
+    const s = Math.floor((Date.now() - t0) / 1000);
+    res.innerHTML = `<div class="score ${sc >= 7 ? 'ok-t' : sc >= 5 ? 'warn-t' : 'bad-t'}">${sc} / 8</div><p class="center mini">Время: ${Math.floor(s / 60)} мин ${s % 60} с. ${sc === 8 ? 'Идеально! 🎉' : sc >= 6 ? 'Хорошо. Разбери ошибки ниже — у каждой задачи есть подробный разбор.' : 'Открой разборы неверных задач, потом потренируй эти типы в тренажёре.'}</p>`;
+    markDone('T3'); res.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+}
+
+/* ====================== T4: карточки (Лейтнер) ====================== */
+const CARDS = [
+  ['Какие системы называют равносильными?', 'Системы с одинаковыми решениями (множествами решений).'],
+  ['Три элементарных преобразования строк?', '1) переставить строки; 2) умножить строку на число ≠ 0; 3) прибавить к строке другую, умноженную на k. (П-У-П)'],
+  ['Почему нельзя умножать строку на 0?', 'Уравнение превращается в 0 = 0 и теряется. Действие нельзя отменить, могут появиться лишние «решения».'],
+  ['Формула множителя k для обнуления?', 'k = −(убиваемое число) / (ступенька).'],
+  ['Какую ступеньку выгодно выбирать?', '±1 (или число, на которое делятся все числа столбца): тогда множители целые, без дробей.'],
+  ['Почему столбец обнуляют строкой его ступеньки, а не первой?', 'У строки-ступеньки левее стоят нули, поэтому уже полученные нули не испортятся.'],
+  ['Что такое прямой ход Гаусса?', 'Приведение матрицы к ступенчатому виду: нули под ступеньками сверху вниз.'],
+  ['Обратный ход — в каком порядке и почему?', 'Снизу вверх: в последней строке меньше всего неизвестных.'],
+  ['Что делать со строкой 0 … 0 | 0?', 'Вычеркнуть: это 0 = 0, верно всегда.'],
+  ['Что значит строка 0 … 0 | b, где b ≠ 0?', '0 = b — противоречие. Решений нет (r < r̄).'],
+  ['Теорема Кронекера–Капелли?', 'Система совместна ⇔ rg A = rg Ā (ранг основной = рангу расширенной).'],
+  ['r = r̄ = n. Сколько решений?', 'Ровно одно.'],
+  ['r = r̄ < n. Сколько решений?', 'Бесконечно много; свободных переменных n − r.'],
+  ['Какие переменные свободные?', 'Те, в столбцах которых нет ступенек.'],
+  ['Может ли у СЛАУ быть ровно 2 решения?', 'Нет: 0, 1 или бесконечно много. Если X₁ ≠ X₂ — решения, то X₁ + t(X₂ − X₁) тоже.'],
+  ['Как найти ранг матрицы?', 'Привести к ступенчатому виду и посчитать ненулевые строки.'],
+  ['Ранг матрицы m×n не больше…', 'min(m, n).'],
+  ['Однородная система — что это? Есть ли решение всегда?', 'Все правые части 0 (A·X = 0). Всегда есть нулевое решение X = 0.'],
+  ['Когда у однородной системы есть ненулевые решения?', 'Когда r < n (для квадратной — когда det A = 0).'],
+  ['Свойства решений однородной системы?', 'X — решение ⇒ αX — решение; X₁, X₂ — решения ⇒ X₁ ± X₂ — решения. Значит, любая линейная комбинация решений — решение.'],
+  ['Когда решения X₁, …, Xₗ линейно зависимы?', 'Есть α₁, …, αₗ, не все нули, с α₁X₁ + … + αₗXₗ = 0.'],
+  ['A·X = B → X = ?', 'X = A⁻¹·B (A слева → A⁻¹ слева).'],
+  ['X·A = B → X = ?', 'X = B·A⁻¹ (A справа → A⁻¹ справа).'],
+  ['A·X·B = C → X = ?', 'X = A⁻¹·C·B⁻¹.'],
+  ['(B·C)⁻¹ = ?', 'C⁻¹·B⁻¹ — в обратном порядке («носки и ботинки»).'],
+  ['Формула обратной матрицы?', 'A⁻¹ = (1/|A|)·A*, где в A* дополнение A_ij стоит на месте (j, i) — транспонированно.'],
+  ['Знак алгебраического дополнения A_ij?', '(−1)^(i+j): шахматка + − + / − + − / + − +.'],
+  ['Главное правило задач с параметром α?', 'Делить на α можно только при α ≠ 0; случай α = 0 разбирать отдельно.'],
+  ['Как проверить ответ системы или матричного уравнения?', 'Подставить в ИСХОДНОЕ уравнение. Ловит ошибки знака.']
+];
+const IVL = [0, 1, 3, 7, 16];
+function cardsEl(host) {
+  const DAY = 864e5; let seen = 0;
+  const card = el('div', 'card'); host.appendChild(card);
+  const info = el('div', 'boxes'); const fl = el('div', 'flash'); const btns = el('div', 'btns center'); btns.style.justifyContent = 'center'; btns.style.marginTop = '16px';
+  card.append(info, fl, btns);
+  const st = id => store.cards[id] || { b: 0, due: 0, n: 1 };
+  let queue = [];
+  function build(all) { const now = Date.now(); queue = CARDS.map((_, i) => 'c' + i).filter(id => all || st(id).due <= now); queue = shuffle(queue).sort((a, b) => st(a).b - st(b).b); }
+  function paintInfo() { const cnt = [0, 0, 0, 0, 0]; CARDS.forEach((_, i) => cnt[Math.min(4, st('c' + i).b)]++); info.innerHTML = cnt.map((c, k) => `<span>Коробка ${k + 1}${k ? ` (раз в ${IVL[k]} дн.)` : ' (каждый раз)'}: ${c}</span>`).join('') + `<span>Сейчас к повторению: ${queue.length}</span>`; }
+  function show() {
+    paintInfo(); btns.innerHTML = '';
+    if (!queue.length) {
+      const nx = Math.min(...CARDS.map((_, i) => st('c' + i).due)); const d = Math.max(0, Math.ceil((nx - Date.now()) / DAY));
+      fl.innerHTML = `<div class="fq">🎉 На сегодня всё!</div><div class="mini">Следующие карточки появятся через ${d} дн. Открой файл тогда — 5 минут повторения сильнее часа зубрёжки.</div>`;
+      const b = el('button', 'btn sm', 'Прогнать все карточки ещё раз'); b.type = 'button'; b.onclick = () => { build(true); show(); }; btns.appendChild(b); return;
+    }
+    const id = queue[0]; const [qq, aa] = CARDS[+id.slice(1)];
+    fl.innerHTML = `<div class="mini">Коробка ${Math.min(4, st(id).b) + 1}</div><div class="fq">${qq}</div><div class="mini">Сначала ответь мысленно (или вслух), потом открой.</div>`;
+    const bo = el('button', 'btn pri', 'Показать ответ'); bo.type = 'button';
+    bo.onclick = () => {
+      fl.innerHTML = `<div class="fq">${qq}</div><div class="fa">${aa}</div>`; btns.innerHTML = '';
+      const bn = el('button', 'btn bad', '✗ Не вспомнил'); bn.type = 'button'; const by = el('button', 'btn ok', '✓ Вспомнил'); by.type = 'button';
+      bn.onclick = () => { store.cards[id] = { b: 0, due: Date.now() }; save(); queue.shift(); queue.push(id); done(); };
+      by.onclick = () => { const b = Math.min(4, st(id).b + 1); store.cards[id] = { b, due: Date.now() + IVL[b] * DAY }; save(); queue.shift(); done(); };
+      btns.append(bn, by); by.focus({ preventScroll: true });
+    };
+    btns.appendChild(bo);
+  }
+  function done() { seen++; if (seen >= 10) markDone('T4'); show(); }
+  build(false); show();
+}
+
+/* ====================== T5: проверялка ====================== */
+function parseMat(txt, o = {}) {
+  const lines = txt.split(/\n/).map(s => s.trim()).filter(Boolean);
+  if (!lines.length) throw new Error('Пусто. Впиши матрицу: каждая строка — с новой строки, числа через пробел.');
+  let barCol = null;
+  const rows = lines.map((ln, i) => {
+    const parts = ln.split('|');
+    if (parts.length > 2) throw new Error(`Строка ${i + 1}: черта «|» должна быть одна.`);
+    const nums = parts.join(' ').trim().split(/[\s;]+/).filter(Boolean).map(t => { const v = parseQ(t); if (!v) throw new Error(`Строка ${i + 1}: не понял «${t}». Пиши числа как 3, −2, 1/2, 0.5.`); return v; });
+    if (parts.length === 2) { const bc = parts[0].trim().split(/[\s;]+/).filter(Boolean).length; if (barCol != null && barCol !== bc) throw new Error('Черта стоит в разных местах.'); barCol = bc; }
+    return nums;
+  });
+  const n = rows[0].length; if (rows.some(r => r.length !== n)) throw new Error('В строках разное количество чисел.');
+  if (rows.length > 6 || n > 7) throw new Error('Слишком большая матрица (максимум 6 строк и 7 столбцов).');
+  return { A: rows, barCol };
+}
+function solverEl(host) {
+  const tb = el('div', 'tabs'); const body = el('div', 'card solv'); host.append(tb, body);
+  const EX = { sys: '2 -1 2 | 3\n1 1 2 | -4\n4 1 4 | -3', rank: '4 -1 2 0\n-1 1 1 1\n1 3 2 -1\n0 4 3 0', A: '5 3 -1\n-2 0 4\n3 5 -1', B: '0\n1\n3' };
+  const out = el('div');
+  tabsEl(tb, ['Система', 'Ранг', 'Матричное уравнение'], k => {
+    body.innerHTML = ''; out.innerHTML = '';
+    const err = el('div', 'err-msg');
+    if (k < 2) {
+      body.appendChild(el('p', 'mini', k === 0 ? 'Каждое уравнение — с новой строки: коэффициенты через пробел, правая часть после «|» (или просто последним числом). Дроби — через /.' : 'Каждая строка матрицы — с новой строки, числа через пробел.'));
+      const ta = el('textarea'); ta.value = k === 0 ? EX.sys : EX.rank; ta.setAttribute('aria-label', 'матрица'); ta.spellcheck = false; body.appendChild(ta);
+      const b = el('button', 'btn pri', k === 0 ? 'Решить' : 'Найти ранг'); b.type = 'button'; body.appendChild(el('div', 'row-f')).appendChild(b); body.append(err, out);
+      b.onclick = () => {
+        err.textContent = ''; out.innerHTML = '';
+        try {
+          const { A, barCol } = parseMat(ta.value);
+          if (k === 0) {
+            if (A[0].length < 2) throw new Error('Нужна хотя бы одна неизвестная и правая часть.');
+            if (barCol != null && barCol !== A[0].length - 1) throw new Error('После черты должно быть ровно одно число.');
+            const nc = A[0].length - 1; const ag = autoGauss(A, { aug: true });
+            const verdict = ag.status === 'unique' ? 'одно решение' : ag.status === 'inf' ? `бесконечно много решений (свободных: ${nc - ag.rank})` : 'решений нет';
+            out.appendChild(el('div', 'box ' + (ag.status === 'none' ? 'bad' : 'okb'), `<span class="bt">Итог</span>${sysHtml(A, nc)}<br>→ ${verdict}. Разбор по шагам ниже.`));
+            new Walk(out, { title: 'Разбор твоей системы', M0: A, aug: nc, steps: [prepStep(), ...ag.steps] });
+          } else {
+            const ag = autoGauss(A);
+            out.appendChild(el('div', 'box okb', `<span class="bt">Итог</span>rg = ${ag.rank}`));
+            new Walk(out, { title: 'Разбор: ранг', M0: A, steps: ag.steps });
+          }
+          markDone('T5');
+        } catch (e) { err.textContent = e.message; }
+      };
+    } else {
+      body.appendChild(el('p', 'mini', 'A — квадратная 2×2 или 3×3. B — столбец, строка или матрица подходящего размера.'));
+      const sel = el('div', 'tabs'); let side = 'L'; body.appendChild(sel);
+      tabsEl(sel, ['A·X = B', 'X·A = B'], i => { side = i ? 'R' : 'L'; });
+      const g = el('div', 'cols2'); const ca = el('div'), cb = el('div');
+      ca.appendChild(el('div', 'mini', 'Матрица A')); const ta = el('textarea'); ta.value = EX.A; ta.setAttribute('aria-label', 'матрица A'); ta.spellcheck = false; ca.appendChild(ta);
+      cb.appendChild(el('div', 'mini', 'Матрица B')); const tbb = el('textarea'); tbb.value = EX.B; tbb.setAttribute('aria-label', 'матрица B'); tbb.spellcheck = false; cb.appendChild(tbb);
+      g.append(ca, cb); body.appendChild(g);
+      const b = el('button', 'btn pri', 'Решить'); b.type = 'button'; body.appendChild(el('div', 'row-f')).appendChild(b); body.append(err, out);
+      b.onclick = () => {
+        err.textContent = ''; out.innerHTML = '';
+        try {
+          const A = parseMat(ta.value).A, B = parseMat(tbb.value).A; const n = A.length;
+          if (A[0].length !== n) throw new Error('A должна быть квадратной.');
+          if (n < 2 || n > 3) throw new Error('Проверялка умеет A размером 2×2 или 3×3.');
+          if (side === 'L' && B.length !== n) throw new Error(`Для A·X = B у B должно быть ${n} строки (как у A).`);
+          if (side === 'R' && B[0].length !== n) throw new Error(`Для X·A = B у B должно быть ${n} столбца (как у A).`);
+          const r = genMatEq(A, B, side);
+          out.appendChild(el('div', 'box ' + (r.X ? 'okb' : 'bad'), `<span class="bt">Итог</span>${r.X ? 'X = ' + mxH(r.X) : '|A| = 0 — обратной матрицы нет. Такое уравнение решают Гауссом (или решений нет / бесконечно много).'}`));
+          new Walk(out, { title: 'Разбор', steps: r.steps });
+          markDone('T5');
+        } catch (e) { err.textContent = e.message; }
+      };
+    }
+  });
+}
+
+'use strict';
+/* ====================== сборка страницы ====================== */
+function safe(name, f) { try { f(); } catch (e) { console.error('mount ' + name + ': ' + e.message + '\n' + e.stack); } }
+function buildToc() {
+  const secs = $$('section.sec[data-toc]'); const host = $('#toclinks'); let grp = null; const links = {};
+  secs.forEach(s => {
+    if (s.dataset.grp !== grp) { grp = s.dataset.grp; host.appendChild(el('div', 'grp', grp)); }
+    const a = el('a', '', `<span class="no">${s.dataset.no}</span><span>${s.dataset.toc}</span>`); a.href = '#' + s.id; links[s.id] = a; host.appendChild(a);
+    a.addEventListener('click', () => document.body.classList.remove('tocopen'));
+  });
+  function paint() {
+    let d = 0; secs.forEach(s => { const on = !!store.done[s.id]; links[s.id].classList.toggle('done', on); if (on) d++; });
+    $('#progt').textContent = `Пройдено: ${d} из ${secs.length}`; $('#progb').style.width = (100 * d / secs.length) + '%';
+  }
+  doneHooks.push(id => { paint(); if (id && links[id]) toast(`✓ Раздел «${$('#' + id).dataset.toc}» пройден`); });
+  paint();
+  // подсветка текущего раздела
+  const io = new IntersectionObserver(es => {
+    es.forEach(e => { if (e.isIntersecting) { Object.values(links).forEach(a => a.classList.remove('on')); const a = links[e.target.id]; if (a) { a.classList.add('on'); const t = $('#toc'); if (a.offsetTop < t.scrollTop || a.offsetTop > t.scrollTop + t.clientHeight - 60) t.scrollTop = a.offsetTop - 120; } } });
+  }, { rootMargin: '-35% 0px -60% 0px' });
+  secs.forEach(s => io.observe(s));
+  // разделы «для чтения» отмечаются, когда дочитаны до конца
+  let user = false; const marks = [];
+  const readIO = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting && user) markDone(e.target.dataset.read); }), { threshold: 1 });
+  const wake = () => { if (user) return; user = true; marks.forEach(m => { readIO.unobserve(m); readIO.observe(m); }); };
+  ['wheel', 'touchmove', 'keydown', 'pointerdown'].forEach(ev => addEventListener(ev, wake, { passive: true, once: true }));
+  ['P0', 'T6'].forEach(id => { const s = $('#' + id); if (!s) return; const m = el('div'); m.dataset.read = id; m.style.height = '1px'; s.appendChild(m); marks.push(m); readIO.observe(m); });
+}
+document.addEventListener('DOMContentLoaded', () => {
+  safe('toc', buildToc);
+  $('#tocbtn').addEventListener('click', () => document.body.classList.toggle('tocopen'));
+  document.addEventListener('click', e => { if (document.body.classList.contains('tocopen') && !e.target.closest('#toc') && !e.target.closest('#tocbtn')) document.body.classList.remove('tocopen'); });
+  safe('warmup', () => quizEl(mnt('warmup'), WARM, { sec: 's0' }));
+  safe('yn', () => ynEl(mnt('yn')));
+  safe('sysmap', () => sysMapEl(mnt('sysmap')));
+  safe('sysfill', () => sysFillEl(mnt('sysfill')));
+  safe('L3', mountL3); safe('L4', mountL4); safe('L5', mountL5); safe('L6', mountL6);
+  safe('quiz', () => quizEl(mnt('quiz'), QUIZ, { conf: true, sec: 'L7' }));
+  safe('P1', mountP1); safe('P2', mountP2); safe('P3', mountP3); safe('P4', mountP4); safe('P5', mountP5); safe('P6', mountP6); safe('P7', mountP7); safe('P8', mountP8);
+  safe('faded', () => fadedEl(mnt('faded')));
+  safe('trainer', () => trainerEl(mnt('trainer')));
+  safe('test', () => testEl(mnt('test')));
+  safe('cards', () => cardsEl(mnt('cards')));
+  safe('solver', () => solverEl(mnt('solver')));
+  $('#reset').addEventListener('click', () => { if (confirm('Сбросить весь прогресс (разделы, карточки, статистику)?')) { try { localStorage.removeItem(STORE); } catch (e) { } location.reload(); } });
+});
+
+</script>
+</body>
+</html>

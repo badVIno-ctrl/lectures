@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Лекция №2 · Проецирование прямой — интерактивная 3D-модель</title>
+<style>
+*{box-sizing:border-box}
+:root{
+  --bg:#FFFFFF;--soft:#F9F8F7;--soft2:#F0EFED;--border:#E6E5E3;--text:#2C2C2B;--text2:#7D7A75;
+  --blue:#2783DE;--blue-s:#E5F2FC;--green:#46A171;--orange:#D5803B;--red:#E56458;
+  --purple:#7A56C2;--teal:#2E8F9E;--pink:#C95F8B;
+  --shadow:0 1px 2px rgba(15,15,15,.05),0 4px 14px rgba(15,15,15,.05);
+}
+html[data-theme="dark"]{
+  --bg:#191919;--soft:#202020;--soft2:#262625;--border:#383836;--text:#FFFFFF;--text2:rgba(255,255,255,.66);
+  --blue:#5E9FE8;--blue-s:#1D3347;--green:#72BC8F;--orange:#DE9255;--red:#E97366;
+  --purple:#BF8EDA;--teal:#4FB9C9;--pink:#DF84A8;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 20px rgba(0,0,0,.35);
+}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font:15px/1.62 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+h1,h2,h3{margin:0;font-weight:650;letter-spacing:-.01em}
+p{margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+
+.topbar{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--border)}
+.topbar-in{max-width:1320px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;gap:12px;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:11px;min-width:0}
+.brand .mark{width:34px;height:34px;flex:0 0 34px;border-radius:9px;background:var(--blue-s);color:var(--blue);display:grid;place-items:center;font-weight:700;font-size:13px}
+.brand b{display:block;font-weight:650;font-size:15px;line-height:1.25}
+.brand span{display:block;color:var(--text2);font-size:12.5px}
+.iconbtn{background:var(--soft);border:1px solid var(--border);border-radius:8px;padding:7px 11px;font-size:13px;color:var(--text2)}
+.iconbtn:hover{background:var(--soft2);color:var(--text)}
+
+.shell{max-width:1320px;margin:0 auto;padding:22px 20px 40px;display:grid;grid-template-columns:252px 1fr;gap:26px;align-items:start}
+.nav{position:sticky;top:76px;display:flex;flex-direction:column;gap:4px}
+.navitem{display:block;width:100%;text-align:left;background:transparent;border:1px solid transparent;border-radius:10px;padding:9px 11px}
+.navitem:hover{background:var(--soft)}
+.navitem .n{display:block;font-size:11px;letter-spacing:.08em;color:var(--text2);font-weight:650}
+.navitem .t{display:block;font-size:14px;font-weight:600;margin-top:1px}
+.navitem .s{display:block;font-size:12px;color:var(--text2);margin-top:1px}
+.navitem[aria-current="true"]{background:var(--blue-s);border-color:var(--blue)}
+.navitem[aria-current="true"] .n,.navitem[aria-current="true"] .t{color:var(--blue)}
+.main{min-width:0}
+
+.stage-head h2{font-size:23px;line-height:1.25}
+.stage-head p{color:var(--text2);margin-top:6px;max-width:74ch}
+.views{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin:16px 0 10px}
+.btn{background:var(--soft);border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-size:13px;color:var(--text2);white-space:nowrap}
+.btn:hover{background:var(--soft2);color:var(--text)}
+.btn[aria-pressed="true"]{background:var(--blue-s);border-color:var(--blue);color:var(--blue);font-weight:600}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:600}
+.btn.primary:hover{filter:brightness(1.06);color:#fff}
+.spacer{flex:1 1 auto}
+
+.stage{background:var(--soft);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
+canvas{display:block;width:100%;height:clamp(340px,56vh,580px);touch-action:none;outline:none;cursor:grab}
+canvas:active{cursor:grabbing}
+.stage-foot{border-top:1px solid var(--border);padding:10px 14px;display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;justify-content:space-between}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px}
+.legend span{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.dot{width:9px;height:9px;border-radius:3px;flex:0 0 9px}
+.hint{font-size:12px;color:var(--text2)}
+
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:12px 20px;margin:16px 0 0;padding:14px 16px;background:var(--soft);border:1px solid var(--border);border-radius:12px}
+.ctl{min-width:0}
+.lab{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--text2);margin-bottom:6px;font-weight:600}
+.lab b{color:var(--text);font-variant-numeric:tabular-nums}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:20px;background:transparent;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:var(--soft2);border:1px solid var(--border)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;margin-top:-6px;border-radius:50%;background:var(--blue);border:2px solid var(--bg)}
+input[type=range]::-moz-range-track{height:4px;border-radius:2px;background:var(--soft2);border:1px solid var(--border)}
+input[type=range]::-moz-range-thumb{width:13px;height:13px;border:2px solid var(--bg);border-radius:50%;background:var(--blue)}
+.seg{display:flex;gap:4px;background:var(--soft2);border:1px solid var(--border);border-radius:9px;padding:3px;flex-wrap:wrap}
+.seg button{flex:1 1 auto;background:transparent;border:0;border-radius:6px;padding:6px 8px;font-size:12.5px;color:var(--text2);white-space:nowrap}
+.seg button:hover{color:var(--text)}
+.seg button[aria-pressed="true"]{background:var(--bg);color:var(--text);font-weight:600}
+.check{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--text2);cursor:pointer;padding-top:18px}
+.check input{width:16px;height:16px;accent-color:var(--blue);cursor:pointer}
+
+.reads{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:10px;margin-top:12px}
+.read{background:var(--soft);border:1px solid var(--border);border-left:3px solid var(--border);border-radius:10px;padding:10px 12px}
+.read .k{display:block;font-size:11.5px;color:var(--text2);font-weight:600}
+.read .v{display:block;font-size:17px;font-weight:650;margin-top:2px;font-variant-numeric:tabular-nums;line-height:1.3}
+.read .x{display:block;font-size:11.5px;color:var(--text2);margin-top:3px}
+
+.theory{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:14px;margin-top:22px}
+.theory.one{grid-template-columns:1fr;max-width:900px}
+.card{background:var(--bg);border:1px solid var(--border);border-radius:13px;padding:16px 18px;box-shadow:var(--shadow)}
+.card h3{font-size:14.5px;margin-bottom:8px}
+.card p+p,.card p+ul,.card p+ol,.card ul+p,.card ol+p{margin-top:9px}
+.card ul,.card ol{margin:0;padding-left:20px}
+.card li+li{margin-top:6px}
+.card.tip{background:var(--blue-s);border-color:var(--blue)}
+.card.rule{background:var(--soft);border-color:var(--green)}
+.card.warn{background:var(--soft);border-color:var(--orange)}
+.k1{color:var(--orange);font-weight:650}
+.k2{color:var(--purple);font-weight:650}
+.k3{color:var(--teal);font-weight:650}
+.ks{color:var(--blue);font-weight:650}
+.kn{color:var(--green);font-weight:650}
+.ka{color:var(--pink);font-weight:650}
+details{margin-top:11px;border-top:1px solid var(--border);padding-top:9px}
+summary{cursor:pointer;font-size:12.5px;color:var(--text2);font-weight:600;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"› "}
+details[open] summary::before{content:"‹ "}
+summary:hover{color:var(--text)}
+details .body{margin-top:8px;font-size:13.5px}
+.quote{color:var(--text2);border-left:2px solid var(--border);padding-left:11px;font-style:italic}
+.quote+.quote{margin-top:8px}
+
+.tablewrap{overflow-x:auto;border:1px solid var(--border);border-radius:11px;margin-top:10px}
+table{border-collapse:collapse;width:100%;font-size:13.2px;min-width:640px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+th{background:var(--soft);font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);font-weight:650;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+.qa{margin-top:10px}
+.foot{margin-top:26px;font-size:12px;color:var(--text2);text-align:center}
+
+@media (max-width:980px){
+  .shell{grid-template-columns:1fr;gap:16px;padding:16px 14px 34px}
+  .nav{position:static;flex-direction:row;overflow-x:auto;gap:6px;padding-bottom:4px}
+  .navitem{flex:0 0 auto;min-width:154px;border:1px solid var(--border)}
+  .navitem .s{display:none}
+  canvas{height:clamp(300px,48vh,460px)}
+  .stage-head h2{font-size:20px}
+  .theory{grid-template-columns:1fr}
+  .topbar-in{padding:9px 14px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<header class="topbar"><div class="topbar-in">
+  <div class="brand">
+    <span class="mark">Л2</span>
+    <div><b>Проецирование прямой</b><span>Лекция №2 · покрути любой рисунок в 3D</span></div>
+  </div>
+  <button class="iconbtn" id="themeBtn" type="button">◐ тема</button>
+</div></header>
+
+<div class="shell">
+  <nav class="nav" id="nav" aria-label="Разделы лекции"></nav>
+  <main class="main">
+    <div class="stage-head">
+      <h2 id="scTitle">—</h2>
+      <p id="scLead"></p>
+    </div>
+    <div class="views" id="views"></div>
+    <div class="stage" id="stage">
+      <canvas id="cv" tabindex="0" aria-label="Интерактивная 3D-модель рисунка из лекции"></canvas>
+      <div class="stage-foot">
+        <div class="legend" id="legend"></div>
+        <p class="hint">мышь / палец — вращать · колёсико — масштаб · стрелки тоже работают · двойной клик — сброс</p>
+      </div>
+    </div>
+    <div class="controls" id="controls"></div>
+    <div class="reads" id="reads"></div>
+    <section class="theory" id="theory"></section>
+    <p class="foot">Собрано по конспекту лекции №2 «Проецирование прямой». Геометрия строится кодом — файл работает полностью автономно, без интернета.</p>
+  </main>
+</div>
+<script>
+'use strict';
+/* π₁: z=0 — пол · π₂: y=0 — стена перед наблюдателем · π₃: x=0 — стена справа */
+const add=(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]];
+const sub=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]];
+const mul=(a,s)=>[a[0]*s,a[1]*s,a[2]*s];
+const dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+const vlen=a=>Math.hypot(a[0],a[1],a[2]);
+const norm=a=>{const l=vlen(a)||1;return mul(a,1/l)};
+const midp=(a,b)=>mul(add(a,b),0.5);
+const lerp=(a,b,k)=>a+(b-a)*k;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const fade=(t,a,b)=>clamp((t-a)/(b-a),0,1);
+const fmt=(n,d)=>{d=d===undefined?2:d;const s=Math.abs(n)<1e-9?0:n;return s.toFixed(d).replace('.',',')};
+const deg=r=>r*180/Math.PI;
+
+const L=10;
+const EX=[1,0,0],EY=[0,1,0],EZ=[0,0,1];
+const DASH=[3.5,3.5],RAY=[5,4.5];
+
+const PAL={
+  light:{stage:'#F9F8F7',grid:'rgba(44,44,43,.08)',text:'#2C2C2B',text2:'#7D7A75',halo:'#F9F8F7',
+    space:'#2783DE',p1:'#D5803B',p2:'#7A56C2',p3:'#2E8F9E',nv:'#46A171',ang:'#C95F8B',helper:'#A9A6A1'},
+  dark:{stage:'#202020',grid:'rgba(255,255,255,.10)',text:'#FFFFFF',text2:'rgba(255,255,255,.66)',halo:'#202020',
+    space:'#5E9FE8',p1:'#DE9255',p2:'#BF8EDA',p3:'#4FB9C9',nv:'#72BC8F',ang:'#DF84A8',helper:'#6E6E6C'}
+};
+let T=PAL.light;
+
+const VIEWS={
+  v3d:{th:0.95,ph:0.42,dist:31,tgt:[3.2,3.2,3.2]},
+  front:{th:Math.PI/2,ph:0.001,dist:35,tgt:[0,0,-0.8]},
+  top:{th:0.80,ph:1.52,dist:29,tgt:[3.6,3.6,0]},
+  side:{th:0.02,ph:0.02,dist:29,tgt:[0,3.6,3.6]}
+};
+const state={
+  scene:0,unfold:0,view:'v3d',
+  cam:{th:0.95,ph:0.42,dist:31,tgt:[3.2,3.2,3.2]},
+  P:{ax:6,ay:3.5,az:5,sub:0,dir:'up',links:true,rays:true,coords:true,fold:0,tri:true}
+};
+const SCENES=[];
+const reduceMotion=!!(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+/* развёртка в КЧ: π₁ — вниз вокруг Ox, π₃ — вправо вокруг Oz */
+function xf(p,tag,t){
+  if(t<=0.0002||!tag||tag==='space'||tag==='p2')return p;
+  if(tag==='p1'){const a=-Math.PI/2*t,c=Math.cos(a),s=Math.sin(a);return [p[0],p[1]*c-p[2]*s,p[1]*s+p[2]*c];}
+  if(tag==='p3'){const b=Math.PI/2*t,c=Math.cos(b),s=Math.sin(b);return [p[0]*c-p[1]*s,p[0]*s+p[1]*c,p[2]];}
+  return p;
+}
+
+const cv=document.getElementById('cv');
+const ctx=cv.getContext('2d');
+let W=900,H=520,DPR=1;
+function camBasis(){
+  const c=state.cam,cp=Math.cos(c.ph),sp=Math.sin(c.ph),ct=Math.cos(c.th),st=Math.sin(c.th);
+  const pos=[c.tgt[0]+c.dist*cp*ct,c.tgt[1]+c.dist*cp*st,c.tgt[2]+c.dist*sp];
+  const fwd=norm(sub(c.tgt,pos));
+  let right=cross(fwd,EZ);
+  if(vlen(right)<1e-5)right=[-Math.sin(c.th),Math.cos(c.th),0];
+  right=norm(right);
+  const up=cross(right,fwd);
+  const f=(H*0.5)/Math.tan(21*Math.PI/180);
+  return {pos:pos,fwd:fwd,right:right,up:up,f:f};
+}
+function proj(p,C){
+  const v=sub(p,C.pos),d=dot(v,C.fwd);
+  return {x:W/2+C.f*dot(v,C.right)/d,y:H/2-C.f*dot(v,C.up)/d,d:d};
+}
+const NEAR=0.35;
+function projSeg(a,b,C){
+  const da=dot(sub(a,C.pos),C.fwd),db=dot(sub(b,C.pos),C.fwd);
+  if(da<NEAR&&db<NEAR)return null;
+  if(da<NEAR){const k=(NEAR-da)/(db-da);a=add(a,mul(sub(b,a),k));}
+  else if(db<NEAR){const k=(NEAR-db)/(da-db);b=add(b,mul(sub(a,b),k));}
+  return [proj(a,C),proj(b,C)];
+}
+
+const FONT=(w,s)=>w+' '+s+'px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif';
+function line(A,B,o){
+  ctx.save();
+  ctx.globalAlpha=o.alpha===undefined?1:o.alpha;
+  ctx.strokeStyle=o.color;ctx.lineWidth=o.w||1.8;ctx.lineCap=o.dash?'butt':'round';
+  if(o.dash)ctx.setLineDash(o.dash);
+  ctx.beginPath();ctx.moveTo(A.x,A.y);ctx.lineTo(B.x,B.y);ctx.stroke();
+  ctx.restore();
+  if(o.arrow){
+    const dx=B.x-A.x,dy=B.y-A.y,l=Math.hypot(dx,dy)||1,ux=dx/l,uy=dy/l,s=8.5;
+    ctx.save();ctx.globalAlpha=o.alpha===undefined?1:o.alpha;ctx.fillStyle=o.color;
+    ctx.beginPath();ctx.moveTo(B.x,B.y);
+    ctx.lineTo(B.x-ux*s-uy*s*.4,B.y-uy*s+ux*s*.4);
+    ctx.lineTo(B.x-ux*s+uy*s*.4,B.y-uy*s-ux*s*.4);
+    ctx.closePath();ctx.fill();ctx.restore();
+  }
+}
+function poly(pts,o){
+  if(pts.length<3)return;
+  ctx.save();
+  const base=o.alpha===undefined?1:o.alpha;
+  ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);
+  for(let i=1;i<pts.length;i++)ctx.lineTo(pts[i].x,pts[i].y);
+  ctx.closePath();
+  if(o.fill){ctx.globalAlpha=base*(o.fillAlpha===undefined?.1:o.fillAlpha);ctx.fillStyle=o.fill;ctx.fill();}
+  if(o.stroke){ctx.globalAlpha=base;ctx.strokeStyle=o.stroke;ctx.lineWidth=o.w||1.2;if(o.dash)ctx.setLineDash(o.dash);ctx.stroke();}
+  ctx.restore();
+}
+function label(x,y,str,o){
+  o=o||{};
+  const size=(o.size||13)*(W<620?0.87:1),weight=o.weight||600;
+  ctx.save();
+  ctx.globalAlpha=o.alpha===undefined?1:o.alpha;
+  ctx.font=FONT(weight,size);
+  ctx.textAlign=o.align||'left';ctx.textBaseline='middle';
+  ctx.lineJoin='round';
+  const lines=String(str).split('\n');
+  for(let i=0;i<lines.length;i++){
+    const yy=y+i*(size*1.25);
+    if(o.halo!==false){ctx.lineWidth=3.6;ctx.strokeStyle=T.halo;ctx.strokeText(lines[i],x,yy);}
+    ctx.fillStyle=o.color||T.text;ctx.fillText(lines[i],x,yy);
+  }
+  ctx.restore();
+}
+function pointMark(P,o){
+  ctx.save();ctx.globalAlpha=o.alpha===undefined?1:o.alpha;
+  const r=o.r||3.7;
+  ctx.beginPath();ctx.arc(P.x,P.y,r+1.7,0,Math.PI*2);ctx.fillStyle=T.halo;ctx.fill();
+  ctx.beginPath();ctx.arc(P.x,P.y,r,0,Math.PI*2);
+  if(o.ring){ctx.lineWidth=2.6;ctx.strokeStyle=o.color;ctx.stroke();}
+  else{ctx.fillStyle=o.color;ctx.fill();}
+  ctx.restore();
+}
+
+let lastReadsHTML='';
+function render(){
+  const sc=SCENES[state.scene];
+  if(!sc||sc.docs)return;
+  const C=camBasis(),t=state.unfold;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle=T.stage;ctx.fillRect(0,0,W,H);
+  const out=sc.build()||{items:[]};
+  const planes=[],polys=[],dashed=[],solid=[],arcs=[],pts=[],labs=[];
+  const items=out.items||[];
+  for(let i=0;i<items.length;i++){
+    const it=items[i];
+    if(!it)continue;
+    const a=it.alpha===undefined?1:it.alpha;
+    if(a<=0.015)continue;
+    const tag=it.tag||'space';
+    const f=p=>xf(p,tag,t);
+    if(it.kind==='plane'){
+      const c=it.pts.map(p=>proj(f(p),C));
+      let d=0;for(let j=0;j<c.length;j++)d+=c[j].d;d/=c.length;
+      planes.push({it:it,c:c,grid:(it.grid||[]).map(g=>projSeg(f(g[0]),f(g[1]),C)),d:d,a:a});
+    }else if(it.kind==='poly'){
+      const c=it.pts.map(p=>proj(f(p),C));
+      let d=0;for(let j=0;j<c.length;j++)d+=c[j].d;d/=c.length;
+      polys.push({it:it,c:c,d:d,a:a});
+    }else if(it.kind==='seg'){
+      const s=projSeg(f(it.a),f(it.b),C);
+      if(s)(it.dash?dashed:solid).push({it:it,s:s,a:a});
+    }else if(it.kind==='arc'){
+      const v=f(it.v),p1=f(it.a),p2=f(it.b);
+      const u1=norm(sub(p1,v)),w2=sub(p2,v);
+      const pr=sub(w2,mul(u1,dot(w2,u1)));
+      if(vlen(pr)<1e-6)continue;
+      const u2=norm(pr),ang=Math.acos(clamp(dot(u1,norm(w2)),-1,1));
+      const r=it.r||1.25,N=26,path=[];
+      for(let j=0;j<=N;j++){const s=ang*j/N;path.push(proj(add(v,add(mul(u1,r*Math.cos(s)),mul(u2,r*Math.sin(s)))),C));}
+      const mp=add(v,add(mul(u1,r*1.5*Math.cos(ang/2)),mul(u2,r*1.5*Math.sin(ang/2))));
+      arcs.push({it:it,path:path,mid:proj(mp,C),a:a});
+    }else if(it.kind==='right'){
+      const v=f(it.v),u1=norm(sub(f(it.a),v)),u2=norm(sub(f(it.b),v)),s=it.s||0.6;
+      const p=[add(v,mul(u1,s)),add(v,add(mul(u1,s),mul(u2,s))),add(v,mul(u2,s))];
+      arcs.push({it:{color:it.color,w:it.w||1.4},path:p.map(q=>proj(q,C)),a:a});
+    }else if(it.kind==='pt'){
+      pts.push({it:it,P:proj(f(it.p),C),a:a});
+      if(it.label)labs.push({it:{text:it.label,off:it.off||[10,-11],color:it.color,size:it.size||13.5,weight:700,align:it.align},P:proj(f(it.p),C),a:a});
+    }else if(it.kind==='label'){
+      labs.push({it:it,P:proj(f(it.p),C),a:a});
+    }
+  }
+  planes.sort((x,y)=>y.d-x.d);
+  polys.sort((x,y)=>y.d-x.d);
+  planes.forEach(pl=>{
+    poly(pl.c,{fill:pl.it.color,fillAlpha:pl.it.fillAlpha===undefined?.085:pl.it.fillAlpha,stroke:pl.it.color,w:1.2,alpha:pl.a*.8});
+    pl.grid.forEach(g=>{if(g)line(g[0],g[1],{color:T.grid,w:1,alpha:pl.a});});
+  });
+  polys.forEach(pg=>poly(pg.c,{fill:pg.it.color,fillAlpha:pg.it.fillAlpha===undefined?.14:pg.it.fillAlpha,stroke:pg.it.stroke||pg.it.color,w:pg.it.w||1.1,dash:pg.it.dash,alpha:pg.a}));
+  dashed.forEach(s=>line(s.s[0],s.s[1],{color:s.it.color,w:s.it.w||1.4,dash:s.it.dash||DASH,alpha:s.a,arrow:s.it.arrow}));
+  solid.forEach(s=>line(s.s[0],s.s[1],{color:s.it.color,w:s.it.w||2,alpha:s.a,arrow:s.it.arrow}));
+  arcs.forEach(ar=>{
+    ctx.save();ctx.globalAlpha=ar.a;ctx.strokeStyle=ar.it.color;ctx.lineWidth=ar.it.w||1.6;ctx.lineJoin='round';
+    ctx.beginPath();ctx.moveTo(ar.path[0].x,ar.path[0].y);
+    for(let j=1;j<ar.path.length;j++)ctx.lineTo(ar.path[j].x,ar.path[j].y);
+    ctx.stroke();ctx.restore();
+    if(ar.it.label&&ar.mid)label(ar.mid.x,ar.mid.y,ar.it.label,{color:ar.it.color,size:12.5,weight:700,align:'center',alpha:ar.a});
+  });
+  pts.forEach(p=>pointMark(p.P,{color:p.it.color,r:p.it.r,ring:p.it.ring,alpha:p.a}));
+  labs.forEach(l=>{
+    const o=l.it.off||[10,-11];
+    label(l.P.x+o[0],l.P.y+o[1],l.it.text,{color:l.it.color||T.text,size:l.it.size||12.5,weight:l.it.weight||600,align:l.it.align||'left',alpha:l.a});
+  });
+  syncReads(out.reads||[]);
+}
+function syncReads(reads){
+  const html=reads.map(r=>'<div class="read"'+(r.c?' style="border-left-color:'+r.c+'"':'')+'><span class="k">'+r.k+'</span><span class="v"'+(r.c?' style="color:'+r.c+'"':'')+'>'+r.v+'</span>'+(r.x?'<span class="x">'+r.x+'</span>':'')+'</div>').join('');
+  if(html!==lastReadsHTML){lastReadsHTML=html;document.getElementById('reads').innerHTML=html;}
+}
+function resize(){
+  const r=cv.getBoundingClientRect();
+  DPR=Math.min(2,window.devicePixelRatio||1);
+  W=Math.max(300,Math.round(r.width));H=Math.max(240,Math.round(r.height));
+  cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  render();
+}
+
+let drag=null;
+cv.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY};try{cv.setPointerCapture(e.pointerId)}catch(_){}});
+cv.addEventListener('pointermove',e=>{
+  if(!drag)return;
+  const dx=e.clientX-drag.x,dy=e.clientY-drag.y;drag={x:e.clientX,y:e.clientY};
+  state.cam.th-=dx*0.007;state.cam.ph=clamp(state.cam.ph+dy*0.006,-1.5,1.52);
+  state.view='';syncViewBtns();render();
+});
+cv.addEventListener('pointerup',()=>{drag=null});
+cv.addEventListener('pointercancel',()=>{drag=null});
+cv.addEventListener('wheel',e=>{e.preventDefault();state.cam.dist=clamp(state.cam.dist*Math.exp(e.deltaY*0.0012),9,90);render();},{passive:false});
+cv.addEventListener('keydown',e=>{
+  let used=true;const k=e.key;
+  if(k==='ArrowLeft')state.cam.th-=0.09;
+  else if(k==='ArrowRight')state.cam.th+=0.09;
+  else if(k==='ArrowUp')state.cam.ph=clamp(state.cam.ph+0.07,-1.5,1.52);
+  else if(k==='ArrowDown')state.cam.ph=clamp(state.cam.ph-0.07,-1.5,1.52);
+  else if(k==='+'||k==='=')state.cam.dist=clamp(state.cam.dist*0.9,9,90);
+  else if(k==='-'||k==='_')state.cam.dist=clamp(state.cam.dist*1.1,9,90);
+  else used=false;
+  if(used){e.preventDefault();state.view='';syncViewBtns();render();}
+});
+
+function tween(ms,apply,done){
+  if(reduceMotion){apply(1);if(done)done();return;}
+  const t0=performance.now();
+  requestAnimationFrame(function step(now){
+    const k=clamp((now-t0)/ms,0,1);
+    const e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;
+    apply(e);
+    if(k<1)requestAnimationFrame(step);else if(done)done();
+  });
+}
+function camTween(v,ms,extra){
+  const c=state.cam,f={th:c.th,ph:c.ph,dist:c.dist,tgt:c.tgt.slice()};
+  let th=v.th;
+  while(th-f.th>Math.PI)th-=2*Math.PI;
+  while(f.th-th>Math.PI)th+=2*Math.PI;
+  tween(ms,k=>{
+    c.th=lerp(f.th,th,k);c.ph=lerp(f.ph,v.ph,k);c.dist=lerp(f.dist,v.dist,k);
+    c.tgt=[lerp(f.tgt[0],v.tgt[0],k),lerp(f.tgt[1],v.tgt[1],k),lerp(f.tgt[2],v.tgt[2],k)];
+    if(extra)extra(k);
+    render();
+  });
+}
+function gotoView(name,ms){
+  const v=VIEWS[name];if(!v)return;
+  state.view=name;syncViewBtns();
+  if(ms===0){const c=state.cam;c.th=v.th;c.ph=v.ph;c.dist=v.dist;c.tgt=v.tgt.slice();render();return;}
+  camTween(v,ms===undefined?520:ms);
+}
+function setUnfold(target,withCam){
+  const from=state.unfold;
+  if(withCam){
+    const v=target>0.5?VIEWS.front:VIEWS.v3d;
+    state.view=target>0.5?'front':'v3d';syncViewBtns();
+    camTween(v,900,k=>{state.unfold=lerp(from,target,k);syncUnfoldUI();});
+  }else{
+    tween(650,k=>{state.unfold=lerp(from,target,k);syncUnfoldUI();render();});
+  }
+}
+
+/* ================= общие строители геометрии ================= */
+function gridLines(tag){
+  const g=[];
+  for(let k=0;k<=L;k++){
+    if(tag==='p1'){g.push([[k,0,0],[k,L,0]]);g.push([[0,k,0],[L,k,0]]);}
+    if(tag==='p2'){g.push([[k,0,0],[k,0,L]]);g.push([[0,0,k],[L,0,k]]);}
+    if(tag==='p3'){g.push([[0,k,0],[0,k,L]]);g.push([[0,0,k],[0,L,k]]);}
+  }
+  return g;
+}
+function planesItems(o){
+  o=o||{};
+  const it=[
+    {kind:'plane',tag:'p1',pts:[[0,0,0],[L,0,0],[L,L,0],[0,L,0]],grid:gridLines('p1'),color:T.p1},
+    {kind:'plane',tag:'p2',pts:[[0,0,0],[L,0,0],[L,0,L],[0,0,L]],grid:gridLines('p2'),color:T.p2},
+    {kind:'plane',tag:'p3',pts:[[0,0,0],[0,L,0],[0,L,L],[0,0,L]],grid:gridLines('p3'),color:T.p3}
+  ];
+  it.push({kind:'label',tag:'p1',p:[L*0.64,L*0.88,0],text:o.long?'π₁ — пол':'π₁',color:T.p1,size:15,weight:700,off:[0,0],align:'center'});
+  it.push({kind:'label',tag:'p2',p:[L*0.82,0,L*0.93],text:o.long?'π₂ — стена перед тобой':'π₂',color:T.p2,size:15,weight:700,off:[0,0],align:'center'});
+  it.push({kind:'label',tag:'p3',p:[0,L*0.5,L*0.94],text:o.long?'π₃ — стена справа':'π₃',color:T.p3,size:15,weight:700,off:[0,0],align:'center'});
+  return it;
+}
+function axesItems(){
+  const t=state.unfold,c=T.text2,it=[];
+  it.push({kind:'seg',tag:'p2',a:[0,0,0],b:[L*1.14,0,0],color:c,w:1.5,arrow:true});
+  it.push({kind:'label',tag:'p2',p:[L*1.14,0,0],text:'x',off:[0,17],align:'center',color:c,size:15,weight:700});
+  it.push({kind:'seg',tag:'p2',a:[0,0,0],b:[0,0,L*1.14],color:c,w:1.5,arrow:true});
+  it.push({kind:'label',tag:'p2',p:[0,0,L*1.14],text:'z',off:[11,-5],color:c,size:15,weight:700});
+  it.push({kind:'seg',tag:'p3',a:[0,0,0],b:[0,L*1.14,0],color:c,w:1.5,arrow:true});
+  it.push({kind:'label',tag:'p3',p:[0,L*1.14,0],text:'y',off:[11,3],color:c,size:15,weight:700});
+  it.push({kind:'seg',tag:'p1',a:[0,0,0],b:[0,L*1.14,0],color:c,w:1.5,arrow:true});
+  it.push({kind:'label',tag:'p1',p:[0,L*1.14,0],text:'y′',off:[9,13],color:c,size:15,weight:700,alpha:fade(t,0.1,0.4)});
+  it.push({kind:'label',tag:'p2',p:[0,0,0],text:'O',off:[-17,13],color:c,size:12.5,weight:700});
+  return it;
+}
+function ptBundle(P,name,o){
+  o=o||{};
+  const t=state.unfold,x=P[0],y=P[1],z=P[2];
+  const P1=[x,y,0],P2=[x,0,z],P3=[0,y,z],Ax=[x,0,0],Ay=[0,y,0],Az=[0,0,z];
+  const fs=1-fade(t,0.08,0.7);
+  const it=[];
+  if(o.links){
+    it.push({kind:'seg',tag:'p1',a:P1,b:Ax,color:T.helper,w:1.15,dash:DASH});
+    it.push({kind:'seg',tag:'p2',a:P2,b:Ax,color:T.helper,w:1.15,dash:DASH});
+    it.push({kind:'seg',tag:'p2',a:P2,b:Az,color:T.helper,w:1.15,dash:DASH});
+    it.push({kind:'seg',tag:'p3',a:P3,b:Az,color:T.helper,w:1.15,dash:DASH});
+    if(o.fullBox){
+      it.push({kind:'seg',tag:'p1',a:P1,b:Ay,color:T.helper,w:1.15,dash:DASH});
+      it.push({kind:'seg',tag:'p3',a:P3,b:Ay,color:T.helper,w:1.15,dash:DASH});
+    }
+  }
+  if(o.rays&&fs>0.02){
+    it.push({kind:'seg',a:P,b:P1,color:T.p1,w:1.35,dash:RAY,alpha:fs*.85});
+    it.push({kind:'seg',a:P,b:P2,color:T.p2,w:1.35,dash:RAY,alpha:fs*.85});
+    it.push({kind:'seg',a:P,b:P3,color:T.p3,w:1.35,dash:RAY,alpha:fs*.85});
+  }
+  if(o.space!==false)it.push({kind:'pt',p:P,color:T.space,r:4.5,label:name,off:o.offS||[12,-13],size:15,alpha:Math.max(0.1,fs)});
+  if(o.projPts!==false){
+    it.push({kind:'pt',tag:'p1',p:P1,color:T.p1,label:name+'₁',off:o.off1||[9,14]});
+    it.push({kind:'pt',tag:'p2',p:P2,color:T.p2,label:name+'₂',off:o.off2||[-28,-12]});
+    it.push({kind:'pt',tag:'p3',p:P3,color:T.p3,label:name+'₃',off:o.off3||[13,-12]});
+  }
+  return it;
+}
+function segLabel(a,b,text,color,off,alpha){
+  return {kind:'label',p:midp(a,b),text:text,off:off||[0,-12],align:'center',color:color,size:12.5,weight:700,alpha:alpha};
+}
+
+/* ================= 01. ТРИ ПЛОСКОСТИ И ТОЧКА ================= */
+SCENES.push({
+  id:'point',n:'01',t:'Три плоскости и точка',s:'пол и две стены, координаты',
+  title:'Система трёх плоскостей и точка A',
+  lead:'Пол — π₁, стена перед тобой — π₂, стена справа — π₃. Покрути угол комнаты, а потом потяни ползунок развёртки — получишь тот самый чертёж из тетради.',
+  cam:'v3d',
+  controls:[
+    {type:'slider',key:'ax',label:'x точки A',min:1,max:9,step:.5},
+    {type:'slider',key:'ay',label:'y точки A',min:1,max:9,step:.5},
+    {type:'slider',key:'az',label:'z точки A',min:1,max:9,step:.5},
+    {type:'check',key:'coords',label:'размеры x, y, z'}
+  ],
+  build(){
+    const P=state.P,x=P.ax,y=P.ay,z=P.az,A=[x,y,z],t=state.unfold;
+    const P1=[x,y,0],P2=[x,0,z],P3=[0,y,z],Ax=[x,0,0],Ay=[0,y,0],Az=[0,0,z];
+    let it=[].concat(planesItems({long:true}),axesItems(),ptBundle(A,'A',{links:true,rays:true,fullBox:true}));
+    const ca=1-fade(t,0.3,0.65);
+    if(P.coords&&ca>0.02){
+      it.push(segLab('p1',P1,Ax,'y = '+fmt(y,1),T.p1,[0,-11],ca));
+      it.push(segLab('p1',P1,Ay,'x = '+fmt(x,1),T.p1,[0,15],ca));
+      it.push(segLab('p2',P2,Ax,'z = '+fmt(z,1),T.p2,[-10,0],ca,'right'));
+      it.push(segLab('p2',P2,Az,'x = '+fmt(x,1),T.p2,[0,-11],ca));
+      it.push(segLab('p3',P3,Ay,'z = '+fmt(z,1),T.p3,[10,0],ca,'left'));
+      it.push(segLab('p3',P3,Az,'y = '+fmt(y,1),T.p3,[0,-11],ca));
+    }
+    const fa=fade(t,0.55,1);
+    if(fa>0.02){
+      it.push(lab('p2',[x,0,z*0.5],'линия связи A₁A₂ ⊥ x',T.helper,[13,0],fa,'left'));
+      it.push(lab('p2',[x*0.5,0,z],'линия связи A₂A₃ ⊥ z',T.helper,[0,-15],fa,'center'));
+    }
+    return {items:it,reads:[
+      {k:'Точка A (x; y; z)',v:'('+fmt(x,1)+'; '+fmt(y,1)+'; '+fmt(z,1)+')',c:T.space,x:'три числа — три расстояния до стен и пола'},
+      {k:'A₁ на π₁ (пол)',v:'('+fmt(x,1)+'; '+fmt(y,1)+'; 0)',c:T.p1,x:'высота z теряется'},
+      {k:'A₂ на π₂ (перед тобой)',v:'('+fmt(x,1)+'; 0; '+fmt(z,1)+')',c:T.p2,x:'глубина y теряется'},
+      {k:'A₃ на π₃ (справа)',v:'(0; '+fmt(y,1)+'; '+fmt(z,1)+')',c:T.p3,x:'координата x теряется'}
+    ]};
+  },
+  theory:`
+  <div class="card tip">
+    <h3>Простыми словами</h3>
+    <p>Встань в угол комнаты. <span class="k1">Пол</span> — это π₁ (горизонтальная плоскость проекций), <span class="k2">стена прямо перед тобой</span> — π₂ (фронтальная), <span class="k3">стена справа</span> — π₃ (профильная).</p>
+    <p>Линии стыка — это оси: пол + передняя стена = <b>ось x</b>, пол + правая стена = <b>ось y</b>, две стены между собой = <b>ось z</b>.</p>
+    <p>Точка A висит в воздухе. Пускаем из неё три перпендикуляра — на пол, на переднюю и на правую стену. Три «тени» A₁, A₂, A₃ и есть проекции точки.</p>
+  </div>
+  <div class="card">
+    <h3>Что значат координаты</h3>
+    <ul>
+      <li><b>x</b> — сколько прошли вдоль оси x; это же расстояние до правой стены <span class="k3">π₃</span>.</li>
+      <li><b>y</b> — глубина: расстояние до передней стены <span class="k2">π₂</span> — чем больше y, тем точка ближе к тебе.</li>
+      <li><b>z</b> — высота над полом <span class="k1">π₁</span>.</li>
+    </ul>
+    <p>Каждая проекция «теряет» ровно одну координату — ту, по которой шёл перпендикуляр. Поэтому одной проекции мало, а двух — уже достаточно, чтобы восстановить точку.</p>
+  </div>
+  <div class="card rule">
+    <h3>Откуда берётся комплексный чертёж (КЧ)</h3>
+    <p>На листе нет трёх плоскостей. Поэтому пол <b>отгибают вниз</b> (вокруг оси x), а правую стену — <b>вправо</b> (вокруг оси z), пока всё не ляжет в одну плоскость — плоскость чертежа.</p>
+    <p>Ось y при этом раздваивается: вниз уезжает <b>y′</b> (вместе с полом), вправо — <b>y</b> (вместе с правой стеной). Именно поэтому в лекции два обозначения: y и y′.</p>
+    <p><b>Главное следствие:</b> после разворота A₁ оказывается строго под A₂ (одна вертикальная линия связи, ⊥ оси x), а A₃ — строго на одной горизонтали с A₂ (⊥ оси z). Это разогнутые рёбра одного координатного «кирпичика».</p>
+    <details><summary>Как это ��аписано в лекции</summary>
+      <div class="body"><p class="quote">Аксиома Евклида: через 2 точки проходит единственная прямая. В связи с этим построение проекций прямой линии на КЧ сводится к построению 2-ух точек, ей принадлежащих.</p>
+      <p>То есть вся работа с прямой сводится к работе с двумя точками — поэтому сначала разбирают точку.</p></div>
+    </details>
+  </div>`
+});
+
+/* ================= 02. ПРЯМАЯ ОБЩЕГО ПОЛОЖЕНИЯ ================= */
+SCENES.push({
+  id:'general',n:'02',t:'Прямая общего положения',s:'все три проекции искажены',
+  title:'Прямая общего положения',
+  lead:'Отрезок AB стоит косо ко всем трём плоскостям. Сравни длину самого отрезка и длины его трёх теней.',
+  cam:'v3d',
+  controls:[
+    {type:'seg',key:'dir',label:'характер прямой',options:[{v:'up',l:'восходящая'},{v:'down',l:'нисходящая'}]},
+    {type:'check',key:'rays',label:'проецирующие лучи'},
+    {type:'check',key:'links',label:'линии связи'}
+  ],
+  build(){
+    const P=state.P,up=P.dir==='up',t=state.unfold;
+    const A=up?[8,2.2,6]:[8,2.2,2],B=up?[2.5,7,2]:[2.5,7,6];
+    const A1=[A[0],A[1],0],B1=[B[0],B[1],0];
+    const A2=[A[0],0,A[2]],B2=[B[0],0,B[2]];
+    const A3=[0,A[1],A[2]],B3=[0,B[1],B[2]];
+    const fs=1-fade(t,0.1,0.8);
+    let it=[].concat(planesItems({}),axesItems());
+    it.push({kind:'seg',tag:'p1',a:A1,b:B1,color:T.p1,w:2.8});
+    it.push({kind:'seg',tag:'p2',a:A2,b:B2,color:T.p2,w:2.8});
+    it.push({kind:'seg',tag:'p3',a:A3,b:B3,color:T.p3,w:2.8});
+    it.push({kind:'seg',a:A,b:B,color:T.space,w:3.6,alpha:Math.max(0.1,fs)});
+    it=it.concat(ptBundle(A,'A',{links:P.links,rays:P.rays,off2:[-30,-12]}),
+                 ptBundle(B,'B',{links:P.links,rays:P.rays,off1:[6,15],off2:[-30,-12],off3:[13,-13]}));
+    it.push(segLabel(A,B,'|AB|',T.space,[14,-8],fs));
+    const ab=vlen(sub(B,A)),l1=vlen(sub(B1,A1)),l2=vlen(sub(B2,A2)),l3=vlen(sub(B3,A3));
+    if(fs>0.06){
+      it.push({kind:'label',p:[4.6,13.6,2.2],text:'наблюдатель смотрит сюда',off:[0,-16],align:'center',color:T.text2,size:12.5,weight:700,alpha:fs});
+      it.push({kind:'seg',a:[4.6,13.2,2.2],b:[4.6,10.4,2.2],color:T.helper,w:1.3,dash:RAY,alpha:fs*.85,arrow:true});
+    }
+    return {items:it,reads:[
+      {k:'|AB| — сам отрезок',v:fmt(ab),c:T.space,x:'этой длины на чертеже нет нигде'},
+      {k:'|A₁B₁| на π₁',v:fmt(l1),c:T.p1,x:Math.round(l1/ab*100)+'% от |AB|'},
+      {k:'|A₂B₂| на π₂',v:fmt(l2),c:T.p2,x:Math.round(l2/ab*100)+'% от |AB|'},
+      {k:'|A₃B₃| на π₃',v:fmt(l3),c:T.p3,x:Math.round(l3/ab*100)+'% от |AB|'}
+    ]};
+  },
+  theory:`
+  <div class="card tip">
+    <h3>Простыми словами</h3>
+    <p>Прямая общего положения — это прямая, которая <b>ко всем трём плоскостям стоит косо</b>: ни параллельна, ни перпендикулярна ни одной из них.</p>
+    <p>Поверни модель: <span class="ks">синий</span> отрезок всегда длиннее любой своей тени. Проценты в карточках показывают, насколько сильно каждая проекция «съедает» длину.</p>
+  </div>
+  <div class="card">
+    <h3>Признаки на чертеже</h3>
+    <ol>
+      <li>Ни одна из трёх проекций <b>не параллельна осям</b> и не перпендикулярна линиям связи.</li>
+      <li>Любая проекция <b>короче</b> самого отрезка — длина искажается всюду.</li>
+      <li>Значит, истинную длину и углы наклона линейкой с такого чертежа не снять — нужен <b>метод прямоугольного треугольника</b> (раздел 05).</li>
+    </ol>
+  </div>
+  <div class="card warn">
+    <h3>Восходящая и нисходящая</h3>
+    <p>Наблюдатель стоит перед π₂. «Удаляться» — значит уходить от него вглубь, к передней стене (координата y уменьшается).</p>
+    <ul>
+      <li><b>Восходящая:</b> по мере удаления от наблюдателя прямая <b>повышается</b>.</li>
+      <li><b>Нисходящая:</b> по мере удаления она <b>понижается</b>.</li>
+    </ul>
+    <p>Переключи тумблер и посмотри вид справа (π₃) — разница сразу видна.</p>
+    <details><summary>Как это записано в лекции</summary>
+      <div class="body"><p class="quote">Прямые, не параллельные ни одной из плоскостей проекций, называются прямыми общего вида (общего положения).</p>
+      <p class="quote">Длина отрезка, принадлежащего прямой общего положения, проецируется на любую плоскость проекций с искажением.</p>
+      <p class="quote">Прямые общего положения бывают восходящими и нисходящими.</p></div>
+    </details>
+  </div>`
+});
+
+/* ================= подписи с учётом развёртки ================= */
+function lab(tag,p,text,color,off,alpha,align){
+  return {kind:'label',tag:tag,p:p,text:text,off:off||[0,-12],align:align||'center',color:color,size:12.5,weight:700,alpha:alpha};
+}
+function segLab(tag,a,b,text,color,off,alpha,align){return lab(tag,midp(a,b),text,color,off,alpha,align);}
+function projsOf(A,B){
+  return {p1:[[A[0],A[1],0],[B[0],B[1],0]],p2:[[A[0],0,A[2]],[B[0],0,B[2]]],p3:[[0,A[1],A[2]],[0,B[1],B[2]]]};
+}
+const PNAME={p1:'π₁',p2:'π₂',p3:'π₃'};
+const SUBIDX={p1:'₁',p2:'₂',p3:'₃'};
+function anglesOf(A,B){
+  const ab=vlen(sub(B,A));
+  return {ab:ab,
+    a:Math.asin(Math.abs(A[2]-B[2])/ab),
+    b:Math.asin(Math.abs(A[1]-B[1])/ab),
+    g:Math.asin(Math.abs(A[0]-B[0])/ab)};
+}
+
+/* ================= 03. ПРЯМЫЕ УРОВНЯ ================= */
+const LEVEL=[
+  {k:'h',nm:'h',full:'Горизонталь h ∥ π₁',plane:'p1',A:[8,2.5,4],B:[3,7,4],dir:EX,ang:'β',angTo:'π₂',
+   par:[['p2','h₂ ∥ Ox'],['p3','h₃ ∥ Oy']],note:'все точки на одной высоте: z = const'},
+  {k:'f',nm:'f',full:'Фронталь f ∥ π₂',plane:'p2',A:[8,3.5,2.5],B:[3,3.5,6.5],dir:EX,ang:'α',angTo:'π₁',
+   par:[['p1','f₁ ∥ Ox'],['p3','f₃ ∥ Oz']],note:'все точки на одной глубине: y = const'},
+  {k:'p',nm:'p',full:'Профильная прямая p ∥ π₃',plane:'p3',A:[5.5,2.5,7],B:[5.5,7,2.5],dir:EY,ang:'α',angTo:'π₁',
+   par:[['p1','p₁ ∥ Oy'],['p2','p₂ ∥ Oz']],note:'x = const; p₁ и p₂ лежат на одной линии связи'}
+];
+SCENES.push({
+  id:'level',n:'03',t:'Прямые уровня',s:'h ∥ π₁, f ∥ π₂, p ∥ π₃',
+  title:'Прямые уровня: горизонталь, фронталь, профильная',
+  lead:'Прямая параллельна одной из плоскостей — и именно на неё она ложится без искажения (зелёная проекция).',
+  cam:'v3d',
+  controls:[
+    {type:'seg',key:'sub',label:'тип прямой',options:[{v:0,l:'горизонталь h'},{v:1,l:'фронталь f'},{v:2,l:'профильная p'}]},
+    {type:'check',key:'rays',label:'проецирующие лучи'},
+    {type:'check',key:'links',label:'линии связи'}
+  ],
+  build(){
+    const P=state.P,d=LEVEL[P.sub]||LEVEL[0],A=d.A,B=d.B,t=state.unfold;
+    const pr=projsOf(A,B),fs=1-fade(t,0.1,0.8),an=anglesOf(A,B);
+    let it=[].concat(planesItems({}),axesItems());
+    ['p1','p2','p3'].forEach(key=>{
+      const nat=key===d.plane;
+      it.push({kind:'seg',tag:key,a:pr[key][0],b:pr[key][1],color:nat?T.nv:T[key],w:nat?3.8:2.6});
+    });
+    it.push({kind:'seg',a:A,b:B,color:T.space,w:3.4,alpha:Math.max(0.12,fs)});
+    it=it.concat(ptBundle(A,'A',{links:P.links,rays:P.rays,off2:[-30,-12]}),
+                 ptBundle(B,'B',{links:P.links,rays:P.rays,off1:[6,15],off2:[-30,-12],off3:[13,-13]}));
+    it.push(segLab(null,A,B,d.nm,T.space,[14,-10],Math.max(0.15,fs)));
+    const nA=pr[d.plane][0],nB=pr[d.plane][1];
+    it.push(segLab(d.plane,nA,nB,'|'+d.nm+SUBIDX[d.plane]+'| = |AB| — натуральная величина',T.nv,[0,21]));
+    d.par.forEach(pp=>{it.push(segLab(pp[0],pr[pp[0]][0],pr[pp[0]][1],pp[1],T[pp[0]],[0,-14]));});
+    const u=norm(sub(nB,nA)),sg=dot(u,d.dir)>=0?1:-1,gd=add(nA,mul(d.dir,sg*3.8));
+    const ang=Math.acos(clamp(Math.abs(dot(u,d.dir)),-1,1));
+    it.push({kind:'seg',tag:d.plane,a:nA,b:gd,color:T.helper,w:1.2,dash:DASH});
+    it.push({kind:'arc',tag:d.plane,v:nA,a:gd,b:nB,r:1.85,color:T.ang,w:1.9,
+      label:d.ang+' = '+fmt(deg(ang),1)+'° к '+d.angTo});
+    return {items:it,reads:[
+      {k:d.full,v:d.note,c:T.text2},
+      {k:'|AB| в пространстве',v:fmt(an.ab),c:T.space},
+      {k:'|'+d.nm+SUBIDX[d.plane]+'| на '+PNAME[d.plane],v:fmt(vlen(sub(nB,nA))),c:T.nv,x:'100% — натуральная величина'},
+      {k:'угол α к π₁',v:fmt(deg(an.a),1)+'°',c:T.p1},
+      {k:'угол β к π₂',v:fmt(deg(an.b),1)+'°',c:T.p2},
+      {k:'угол γ к π₃',v:fmt(deg(an.g),1)+'°',c:T.p3}
+    ]};
+  },
+  theory:`
+  <div class="card tip">
+    <h3>Простыми словами</h3>
+    <p>Прямая уровня — это прямая, которая <b>лежит ровно относительно одной плоскости</b> (параллельна ей). Представь палку, которую держат горизонтально над полом: тень на полу будет такой же длины, как сама палка.</p>
+    <p><b>Правило одной строкой:</b> параллельна плоскости ⇒ на эту плоскость проецируется <span class="kn">без искажения</span>, а две другие проекции становятся параллельными осям.</p>
+  </div>
+  <div class="card rule">
+    <h3>Три вида</h3>
+    <ul>
+      <li><b>Горизонталь h ∥ π₁.</b> Высота одинаковая (z = const). На КЧ: <b>h₂ ∥ Ox</b>, а <span class="kn">|h₁| = |AB|</span>. Угол между h₁ и Ox — это угол β наклона прямой к π₂.</li>
+      <li><b>Фронталь f ∥ π₂.</b> Глубина одинаковая (y = const). На КЧ: <b>f₁ ∥ Ox</b>, а <span class="kn">|f₂| = |AB|</span>. Угол между f₂ и Ox — угол α наклона к π₁.</li>
+      <li><b>Профильная p ∥ π₃.</b> x = const. На КЧ её горизонтальная и фронтальная проекции лежат на одной вертикальной линии связи, поэтому двух проекций не хватает — профильную прямую <b>всегда задают отрезком</b> и строят третью проекцию.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>Как узнать по чертежу</h3>
+    <p>Ищешь проекцию, <b>параллельную оси</b>. Если фронтальная проекция ∥ Ox — перед тобой горизонталь, и натуральная величина лежит на π₁. Если горизонтальная проекция ∥ Ox — это фронталь, натуральная величина на π₂.</p>
+    <p>Удобно так: <b>где проекция параллельна оси — там прямая «спрятала» длину; длина живёт на той плоскости, которой прямая параллельна</b>.</p>
+    <details><summary>Как это записано в лекции</summary>
+      <div class="body">
+        <p class="quote">Прямая, параллельная π₁, называется горизонтальной прямой уровня (горизонталью) h. Признаки: h₂ ∥ Ox; |A₁B₁| = |AB|; ∠(h₁, Ox) = β = ∠(AB, π₂).</p>
+        <p class="quote">Прямая, параллельная π₂ — фронталь f: f₁ ∥ Ox; |A₂B₂| = |AB|; ∠(f₂, Ox) = α = ∠(AB, π₁).</p>
+        <p class="quote">Прямая, параллельная π₃ — профильная прямая уровня; такая прямая всегда задаётся отрезком.</p>
+      </div>
+    </details>
+  </div>`
+});
+
+/* ================= 04. ПРОЕЦИРУЮЩИЕ ПРЯМЫЕ ================= */
+const PROJL=[
+  {k:'i',nm:'i',full:'i ⊥ π₁ — горизонтально-проецирующая',plane:'p1',A:[6,3.5,7.5],B:[6,3.5,2],
+   note:'вертикальная палка: стоит на полу перпендикулярно'},
+  {k:'j',nm:'j',full:'j ⊥ π₂ — фронтально-проецирующая',plane:'p2',A:[6,2,4.5],B:[6,7.5,4.5],
+   note:'палка смотрит точно в переднюю стену — в лоб наблюдателю'},
+  {k:'p',nm:'p',full:'p ⊥ π₃ — профильно-проецирующая',plane:'p3',A:[2.5,4,5.5],B:[8,4,5.5],
+   note:'палка втыкается в правую стену'}
+];
+SCENES.push({
+  id:'projecting',n:'04',t:'Проецирующие прямые',s:'проекция вырождается в точку',
+  title:'Проецирующие прямые',
+  lead:'Прямая перпендикулярна плоскости — вся прямая сжимается в одну точку (след), а две другие проекции дают натуральную величину.',
+  cam:'v3d',
+  controls:[
+    {type:'seg',key:'sub',label:'куда перпендикулярна',options:[{v:0,l:'i ⊥ π₁'},{v:1,l:'j ⊥ π₂'},{v:2,l:'p ⊥ π₃'}]},
+    {type:'check',key:'rays',label:'проецирующие лучи'},
+    {type:'check',key:'links',label:'линии связи'}
+  ],
+  build(){
+    const P=state.P,d=PROJL[P.sub]||PROJL[0],A=d.A,B=d.B,t=state.unfold;
+    const pr=projsOf(A,B),fs=1-fade(t,0.1,0.8),ab=vlen(sub(B,A));
+    let it=[].concat(planesItems({}),axesItems());
+    ['p1','p2','p3'].forEach(key=>{
+      if(key===d.plane){
+        it.push({kind:'pt',tag:key,p:pr[key][0],color:T[key],r:6,ring:true});
+        it.push({kind:'pt',tag:key,p:pr[key][0],color:T[key],r:2.6});
+        it.push(lab(key,pr[key][0],d.nm+SUBIDX[key]+' = A'+SUBIDX[key]+'≡B'+SUBIDX[key],T[key],[0,-21]));
+        it.push(lab(key,pr[key][0],'след — вся прямая в одной точке',T.text2,[0,21]));
+      }else{
+        it.push({kind:'seg',tag:key,a:pr[key][0],b:pr[key][1],color:T.nv,w:3.6});
+        it.push(segLab(key,pr[key][0],pr[key][1],'|'+d.nm+SUBIDX[key]+'| = |AB|',T.nv,[0,-15]));
+        it.push({kind:'pt',tag:key,p:pr[key][0],color:T[key],label:'A'+SUBIDX[key],off:key==='p2'?[-30,-12]:[10,14]});
+        it.push({kind:'pt',tag:key,p:pr[key][1],color:T[key],label:'B'+SUBIDX[key],off:key==='p2'?[-30,-12]:[10,14]});
+      }
+    });
+    it.push({kind:'seg',a:A,b:B,color:T.space,w:3.6,alpha:Math.max(0.12,fs)});
+    it=it.concat(ptBundle(A,'A',{links:P.links,rays:P.rays,projPts:false,offS:[12,-14]}),
+                 ptBundle(B,'B',{links:P.links,rays:P.rays,projPts:false,offS:[12,-14]}));
+    const others=['p1','p2','p3'].filter(k=>k!==d.plane);
+    return {items:it,reads:[
+      {k:d.full,v:d.note,c:T.text2},
+      {k:d.nm+SUBIDX[d.plane]+' на '+PNAME[d.plane],v:'точка (след)',c:T[d.plane],x:'длина сжалась до нуля'},
+      {k:'|AB| в пространстве',v:fmt(ab),c:T.space},
+      {k:'на '+PNAME[others[0]]+' и '+PNAME[others[1]],v:fmt(ab)+' и '+fmt(ab),c:T.nv,x:'обе — натуральная величина'},
+      {k:'углы наклона',v:'90° к '+PNAME[d.plane]+', 0° к двум другим',c:T.ang}
+    ]};
+  },
+  theory:`
+  <div class="card tip">
+    <h3>Простыми словами</h3>
+    <p>Проецирующая прямая — это прямая, которая смотрит <b>ровно в плоскость</b> (перпендикулярна ей). Проецирующие лучи тогда идут вдоль самой прямой, и вся она попадает <b>в одну точку</b>.</p>
+    <p>Аналогия: светишь фонариком строго сверху на вертикальную ручку — тень на полу будет точкой.</p>
+  </div>
+  <div class="card rule">
+    <h3>Три вида и их признаки</h3>
+    <ul>
+      <li><b>i ⊥ π₁</b> (горизонтально-проецирующая): i₁ — точка; i₂ и i₃ ⊥ оси Ox и дают натуральную величину. Это же — вертикальная прямая.</li>
+      <li><b>j ⊥ π₂</b> (фронтально-проецирующая): j₂ — точка; j₁ и j₃ — натуральная величина.</li>
+      <li><b>p ⊥ π₃</b> (профильно-проецирующая): p₃ — точка; p₁, p₂ ∥ Ox и равны |AB|.</li>
+    </ul>
+    <p>Важно: проецирующая прямая автоматически параллельна двум другим плоскостям — поэтому там сразу две натуральные величины.</p>
+  </div>
+  <div class="card">
+    <h3>Почему точку называют следом</h3>
+    <p>Если продолжить прямую, она проткнёт плоскость ровно в этой точке — такой «прокол» называют следом прямой. У проецирующей прямой проекция и след — одна и та же точка.</p>
+    <p>И ещё: любая точка такой прямой даёт на эту плоскость одну и ту же проекцию — точки становятся конкурирующими и на этой проекции неразличимы.</p>
+    <details><summary>Как это записано в лекции</summary>
+      <div class="body"><p class="quote">Прямые, перпендикулярные одной из плоскостей проекций, называются проецирующими. Горизонтально-проецирующая i ⊥ π₁: i₁ — точка (след прямой).</p></div>
+    </details>
+  </div>`
+});
+
+/* ============================================================
+   05. МЕТОД ПРЯМОУГОЛЬНОГО ТРЕУГОЛЬНИКА
+   ============================================================ */
+const AT=[8,2.2,6],BT=[2.5,7,2];
+const TRI=[
+  {plane:'p1',m:EZ,at:'A',ang:'α',angTo:'π₁',K:[8,2.2,2],h:Math.abs(AT[2]-BT[2]),
+   legName:'Δz',legFull:'Δz = zᴀ − zʙ',legWhat:'разность высот концов'},
+  {plane:'p2',m:EY,at:'B',ang:'β',angTo:'π₂',K:[2.5,2.2,2],h:Math.abs(BT[1]-AT[1]),
+   legName:'Δy',legFull:'Δy = yʙ − yᴀ',legWhat:'разность глубин концов'},
+  {plane:'p3',m:EX,at:'A',ang:'γ',angTo:'π₃',K:[2.5,2.2,6],h:Math.abs(AT[0]-BT[0]),
+   legName:'Δx',legFull:'Δx = xᴀ − xʙ',legWhat:'разность расстояний до π₃'}
+];
+const PCENTER={p1:[5,5,0],p2:[5,0,5],p3:[0,5,5]};
+SCENES.push({
+  id:'truelength',n:'05',t:'Прямоугольный треугольник',s:'как найти |AB| и угол',
+  title:'Метод прямоугольного треугольника',
+  lead:'Прямая общего положения нигде не даёт натуральную величину — её достраивают. Ползунок поворота показывает секрет: треугольник реально есть в пространстве, его просто кладут на лист.',
+  cam:'v3d',
+  controls:[
+    {type:'seg',key:'sub',label:'на какой плоскости строим',options:[{v:0,l:'π₁ → α'},{v:1,l:'π₂ → β'},{v:2,l:'π₃ → γ'}]},
+    {type:'slider',key:'fold',label:'повернуть треугольник в плоскость',min:0,max:1,step:.01,pct:true},
+    {type:'check',key:'tri',label:'треугольник в пространстве'}
+  ],
+  build(){
+    const P=state.P,d=TRI[P.sub]||TRI[0],A=AT,B=BT,t=state.unfold,key=d.plane;
+    const pr=projsOf(A,B),fs=1-fade(t,0.1,0.8);
+    const base=d.at==='A'?pr[key][0]:pr[key][1];
+    const vert=d.at==='A'?pr[key][1]:pr[key][0];
+    const tipName=(d.at==='A'?'A':'B')+'₀';
+    const u=norm(sub(vert,base));
+    let n=norm(cross(u,d.m));
+    if(dot(n,sub(PCENTER[key],base))<0)n=mul(n,-1);
+    const phi=Math.PI/2*P.fold;
+    const dirv=add(mul(d.m,Math.cos(phi)),mul(n,Math.sin(phi)));
+    const tip=add(base,mul(dirv,d.h));
+    const projLen=vlen(sub(vert,base)),ab=vlen(sub(B,A));
+    const angle=Math.acos(clamp(projLen/ab,-1,1));
+    let it=[].concat(planesItems({}),axesItems());
+    ['p1','p2','p3'].forEach(k2=>{
+      if(k2===key)return;
+      it.push({kind:'seg',tag:k2,a:pr[k2][0],b:pr[k2][1],color:T[k2],w:1.8,alpha:.32});
+    });
+    it.push({kind:'poly',tag:key,pts:[base,vert,tip],color:T.nv,fillAlpha:.12,stroke:T.nv,w:1,dash:DASH});
+    it.push({kind:'seg',tag:key,a:base,b:vert,color:T[key],w:3.2});
+    it.push(segLab(key,base,vert,'катет 1 = проекция '+fmt(projLen),T[key],[0,31]));
+    it.push({kind:'seg',tag:key,a:base,b:tip,color:T.ang,w:2.8});
+    it.push(segLab(key,base,tip,'катет 2 = '+d.legName+' = '+fmt(d.h,1),T.ang,[-13,0],undefined,'right'));
+    it.push({kind:'seg',tag:key,a:tip,b:vert,color:T.nv,w:3.8});
+    it.push(segLab(key,tip,vert,'гипотенуза |AB| = '+fmt(ab),T.nv,[26,-33],undefined,'left'));
+    it.push({kind:'right',tag:key,v:base,a:vert,b:tip,color:T.helper,s:.6,w:1.4});
+    it.push({kind:'arc',tag:key,v:vert,a:base,b:tip,r:1.3,color:T.ang,w:1.9,label:d.ang+' = '+fmt(deg(angle),1)+'°'});
+    it.push({kind:'pt',tag:key,p:base,color:T[key],label:(d.at==='A'?'A':'B')+SUBIDX[key],off:[10,15]});
+    it.push({kind:'pt',tag:key,p:vert,color:T[key],label:(d.at==='A'?'B':'A')+SUBIDX[key],off:[10,15]});
+    it.push({kind:'pt',tag:key,p:tip,color:T.nv,label:tipName,off:[11,-13]});
+    if(fs>0.03){
+      it.push({kind:'seg',a:A,b:B,color:T.space,w:3.4,alpha:fs});
+      it.push({kind:'seg',a:A,b:pr[key][0],color:T[key],w:1.3,dash:RAY,alpha:fs*.8});
+      it.push({kind:'seg',a:B,b:pr[key][1],color:T[key],w:1.3,dash:RAY,alpha:fs*.8});
+      it.push({kind:'pt',p:A,color:T.space,r:4.5,label:'A',off:[12,-13],size:15,alpha:fs});
+      it.push({kind:'pt',p:B,color:T.space,r:4.5,label:'B',off:[12,-13],size:15,alpha:fs});
+      if(P.tri){
+        const K=d.K,eA=d.at==='A'?A:B,eB=d.at==='A'?B:A;
+        it.push({kind:'poly',pts:[A,K,B],color:T.space,fillAlpha:.1,stroke:T.space,w:1.1,dash:DASH,alpha:fs*.9});
+        it.push({kind:'seg',a:eA,b:K,color:T.ang,w:2.4,alpha:fs});
+        it.push({kind:'seg',a:K,b:eB,color:T[key],w:2.2,alpha:fs});
+        it.push({kind:'right',v:K,a:eA,b:eB,color:T.helper,s:.6,w:1.4,alpha:fs});
+        it.push({kind:'arc',v:eB,a:K,b:eA,r:1.4,color:T.ang,w:1.8,label:d.ang,alpha:fs});
+        it.push({kind:'pt',p:K,color:T.helper,r:3.2,label:'K',off:[10,-11],alpha:fs});
+        it.push(segLab(null,eA,K,d.legName,T.ang,[15,0],fs,'left'));
+      }
+    }
+    return {items:it,reads:[
+      {k:'катет 1 — проекция на '+PNAME[key],v:fmt(projLen),c:T[key],x:'берётся готовой с чертежа'},
+      {k:'катет 2 — '+d.legFull,v:fmt(d.h,1),c:T.ang,x:d.legWhat},
+      {k:'гипотенуза = |AB|',v:fmt(ab),c:T.nv,x:'натуральная величина отрезка'},
+      {k:'угол '+d.ang+' к '+d.angTo,v:fmt(deg(angle),1)+'°',c:T.ang,x:'между гипотенузой и катетом-проекцией'},
+      {k:'проверка по Пифагору',v:fmt(Math.sqrt(projLen*projLen+d.h*d.h)),c:T.nv,x:'√(катет₁² + катет₂²) = |AB|'}
+    ]};
+  },
+  theory:`
+  <div class="card tip">
+    <h3>Простыми словами</h3>
+    <p>На чертеже есть только короткие тени отрезка. Но в пространстве уже есть готовый прямоугольный треугольник: один катет — сама тень, второй катет — насколько один конец дальше от плоскости, чем другой, а гипотенуза — сам отрезок.</p>
+    <p>Включи «треугольник в пространстве» и тяни ползунок поворота: треугольник <b>поворачивается вокруг катета-проекции</b> и ложится в плоскость чертежа. Длины при повороте не меняются — поэтому гипотенуза на бумаге равна |AB|.</p>
+  </div>
+  <div class="card rule">
+    <h3>Алгоритм (один для всех трёх плоскостей)</h3>
+    <ol>
+      <li><b>Первый катет</b> — готовая проекция отрезка на эту плоскость.</li>
+      <li><b>Второй катет</b> — разность расстояний концов до этой плоскости; откладывается <b>⊥ проекции</b> из проекции любого из двух концов.</li>
+      <li><b>Гипотенуза</b> — это натуральная величина |AB|.</li>
+      <li><b>Угол между гипотенузой и катетом-проекцией</b> — угол наклона прямой к этой же плоскости.</li>
+    </ol>
+    <p>Не путать разности: для π₁ — разность <b>высот</b> Δz, для π₂ — разность <b>глубин</b> Δy, для π₃ — разность координат <b>x</b>.</p>
+  </div>
+  <div class="card">
+    <h3>Формулы и самопроверка</h3>
+    <ul>
+      <li>через π₁: |AB| = √(|A₁B₁|² + Δz²), угол <span class="ka">α</span> — к полу;</li>
+      <li>через π₂: |AB| = √(|A₂B₂|² + Δy²), угол <span class="ka">β</span> — к передней стене;</li>
+      <li>через π₃: |AB| = √(|A₃B₃|² + Δx²), угол <span class="ka">γ</span> — к правой стене.</li>
+    </ul>
+    <p>Любой из трёх путей даёт один ответ — переключай π₁/π₂/π₃ и смотри на карточку гипотенузы. Бонус: sin²α + sin²β + sin²γ = 1.</p>
+    <details><summary>Как это записано в лекции</summary>
+      <div class="body">
+        <p class="quote">Первым катетом прямоугольного треугольника является проекция отрезка прямой на плоскость проекций.</p>
+        <p class="quote">Вторым катетом является разность расстояний концов отрезка до этой же плоскости проекций; откладывается перпендикулярно проекции из проекции любого конца отрезка.</p>
+        <p class="quote">Гипотенуза — натуральная величина отрезка; угол между гипотенузой и катетом-проекцией — угол наклона прямой к данной плоскости проекций.</p>
+      </div>
+    </details>
+  </div>`
+});
+
+/* ============================================================
+   06. ШПАГАЛКА (без 3D)
+   ============================================================ */
+SCENES.push({
+  id:'cheat',n:'06',t:'Шпаргалка и самопроверка',s:'вся лекция на одном экране',
+  title:'Вся лекция на одном экране',
+  lead:'Таблица распознавания прямых, порядок решения задач и вопросы для самопроверки.',
+  docs:true,
+  theory:`
+  <div class="card">
+    <h3>Тип прямой по комплексному чертежу</h3>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Тип прямой</th><th>Как стоит в пространстве</th><th>Признак на КЧ</th><th>Где натуральная величина</th></tr></thead>
+      <tbody>
+        <tr><td><b>Общего положения</b></td><td>косо ко всем трём плоскостям</td><td>ни одна проекция не ∥ осям и не ⊥ линиям связи</td><td>нигде — только методом прямоугольного треугольника</td></tr>
+        <tr><td><b>Горизонталь h</b></td><td>∥ π₁ (полу), z = const</td><td>h₂ ∥ Ox, h₃ ∥ Oy</td><td><b>π₁</b>: |h₁| = |AB|; ∠(h₁, Ox) = β</td></tr>
+        <tr><td><b>Фронталь f</b></td><td>∥ π₂ (передней стене), y = const</td><td>f₁ ∥ Ox, f₃ ∥ Oz</td><td><b>π₂</b>: |f₂| = |AB|; ∠(f₂, Ox) = α</td></tr>
+        <tr><td><b>Профильная p</b></td><td>∥ π₃ (правой стене), x = const</td><td>p₁ ∥ Oy, p₂ ∥ Oz (p₁ и p₂ на одной линии связи)</td><td><b>π₃</b>: |p₃| = |AB|; задаётся только отрезком</td></tr>
+        <tr><td><b>i ⊥ π₁</b></td><td>вертикальная</td><td>i₁ — точка (след); i₂, i₃ ⊥ Ox</td><td><b>π₂ и π₃</b> — сразу две</td></tr>
+        <tr><td><b>j ⊥ π₂</b></td><td>смотрит в переднюю стену</td><td>j₂ — точка; j₁ ⊥ Ox, j₃ ⊥ Oz</td><td><b>π₁ и π₃</b></td></tr>
+        <tr><td><b>p ⊥ π₃</b></td><td>смотрит в правую стену</td><td>p₃ — точка; p₁, p₂ ∥ Ox</td><td><b>π₁ и π₂</b></td></tr>
+      </tbody>
+    </table></div>
+    <p style="margin-top:10px">Коротко: <b>параллельна</b> плоскости — там натуральная величина; <b>перпендикулярна</b> плоскости — там точка, а натуральная величина на двух остальных.</p>
+  </div>
+  <div class="card rule">
+    <h3>Порядок решения задачи «даны две проекции отрезка»</h3>
+    <ol>
+      <li><b>Посмотри на наклон проекций.</b> Есть проекция ∥ оси? → прямая уровня. Проекция выродилась в точку? → проецирующая. Иначе → общего положения.</li>
+      <li><b>Если нужна длина.</b> У прямых уровня и проецирующих — просто измерь нужную проекцию. У прямой общего положения — прямоугольный треугольник.</li>
+      <li><b>Если нужен угол</b> — бери ту плоскость, к которой ищешь угол: α — через π₁ (Δz), β — через π₂ (Δy), γ — через π₃ (Δx).</li>
+      <li><b>Проверка.</b> Натуральная величина всегда больше любой проекции; угол выходит от 0° до 90°.</li>
+    </ol>
+  </div>
+  <div class="card tip">
+    <h3>Словарик одной строкой</h3>
+    <ul>
+      <li><span class="k1">π₁</span> — пол (горизонтальная плоскость), проекции с индексом ₁.</li>
+      <li><span class="k2">π₂</span> — стена перед тобой (фронтальная), индекс ₂.</li>
+      <li><span class="k3">π₃</span> — стена справа (профильная), индекс ₃.</li>
+      <li><b>КЧ</b> — комплексный чертёж (три развёрнутые плоскости на одном листе).</li>
+      <li><b>Линия связи</b> — линия, соединяющая проекции одной точки; A₁A₂ ⊥ Ox, A₂A₃ ⊥ Oz.</li>
+      <li><b>Натуральная величина</b> — истинная длина отрезка, а не его тень.</li>
+      <li><b>След прямой</b> — точка, в которой прямая протыкает плоскость проекций.</li>
+      <li><b>α, β, γ</b> — углы наклона прямой к π₁, π₂, π₃.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>Проверь себя</h3>
+    <div class="qa">
+      <details><summary>1. Почему для построения прямой достаточно двух точек?</summary>
+        <div class="body">По аксиоме Евклида через две точки проходит единственная прямая. Значит, проекции прямой = проекции двух её точек, соединённые линией.</div>
+      </details>
+      <details><summary>2. Горизонтальная проекция отрезка ∥ Ox. Что это за прямая и где её длина?</summary>
+        <div class="body">Это <b>фронталь f ∥ π₂</b>. Натуральная величина — на π₂ (|A₂B₂|), а угол между f₂ и Ox — это α, угол наклона к полу.</div>
+      </details>
+      <details><summary>3. Фронтальная проекция — точка. Что это?</summary>
+        <div class="body">Фронтально-проецирующая прямая <b>j ⊥ π₂</b>. Её горизонтальная и профильная проекции дают натуральную величину, а точка j₂ — след прямой на π₂.</div>
+      </details>
+      <details><summary>4. Какой катет брать, если строишь треугольник на π₂?</summary>
+        <div class="body">Первый катет — |A₂B₂|, второй — разность глубин Δy = yʙ − yᴀ (расстояний до π₂). Гипотенуза даст |AB|, угол с катетом-проекцией — β.</div>
+      </details>
+      <details><summary>5. Почему профильную прямую нельзя задать двумя проекциями?</summary>
+        <div class="body">Потому что p₁ и p₂ лежат на одной вертикальной линии связи: по ним нельзя понять, какие именно точки взяты. Поэтому её задают отрезком или строят третью проекцию.</div>
+      </details>
+      <details><summary>6. Отрезок удаляется от наблюдателя и одновременно поднимается. Какая это прямая?</summary>
+        <div class="body">Восходящая прямая общего положения (y уменьшается, z растёт). Если бы при удалении опускалась — нисходящая.</div>
+      </details>
+    </div>
+  </div>`
+});
+
+/* ============================================================
+   ИНТЕРФЕЙС
+   ============================================================ */
+const el=id=>document.getElementById(id);
+const navEl=el('nav'),viewsEl=el('views'),ctlEl=el('controls'),legEl=el('legend'),
+      thEl=el('theory'),stageEl=el('stage'),readsEl=el('reads');
+
+const LEGEND=[['space','отрезок / точка в пространстве'],['p1','π₁ — пол и горизонтальные проекции'],
+  ['p2','π₂ — стена перед тобой'],['p3','π₃ — стена справа'],
+  ['nv','натуральная величина'],['ang','углы наклона и разности Δ']];
+function buildLegend(){
+  legEl.innerHTML=LEGEND.map(p=>'<span><i class="dot" style="background:'+T[p[0]]+'"></i>'+p[1]+'</span>').join('');
+}
+function buildNav(){
+  navEl.innerHTML='';
+  SCENES.forEach((sc,i)=>{
+    const b=document.createElement('button');
+    b.className='navitem';b.type='button';
+    b.innerHTML='<span class="n">'+sc.n+'</span><span class="t">'+sc.t+'</span><span class="s">'+sc.s+'</span>';
+    b.addEventListener('click',()=>selectScene(i));
+    navEl.appendChild(b);
+  });
+}
+function syncNav(){
+  Array.prototype.forEach.call(navEl.children,(b,i)=>b.setAttribute('aria-current',i===state.scene?'true':'false'));
+}
+const VIEWBTNS=[['v3d','3D'],['front','спереди (π₂)'],['top','сверху (π₁)'],['side','справа (π₃)']];
+function buildViews(){
+  viewsEl.innerHTML='';
+  VIEWBTNS.forEach(v=>{
+    const b=document.createElement('button');
+    b.className='btn';b.type='button';b.dataset.view=v[0];b.textContent=v[1];
+    b.addEventListener('click',()=>gotoView(v[0]));
+    viewsEl.appendChild(b);
+  });
+  const sp=document.createElement('span');sp.className='spacer';viewsEl.appendChild(sp);
+  const u=document.createElement('button');
+  u.className='btn primary';u.id='unfoldBtn';u.type='button';
+  u.addEventListener('click',()=>setUnfold(state.unfold>0.5?0:1,true));
+  viewsEl.appendChild(u);
+  syncViewBtns();syncUnfoldUI();
+}
+function syncViewBtns(){
+  const bs=viewsEl.querySelectorAll('[data-view]');
+  Array.prototype.forEach.call(bs,b=>b.setAttribute('aria-pressed',b.dataset.view===state.view?'true':'false'));
+}
+function syncUnfoldUI(){
+  const b=el('unfoldBtn');
+  if(b)b.textContent=state.unfold>0.5?'Собрать в 3D':'Разложить в чертёж (КЧ)';
+  const s=el('foldRange');
+  if(s&&document.activeElement!==s)s.value=String(state.unfold);
+  const o=el('foldOut');
+  if(o)o.textContent=Math.round(state.unfold*100)+'%';
+}
+function buildControls(sc){
+  ctlEl.innerHTML='';
+  if(sc.docs){ctlEl.style.display='none';return;}
+  ctlEl.style.display='';
+  const w0=document.createElement('div');
+  w0.className='ctl';
+  w0.innerHTML='<div class="lab"><span>развернуть плоскости в чертёж</span><b id="foldOut">0%</b></div>';
+  const r0=document.createElement('input');
+  r0.type='range';r0.min='0';r0.max='1';r0.step='0.01';r0.id='foldRange';r0.value=String(state.unfold);
+  r0.addEventListener('input',()=>{state.unfold=parseFloat(r0.value);state.view='';syncViewBtns();syncUnfoldUI();render();});
+  w0.appendChild(r0);ctlEl.appendChild(w0);
+  (sc.controls||[]).forEach(c=>{
+    if(c.type==='slider'){
+      const w=document.createElement('div');w.className='ctl';
+      const lab=document.createElement('div');lab.className='lab';
+      const sp=document.createElement('span');sp.textContent=c.label;
+      const out=document.createElement('b');
+      const show=v=>c.pct?Math.round(v*100)+'%':fmt(v,1);
+      out.textContent=show(state.P[c.key]);
+      lab.appendChild(sp);lab.appendChild(out);
+      const inp=document.createElement('input');
+      inp.type='range';inp.min=String(c.min);inp.max=String(c.max);inp.step=String(c.step);inp.value=String(state.P[c.key]);
+      inp.addEventListener('input',()=>{state.P[c.key]=parseFloat(inp.value);out.textContent=show(state.P[c.key]);render();});
+      w.appendChild(lab);w.appendChild(inp);ctlEl.appendChild(w);
+    }else if(c.type==='seg'){
+      const w=document.createElement('div');w.className='ctl';
+      w.innerHTML='<div class="lab"><span>'+c.label+'</span></div>';
+      const seg=document.createElement('div');seg.className='seg';
+      c.options.forEach(o=>{
+        const b=document.createElement('button');b.type='button';b.textContent=o.l;
+        b.setAttribute('aria-pressed',o.v===state.P[c.key]?'true':'false');
+        b.addEventListener('click',()=>{
+          state.P[c.key]=o.v;
+          Array.prototype.forEach.call(seg.children,(x,i)=>x.setAttribute('aria-pressed',c.options[i].v===state.P[c.key]?'true':'false'));
+          render();
+        });
+        seg.appendChild(b);
+      });
+      w.appendChild(seg);ctlEl.appendChild(w);
+    }else if(c.type==='check'){
+      const lb=document.createElement('label');lb.className='check';
+      const cb=document.createElement('input');cb.type='checkbox';cb.checked=!!state.P[c.key];
+      cb.addEventListener('change',()=>{state.P[c.key]=cb.checked;render();});
+      lb.appendChild(cb);lb.appendChild(document.createTextNode(c.label));
+      ctlEl.appendChild(lb);
+    }
+  });
+}
+function selectScene(i,keep){
+  state.scene=clamp(i|0,0,SCENES.length-1);
+  const sc=SCENES[state.scene];
+  if(!keep){state.P.sub=0;state.P.fold=0;state.unfold=0;}
+  el('scTitle').textContent=sc.title;
+  el('scLead').textContent=sc.lead||'';
+  thEl.innerHTML=sc.theory||'';
+  thEl.classList.toggle('one',!!sc.docs);
+  stageEl.style.display=sc.docs?'none':'';
+  viewsEl.style.display=sc.docs?'none':'flex';
+  readsEl.style.display=sc.docs?'none':'grid';
+  buildControls(sc);
+  syncNav();
+  if(!sc.docs){
+    lastReadsHTML='';
+    gotoView(sc.cam||'v3d',0);
+    resize();
+  }
+  syncUnfoldUI();
+}
+function setTheme(name){
+  const n=name==='dark'?'dark':'light';
+  document.documentElement.setAttribute('data-theme',n);
+  T=PAL[n];
+  buildLegend();
+  const sc=SCENES[state.scene];
+  if(sc&&!sc.docs)render();
+}
+el('themeBtn').addEventListener('click',()=>{
+  setTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark');
+});
+
+/* глубокие ссылки: #s=2&sub=1&t=1&v=front&fold=0.5&theme=dark */
+function applyHash(){
+  const h=(location.hash||'').replace(/^#/,'');
+  if(!h)return false;
+  const q={};
+  h.split('&').forEach(part=>{
+    const kv=part.split('=');
+    if(kv[0])q[kv[0]]=decodeURIComponent(kv[1]||'');
+  });
+  if(q.theme)setTheme(q.theme);
+  let idx=0;
+  if(q.s!==undefined){
+    const byId=SCENES.findIndex(s=>s.id===q.s);
+    const n=parseInt(q.s,10);
+    idx=byId>=0?byId:(isNaN(n)?0:clamp(n,0,SCENES.length-1));
+  }
+  selectScene(idx);
+  const sc=SCENES[state.scene];
+  if(q.sub!==undefined){const n=parseInt(q.sub,10);if(!isNaN(n))state.P.sub=n;}
+  if(q.dir)state.P.dir=q.dir;
+  if(q.fold!==undefined)state.P.fold=clamp(parseFloat(q.fold)||0,0,1);
+  if(q.t!==undefined)state.unfold=clamp(parseFloat(q.t)||0,0,1);
+  if(!sc.docs){
+    buildControls(sc);
+    if(q.v&&VIEWS[q.v])gotoView(q.v,0);
+    syncUnfoldUI();
+    lastReadsHTML='';
+    render();
+  }
+  return true;
+}
+function init(){
+  buildNav();buildViews();buildLegend();
+  if(!applyHash())selectScene(0);
+  resize();
+  if(window.ResizeObserver){new ResizeObserver(()=>resize()).observe(cv);}
+  else{window.addEventListener('resize',resize);}
+  window.addEventListener('hashchange',applyHash);
+  cv.addEventListener('dblclick',()=>{
+    const sc=SCENES[state.scene];
+    gotoView((sc&&sc.cam)||'v3d');
+  });
+}
+init();
+</script>
+</body>
+</html>

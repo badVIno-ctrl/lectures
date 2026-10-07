@@ -1,0 +1,2145 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Матрицы и определители — интерактивный курс</title>
+<meta name="theme-color" content="#090b11">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#090b11; --bg2:#0d1018; --panel:#10141e; --panel2:#151a26; --panel3:#1b2130;
+  --line:rgba(255,255,255,.07); --line2:rgba(255,255,255,.12);
+  --text:#e8ebf4; --muted:#8a93a8; --muted2:#5f6779;
+  --c1:#a293ff; --c2:#4cd3ff; --c3:#57e3a4; --c4:#ffc15e; --c5:#ff72b0; --c6:#ff8a5c; --red:#ff5f78;
+  --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:'Manrope',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --disp:'Unbounded','Manrope',system-ui,sans-serif;
+  --r:18px; --toc:282px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:24px;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16.5px/1.7 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;
+  background:
+   radial-gradient(900px 600px at 85% -8%,rgba(162,147,255,.13),transparent 62%),
+   radial-gradient(700px 520px at -8% 38%,rgba(76,211,255,.07),transparent 60%),
+   radial-gradient(800px 600px at 60% 110%,rgba(255,114,176,.06),transparent 60%)}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;opacity:.35;
+  background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+  background-size:44px 44px;-webkit-mask-image:radial-gradient(ellipse at 50% 0%,#000 20%,transparent 75%);mask-image:radial-gradient(ellipse at 50% 0%,#000 20%,transparent 75%)}
+::selection{background:rgba(162,147,255,.35)}
+a{color:var(--c2);text-decoration:none}
+b,strong{font-weight:700;color:#fff}
+i.v{font-family:'Times New Roman',Georgia,serif;font-style:italic;font-size:1.1em;letter-spacing:.01em}
+sub,sup{font-size:.68em;line-height:0}
+code,.mono{font-family:var(--mono);font-size:.92em}
+kbd{font:600 .78em var(--mono);padding:2px 7px;border-radius:6px;border:1px solid var(--line2);border-bottom-width:2px;background:var(--panel2);color:var(--text)}
+
+/* ---------- прогресс и навигация ---------- */
+#bar{position:fixed;left:0;top:0;height:3px;width:0;z-index:60;background:linear-gradient(90deg,var(--c1),var(--c2),var(--c3));box-shadow:0 0 12px rgba(162,147,255,.6)}
+#toc{position:fixed;left:0;top:0;bottom:0;width:var(--toc);padding:26px 16px 20px 20px;overflow-y:auto;z-index:50;
+  background:rgba(10,12,18,.78);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-right:1px solid var(--line);scrollbar-width:thin}
+#toc .brand{display:flex;align-items:center;gap:11px;margin:0 0 18px 4px;font:700 15px var(--disp);letter-spacing:.02em}
+#toc .brand .logo{width:34px;height:34px;border-radius:10px;display:grid;grid-template-columns:repeat(2,1fr);gap:3px;padding:6px;background:linear-gradient(135deg,rgba(162,147,255,.25),rgba(76,211,255,.18));border:1px solid var(--line2)}
+#toc .brand .logo i{border-radius:3px;background:var(--c1)}#toc .brand .logo i:nth-child(2){background:var(--c2)}#toc .brand .logo i:nth-child(3){background:var(--c5)}#toc .brand .logo i:nth-child(4){background:var(--c3)}
+#toc .grp{font:600 10.5px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--muted2);margin:18px 0 6px 8px}
+#toc a{display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:10px;color:var(--muted);font-size:14px;line-height:1.35;transition:.2s}
+#toc a .n{flex:0 0 24px;height:24px;border-radius:7px;display:grid;place-items:center;font:600 11px var(--mono);background:var(--panel2);border:1px solid var(--line);color:var(--muted);transition:.2s}
+#toc a:hover{color:var(--text);background:rgba(255,255,255,.035)}
+#toc a.on{color:#fff;background:rgba(162,147,255,.1)}
+#toc a.on .n{background:var(--c1);color:#0b0b14;border-color:transparent}
+#toc a.done .n{background:rgba(87,227,164,.16);color:var(--c3);border-color:rgba(87,227,164,.35)}
+#toc a.done .n span{display:none}#toc a.done .n::after{content:"✓"}
+#toc .tprog{margin:0 4px 6px;font-size:12px;color:var(--muted)}
+#tocBtn{display:none;position:fixed;right:14px;top:12px;z-index:70;width:46px;height:46px;border-radius:14px;border:1px solid var(--line2);background:rgba(16,20,30,.85);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:var(--text);font-size:20px;cursor:pointer}
+#scrim{display:none}
+
+main{margin-left:var(--toc);padding:0 44px 120px}
+.wrap{max-width:980px;margin:0 auto}
+
+/* ---------- hero ---------- */
+.hero{min-height:92vh;display:grid;grid-template-columns:1.15fr .85fr;align-items:center;gap:40px;padding:60px 0 40px}
+.kick{display:inline-flex;align-items:center;gap:8px;font:600 12px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--c2);padding:6px 12px;border-radius:99px;border:1px solid rgba(76,211,255,.25);background:rgba(76,211,255,.06)}
+.kick::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c2);box-shadow:0 0 10px var(--c2)}
+.hero h1{font:700 clamp(34px,4.3vw,58px)/1.08 var(--disp);letter-spacing:-.02em;margin:22px 0 18px}
+.grad{background:linear-gradient(100deg,#fff 0%,#cfc8ff 30%,var(--c1) 55%,var(--c2) 80%,var(--c3));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p.lead{font-size:18.5px;color:#b7bfd2;max-width:560px;margin:0 0 28px}
+.cta{display:flex;gap:12px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:9px;padding:12px 20px;border-radius:14px;border:1px solid var(--line2);background:var(--panel2);color:var(--text);font:700 14.5px var(--sans);cursor:pointer;transition:transform .15s,background .2s,border-color .2s,box-shadow .2s;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
+.btn:hover{transform:translateY(-1px);border-color:rgba(255,255,255,.22);background:var(--panel3)}
+.btn:active{transform:translateY(1px) scale(.98)}
+.btn.pri{background:linear-gradient(135deg,#8f7dff,#5a8dff);border-color:transparent;color:#fff;box-shadow:0 8px 30px -8px rgba(143,125,255,.7)}
+.btn.pri:hover{box-shadow:0 10px 36px -6px rgba(143,125,255,.9)}
+.btn.ok{background:rgba(87,227,164,.12);border-color:rgba(87,227,164,.4);color:var(--c3)}
+.btn.sm{padding:8px 13px;font-size:13px;border-radius:11px}
+.btn[disabled]{opacity:.4;pointer-events:none}
+.hero-art{position:relative;aspect-ratio:1;max-width:440px;justify-self:center;width:100%}
+.hero-art .glow{position:absolute;inset:8%;border-radius:40%;background:conic-gradient(from 0deg,rgba(162,147,255,.35),rgba(76,211,255,.25),rgba(87,227,164,.2),rgba(255,114,176,.3),rgba(162,147,255,.35));filter:blur(50px);animation:spin 14s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero-art .hcard{position:absolute;inset:9%;border-radius:28px;background:rgba(16,20,30,.78);border:1px solid var(--line2);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;box-shadow:0 30px 80px -20px rgba(0,0,0,.8)}
+.hero-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;position:relative;padding:0 24px}
+.hero-grid::before,.hero-grid::after{content:"";position:absolute;top:-6px;bottom:-6px;width:16px;border:3px solid rgba(255,255,255,.75)}
+.hero-grid::before{left:0;border-right:0;border-radius:18px 0 0 18px/50% 0 0 50%}
+.hero-grid::after{right:0;border-left:0;border-radius:0 18px 18px 0/0 50% 50% 0}
+.hero-grid span{width:54px;height:54px;border-radius:15px;display:grid;place-items:center;font:600 22px var(--mono);background:rgba(255,255,255,.03);border:1px solid var(--line);transition:all .5s cubic-bezier(.2,.8,.2,1)}
+.hero-grid span.a{background:rgba(162,147,255,.22);border-color:rgba(162,147,255,.7);color:#fff;transform:scale(1.06)}
+.hero-grid span.b{background:rgba(76,211,255,.18);border-color:rgba(76,211,255,.6);color:#fff}
+.hero-grid span.g{background:rgba(87,227,164,.18);border-color:rgba(87,227,164,.6);color:#fff}
+.hero-cap{font:600 14px var(--mono);color:var(--muted);min-height:22px;text-align:center;padding:0 16px}
+.hero-cap b{color:var(--c3)}
+.hero-tag{position:absolute;font:600 12px var(--mono);padding:7px 11px;border-radius:10px;background:var(--panel2);border:1px solid var(--line2);color:var(--muted);box-shadow:0 10px 30px -10px #000;animation:float 6s ease-in-out infinite;white-space:nowrap}
+.hero-tag b{color:var(--c2)}
+@keyframes float{50%{transform:translateY(-10px)}}
+
+.map{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin:10px 0 30px}
+.map a{display:block;padding:16px 16px 14px;border-radius:16px;background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);color:var(--text);transition:.25s;position:relative;overflow:hidden}
+.map a:hover{transform:translateY(-3px);border-color:rgba(162,147,255,.4);box-shadow:0 18px 40px -20px rgba(162,147,255,.5)}
+.map a .no{font:600 11px var(--mono);color:var(--c1);letter-spacing:.1em}
+.map a .tt{font-weight:700;margin:4px 0 2px;line-height:1.3}
+.map a .ds{font-size:13px;color:var(--muted);line-height:1.45}
+
+/* ---------- секции ---------- */
+section.sec{padding:70px 0 20px;border-top:1px solid var(--line)}
+.sec-head{display:flex;align-items:flex-start;gap:18px;margin-bottom:22px}
+.sec-no{flex:0 0 auto;font:700 13px var(--mono);color:var(--c1);padding:7px 11px;border-radius:12px;border:1px solid rgba(162,147,255,.35);background:rgba(162,147,255,.08);margin-top:6px}
+h2{font:700 clamp(25px,3.3vw,37px)/1.18 var(--disp);letter-spacing:-.015em;margin:0}
+.sec-sub{color:var(--muted);margin:8px 0 0;font-size:16px}
+h3{font:700 21px/1.3 var(--sans);margin:38px 0 12px;letter-spacing:-.01em}
+h4{font:700 17px var(--sans);margin:22px 0 8px}
+p{margin:0 0 14px}
+.muted{color:var(--muted)}
+ul.clean{padding-left:0;list-style:none;margin:0 0 16px}
+ul.clean li{position:relative;padding-left:26px;margin:7px 0}
+ul.clean li::before{content:"";position:absolute;left:6px;top:.72em;width:7px;height:7px;border-radius:2px;background:var(--c1);transform:rotate(45deg)}
+ol.steps{counter-reset:s;list-style:none;padding:0;margin:0 0 16px}
+ol.steps>li{counter-increment:s;position:relative;padding:4px 0 4px 44px;margin:8px 0}
+ol.steps>li::before{content:counter(s);position:absolute;left:0;top:3px;width:30px;height:30px;border-radius:10px;display:grid;place-items:center;font:700 13px var(--mono);background:rgba(162,147,255,.14);color:var(--c1);border:1px solid rgba(162,147,255,.35)}
+
+.card{background:linear-gradient(180deg,rgba(21,26,38,.9),rgba(16,20,30,.9));border:1px solid var(--line);border-radius:var(--r);padding:22px 24px;margin:18px 0;position:relative}
+.theory{border-left:3px solid var(--c1)}
+.idea{display:flex;gap:14px;align-items:flex-start;padding:16px 18px;border-radius:16px;margin:16px 0;background:rgba(76,211,255,.06);border:1px solid rgba(76,211,255,.2)}
+.idea .ic{flex:0 0 34px;height:34px;border-radius:10px;display:grid;place-items:center;background:rgba(76,211,255,.15);font-size:17px}
+.idea.warn{background:rgba(255,193,94,.06);border-color:rgba(255,193,94,.25)}.idea.warn .ic{background:rgba(255,193,94,.16)}
+.idea.err{background:rgba(255,95,120,.06);border-color:rgba(255,95,120,.28)}.idea.err .ic{background:rgba(255,95,120,.16)}
+.idea.good{background:rgba(87,227,164,.06);border-color:rgba(87,227,164,.25)}.idea.good .ic{background:rgba(87,227,164,.15)}
+.idea>div:last-child{min-width:0;flex:1}
+.idea p:last-child{margin-bottom:0}
+.formula{font-family:var(--mono);font-size:17px;padding:16px 18px;border-radius:14px;background:rgba(0,0,0,.25);border:1px dashed var(--line2);margin:14px 0;overflow-x:auto;text-align:center;line-height:2.2}
+.def{padding:14px 18px;border-radius:14px;background:rgba(162,147,255,.07);border:1px solid rgba(162,147,255,.22);margin:14px 0}
+.def>b:first-child sub{text-transform:none}
+.def>b:first-child{color:var(--c1);font:700 11.5px var(--mono);letter-spacing:.12em;text-transform:uppercase;display:block;margin-bottom:4px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+
+details.why{margin:16px 0;border-radius:16px;border:1px solid rgba(255,114,176,.25);background:rgba(255,114,176,.045);overflow:hidden}
+details.why>summary{cursor:pointer;list-style:none;padding:14px 18px;font-weight:700;display:flex;align-items:center;gap:10px;color:#ffc2dc}
+details.why>summary::-webkit-details-marker{display:none}
+details.why>summary::before{content:"?";flex:0 0 26px;height:26px;border-radius:8px;display:grid;place-items:center;background:rgba(255,114,176,.18);color:var(--c5);font:700 14px var(--mono)}
+details.why>summary::after{content:"▾";margin-left:auto;transition:.25s;color:var(--muted)}
+details.why[open]>summary::after{transform:rotate(180deg)}
+details.why>div{padding:0 18px 16px}
+
+/* цветные токены в тексте и формулах */
+.tk{font-weight:700;border-radius:6px}
+.k1{color:var(--c1)}.k2{color:var(--c2)}.k3{color:var(--c3)}.k4{color:var(--c4)}.k5{color:var(--c5)}.k6{color:var(--c6)}.kr{color:var(--red)}.km{color:var(--muted)}
+.bg1{background:rgba(162,147,255,.18)}.bg2{background:rgba(76,211,255,.16)}.bg3{background:rgba(87,227,164,.16)}.bg4{background:rgba(255,193,94,.16)}.bg5{background:rgba(255,114,176,.16)}.bg6{background:rgba(255,95,120,.16)}
+.q0{color:var(--c2)}.q1{color:var(--c5)}.q2{color:var(--c4)}.q3{color:var(--c3)}.q4{color:var(--c1)}.q5{color:var(--c6)}
+
+/* ---------- матрицы ---------- */
+.mxw{display:inline-flex;align-items:center;gap:10px;position:relative;vertical-align:middle}
+.mxw .lab{font:600 1.12em var(--sans);white-space:nowrap}
+.mxw .lab:empty{display:none}
+.mxc{display:inline-flex;flex-direction:column;align-items:center;gap:6px}
+.mxc .cap{font:600 11.5px var(--mono);color:var(--muted);letter-spacing:.06em;padding:2px 8px;border-radius:7px;background:rgba(255,255,255,.04);transition:.3s}
+.mxc .cap:empty{display:none}
+.mxc .cap.ok{color:var(--c3);background:rgba(87,227,164,.1)}
+.mxc .cap.bad{color:var(--red);background:rgba(255,95,120,.1)}
+.mx{position:relative;display:inline-grid;gap:5px 6px;padding:5px 14px;font-family:var(--mono);--br:rgba(232,235,244,.8)}
+.mx::before,.mx::after{content:"";position:absolute;top:0;bottom:0;width:10px;border:2px solid var(--br);pointer-events:none}
+.mx.paren::before{left:0;border-right:0;border-radius:14px 0 0 14px/50% 0 0 50%}
+.mx.paren::after{right:0;border-left:0;border-radius:0 14px 14px 0/0 50% 50% 0}
+.mx.bars::before{left:3px;width:0;border-width:0 0 0 2px}
+.mx.bars::after{right:3px;width:0;border-width:0 2px 0 0}
+.mx.none::before,.mx.none::after{display:none}
+.mx.none{padding:5px 4px}
+.c{min-width:2.5em;min-height:2.25em;padding:2px .4em;display:flex;align-items:center;justify-content:center;border-radius:10px;font-size:1.04rem;font-weight:500;position:relative;
+  transition:background .35s,color .35s,box-shadow .35s,opacity .35s,transform .35s;white-space:nowrap}
+.c .v{transition:opacity .25s}
+.c.h1{background:rgba(162,147,255,.2);box-shadow:inset 0 0 0 1.5px rgba(162,147,255,.85),0 0 18px -4px rgba(162,147,255,.6);color:#fff}
+.c.h2{background:rgba(76,211,255,.17);box-shadow:inset 0 0 0 1.5px rgba(76,211,255,.8),0 0 18px -4px rgba(76,211,255,.55);color:#fff}
+.c.h3{background:rgba(87,227,164,.17);box-shadow:inset 0 0 0 1.5px rgba(87,227,164,.8),0 0 18px -4px rgba(87,227,164,.55);color:#fff}
+.c.h4{background:rgba(255,193,94,.16);box-shadow:inset 0 0 0 1.5px rgba(255,193,94,.8),0 0 18px -4px rgba(255,193,94,.5);color:#fff}
+.c.h5{background:rgba(255,114,176,.17);box-shadow:inset 0 0 0 1.5px rgba(255,114,176,.8),0 0 18px -4px rgba(255,114,176,.55);color:#fff}
+.c.h6{background:rgba(255,95,120,.18);box-shadow:inset 0 0 0 1.5px rgba(255,95,120,.85),0 0 18px -4px rgba(255,95,120,.55);color:#fff}
+.c.p0{background:rgba(76,211,255,.2);box-shadow:inset 0 0 0 1.5px rgba(76,211,255,.9);color:#fff}
+.c.p1{background:rgba(255,114,176,.2);box-shadow:inset 0 0 0 1.5px rgba(255,114,176,.9);color:#fff}
+.c.p2{background:rgba(255,193,94,.2);box-shadow:inset 0 0 0 1.5px rgba(255,193,94,.9);color:#fff}
+.c.p3{background:rgba(87,227,164,.2);box-shadow:inset 0 0 0 1.5px rgba(87,227,164,.9);color:#fff}
+.c.p4{background:rgba(162,147,255,.22);box-shadow:inset 0 0 0 1.5px rgba(162,147,255,.9);color:#fff}
+.c.p5{background:rgba(255,138,92,.2);box-shadow:inset 0 0 0 1.5px rgba(255,138,92,.9);color:#fff}
+.c.soft{background:rgba(255,255,255,.07)}
+.c.dim{opacity:.26}
+.c.x{opacity:.2}
+.c.q .v{opacity:0}
+.c.q::after{content:"?";position:absolute;color:var(--muted2);font-weight:600}
+.c.q{box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.08);background:rgba(255,255,255,.015)}
+.c.blank .v{opacity:0}.c.blank{box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.06)}
+.c.wait .v{opacity:0}
+.c.pop{animation:pop .55s cubic-bezier(.2,.9,.3,1.4)}
+.c.chg{animation:chg .6s ease}
+.c.ring{outline:2px solid rgba(255,255,255,.9);outline-offset:2px}
+.c.pulse{animation:pulse 1.6s ease-in-out infinite}
+@keyframes pop{0%{transform:scale(.3);opacity:0}100%{transform:none;opacity:1}}
+@keyframes chg{0%{transform:rotateX(0)}45%{transform:rotateX(90deg);color:var(--c4)}100%{transform:none}}
+@keyframes pulse{50%{transform:scale(1.1)}}
+.fr{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.08;font-size:.82em;margin:0 1px}
+.fr>span:first-child{border-bottom:1.5px solid currentColor;padding:0 3px 1px}
+.fr>span:last-child{padding-top:1px}
+.mx .c .fr{font-size:.8em}
+.ghost{position:fixed;z-index:80;pointer-events:none;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-weight:700;color:#fff;border-radius:10px;background:rgba(162,147,255,.4);box-shadow:0 0 22px rgba(162,147,255,.8);font-size:1.04rem;white-space:nowrap}
+.opb{font:500 1.55em var(--mono);color:var(--muted);padding:0 2px;user-select:none}
+.txb{font-size:1.12em;font-weight:600;white-space:nowrap}
+.txb .fr{font-size:.85em}
+
+/* inline mini matrices (в тексте) */
+.mm{display:inline-grid;vertical-align:middle;gap:0 .75em;padding:.12em .62em;margin:.15em .15em;position:relative;font:500 .93em/1.45 var(--mono)}
+.mm::before,.mm::after{content:"";position:absolute;top:0;bottom:0;width:.42em;border:1.5px solid currentColor;opacity:.75}
+.mm::before{left:0;border-right:0;border-radius:.5em 0 0 .5em/50% 0 0 50%}
+.mm::after{right:0;border-left:0;border-radius:0 .5em .5em 0/0 50% 50% 0}
+.mm.b::before{border-radius:0;border-width:0 0 0 1.5px;left:.12em}
+.mm.b::after{border-radius:0;border-width:0 1.5px 0 0;right:.12em}
+.mm>span{text-align:center}
+.mm .fr{font-size:.78em}
+.mm.big{font-size:1.15em}
+
+/* ---------- walkthrough ---------- */
+.ex{margin:22px 0;border-radius:22px;border:1px solid var(--line2);background:linear-gradient(180deg,rgba(24,29,43,.95),rgba(14,17,26,.95));overflow:hidden;box-shadow:0 30px 60px -40px rgba(0,0,0,.9)}
+.ex-head{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.ex-tag{font:700 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;padding:5px 10px;border-radius:8px;background:rgba(87,227,164,.12);color:var(--c3);border:1px solid rgba(87,227,164,.3);white-space:nowrap}
+.ex-tag.try{background:rgba(255,193,94,.1);color:var(--c4);border-color:rgba(255,193,94,.3)}
+.ex-tag.task{background:rgba(162,147,255,.12);color:var(--c1);border-color:rgba(162,147,255,.32)}
+.ex-tag.hw{background:rgba(255,114,176,.12);color:var(--c5);border-color:rgba(255,114,176,.32)}
+.ex-tag.done{background:rgba(87,227,164,.14);color:var(--c3);border-color:rgba(87,227,164,.4)}
+.ex-title{font-weight:700;font-size:16px}
+.ex-src{margin-left:auto;font:500 11.5px var(--mono);color:var(--muted2)}
+.ex-q{padding:16px 20px 4px;font-size:16px}
+.walk{position:relative}
+.walk-chip{display:none;margin:14px 20px 0;font:700 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--c4);padding:4px 10px;border-radius:8px;background:rgba(255,193,94,.08);border:1px solid rgba(255,193,94,.25);width:max-content;max-width:calc(100% - 40px)}
+.walk-chip.on{display:block}
+.stage{position:relative;overflow-x:auto;overflow-y:hidden;padding:26px 16px 22px;scrollbar-width:thin}
+.stage-in{position:relative;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:16px 16px;min-height:110px;margin:0 auto;width:max-content;max-width:100%}
+.stage svg.ov{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;overflow:visible;z-index:3}
+.stage svg.ov.under{z-index:0}
+.stage-in>.mxc,.stage-in>.opb,.stage-in>.txb{position:relative;z-index:1}
+.walk-f{margin:0 20px;padding:12px 18px;border-radius:14px;background:rgba(0,0,0,.28);border:1px solid var(--line);font:500 17px/2.15 var(--mono);text-align:center;min-height:62px;overflow-x:auto}
+.walk-f:empty{display:none}
+.walk-f .mm{font-size:.9em}
+.walk-t{padding:14px 22px 4px;color:#c3cadb;font-size:15.5px;min-height:34px}
+.walk-t p{margin:0 0 8px}
+.walk-t small{color:var(--muted)}
+.fade{animation:fade .45s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.walk-ctl{display:flex;align-items:center;gap:8px;padding:12px 16px 16px;flex-wrap:wrap}
+.walk-ctl .ib{width:42px;height:42px;border-radius:13px;border:1px solid var(--line2);background:var(--panel2);color:var(--text);display:grid;place-items:center;cursor:pointer;font-size:15px;transition:.15s;-webkit-tap-highlight-color:transparent}
+.walk-ctl .ib:hover{background:var(--panel3);border-color:rgba(255,255,255,.22)}
+.walk-ctl .ib:active{transform:scale(.94)}
+.walk-ctl .ib.next{width:auto;padding:0 18px;gap:8px;display:flex;align-items:center;font:700 14px var(--sans);background:linear-gradient(135deg,#8f7dff,#5a8dff);border-color:transparent;box-shadow:0 6px 22px -8px rgba(143,125,255,.8);color:#fff}
+.walk-ctl .ib.next.end{background:rgba(87,227,164,.14);color:var(--c3);border:1px solid rgba(87,227,164,.4);box-shadow:none}
+.walk-ctl .ib[disabled]{opacity:.35;pointer-events:none}
+.walk-ctl .ib.play.on{background:rgba(255,193,94,.15);border-color:rgba(255,193,94,.45);color:var(--c4)}
+.walk-ctl .cnt{font:600 13px var(--mono);color:var(--muted);min-width:70px;text-align:center}
+.walk-ctl .cnt b{color:#fff}
+.segs{flex:1 1 160px;display:flex;gap:3px;height:22px;align-items:center;cursor:pointer;min-width:120px}
+.segs i{flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,.08);transition:.25s}
+.segs i.sd{background:rgba(162,147,255,.55)}
+.segs i.sc{background:var(--c2);height:9px;box-shadow:0 0 10px rgba(76,211,255,.6)}
+.segs i:hover{background:rgba(255,255,255,.25)}
+.walk-kbd{font-size:12px;color:var(--muted2);padding:0 20px 14px;margin-top:-6px}
+
+/* задачи */
+.ask{padding:6px 20px 16px}
+.ask-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:8px 0}
+.ask .lbl{font:600 12px var(--mono);letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+.ingrid{display:inline-grid;gap:6px;padding:6px 16px;position:relative}
+.ingrid::before,.ingrid::after{content:"";position:absolute;top:0;bottom:0;width:10px;border:2px solid rgba(232,235,244,.7)}
+.ingrid::before{left:0;border-right:0;border-radius:14px 0 0 14px/50% 0 0 50%}
+.ingrid::after{right:0;border-left:0;border-radius:0 14px 14px 0/0 50% 50% 0}
+.ingrid.plain::before,.ingrid.plain::after{display:none}
+.ingrid.plain{padding:0}
+input.cell{width:4.1em;height:2.5em;border-radius:10px;border:1.5px solid var(--line2);background:rgba(0,0,0,.3);color:#fff;font:600 16px var(--mono);text-align:center;outline:none;transition:.2s;padding:0 4px}
+input.cell:focus{border-color:var(--c1);box-shadow:0 0 0 4px rgba(162,147,255,.18)}
+input.cell.good{border-color:var(--c3);background:rgba(87,227,164,.1)}
+input.cell.bad{border-color:var(--red);background:rgba(255,95,120,.1);animation:shake .4s}
+input.cell.wide{width:6.5em}
+input.cell.p0{border-color:var(--c2);background:rgba(76,211,255,.14)}input.cell.p1{border-color:var(--c5);background:rgba(255,114,176,.14)}input.cell.p2{border-color:var(--c4);background:rgba(255,193,94,.14)}input.cell.p3{border-color:var(--c3);background:rgba(87,227,164,.14)}
+input.cell.dimi{opacity:.4}
+@keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.verdict{font-weight:700;font-size:14.5px;padding:8px 13px;border-radius:11px;display:none}
+.verdict.on{display:inline-block;animation:fade .3s}
+.verdict.good{background:rgba(87,227,164,.12);color:var(--c3)}
+.verdict.bad{background:rgba(255,95,120,.1);color:#ff9aab}
+.hint{display:none;margin:10px 0 0;padding:12px 15px;border-radius:12px;background:rgba(255,193,94,.07);border:1px solid rgba(255,193,94,.22);color:#ffe2b0;font-size:15px}
+.hint.on{display:block;animation:fade .3s}
+.sol{display:none;border-top:1px solid var(--line)}
+.sol.on{display:block;animation:fade .4s}
+.sol-lock{display:flex;align-items:center;gap:14px;padding:14px 20px;border-top:1px dashed var(--line2);background:repeating-linear-gradient(-45deg,rgba(255,255,255,.012) 0 10px,transparent 10px 20px);flex-wrap:wrap}
+.sol-lock .muted{font-size:14px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.chip{padding:7px 13px;border-radius:11px;border:1px solid var(--line2);background:var(--panel2);font:600 13.5px var(--sans);cursor:pointer;color:var(--muted);transition:.2s;-webkit-tap-highlight-color:transparent}
+.chip:hover{color:var(--text)}
+.chip.on{background:rgba(162,147,255,.16);border-color:rgba(162,147,255,.5);color:#fff}
+.chip.good{background:rgba(87,227,164,.12);border-color:rgba(87,227,164,.5);color:var(--c3)}
+.chip.bad{background:rgba(255,95,120,.1);border-color:rgba(255,95,120,.45);color:#ff9aab}
+
+/* виджеты */
+.lab-box{border-radius:22px;border:1px solid rgba(76,211,255,.22);background:linear-gradient(180deg,rgba(76,211,255,.05),rgba(16,20,30,.6));padding:18px 20px;margin:20px 0}
+.lab-top{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.lab-top .ex-tag{background:rgba(76,211,255,.1);color:var(--c2);border-color:rgba(76,211,255,.3)}
+.lab-top .ttl{font-weight:700}
+.lab-top .sub{color:var(--muted);font-size:13.5px;width:100%}
+.lab-stage{display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;padding:14px 0;min-height:110px}
+.lab-info{padding:12px 16px;border-radius:13px;background:rgba(0,0,0,.25);border:1px solid var(--line);font-size:15.5px;min-height:50px;text-align:center;line-height:2}
+.lab-ctl{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:center;margin:10px 0}
+.stepper{display:inline-flex;align-items:center;border:1px solid var(--line2);border-radius:12px;overflow:hidden;background:var(--panel2)}
+.stepper button{width:34px;height:34px;border:0;background:transparent;color:var(--text);font-size:18px;cursor:pointer}
+.stepper button:hover{background:rgba(255,255,255,.06)}
+.stepper span{min-width:34px;text-align:center;font:700 14px var(--mono)}
+.c.hov{cursor:pointer}
+.c.hov:hover{background:rgba(255,255,255,.08)}
+.types{display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:12px;margin:16px 0}
+.type{padding:16px;border-radius:16px;background:var(--panel);border:1px solid var(--line);text-align:center;transition:.25s}
+.type:hover{border-color:rgba(162,147,255,.35);transform:translateY(-2px)}
+.type .nm{font-weight:700;margin-top:10px}
+.type .ds{font-size:13px;color:var(--muted);line-height:1.45;margin-top:3px}
+.type .mm{font-size:15px}
+.mm .dg{color:var(--c3);font-weight:700}.mm .ad{color:var(--c5);font-weight:700}.mm .zz{color:var(--muted2)}
+.dom{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;font:700 20px var(--mono);margin:8px 0}
+.dom .d{display:inline-flex;border-radius:12px;overflow:hidden;border:1.5px solid var(--line2)}
+.dom .d span{padding:8px 13px;background:var(--panel2)}
+.dom .d span+span{border-left:1.5px dashed var(--line2)}
+.dom .d .x{color:var(--muted)}
+.dom.ok .in{background:rgba(87,227,164,.18)!important;color:var(--c3)}
+.dom.no .in{background:rgba(255,95,120,.16)!important;color:var(--red)}
+.dom .res{padding:8px 14px;border-radius:12px;background:rgba(162,147,255,.14);border:1.5px solid rgba(162,147,255,.45)}
+.dom .res.no{background:rgba(255,95,120,.1);border-color:rgba(255,95,120,.4);color:#ff9aab;font-size:15px}
+.dom .out{color:var(--c1)}
+select.sel{background:var(--panel2);color:var(--text);border:1px solid var(--line2);border-radius:10px;padding:7px 10px;font:600 14px var(--mono)}
+.geo{width:100%;max-width:470px;aspect-ratio:1;touch-action:none;border-radius:16px;background:rgba(0,0,0,.25);border:1px solid var(--line);display:block;margin:0 auto}
+.geo .hd{cursor:grab}
+.log{font:500 13.5px var(--mono);color:var(--muted);max-height:160px;overflow-y:auto;padding:8px 12px;border-radius:12px;background:rgba(0,0,0,.22);border:1px solid var(--line);margin-top:10px}
+.log div{padding:3px 0;border-bottom:1px dashed rgba(255,255,255,.05)}
+.log div:first-child{color:var(--text)}
+.big-det{font:700 28px var(--mono)}
+.chess{display:inline-grid;gap:4px}
+.chess span{width:34px;height:34px;display:grid;place-items:center;border-radius:9px;font:700 17px var(--mono);transition:.25s}
+.chess .pl{background:rgba(87,227,164,.14);color:var(--c3)}
+.chess .mi{background:rgba(255,95,120,.13);color:var(--red)}
+.chess .sel{outline:2px solid #fff;transform:scale(1.08)}
+.table{width:100%;border-collapse:collapse;font-size:15px;margin:10px 0}
+.table td,.table th{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+.table th{font:600 11.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.tablew{overflow-x:auto}
+.cheat{display:grid;grid-template-columns:repeat(auto-fill,minmax(285px,1fr));gap:14px}
+.cheat .card{margin:0;padding:18px}
+.cheat h4{margin:0 0 8px;color:var(--c2);font-size:15px}
+.cheat p,.cheat li{font-size:14.5px}
+.pbar{height:8px;border-radius:5px;background:rgba(255,255,255,.07);overflow:hidden;margin:8px 0}
+.pbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--c1),var(--c3));transition:width .5s}
+.foot{margin-top:60px;padding:30px 0;border-top:1px solid var(--line);color:var(--muted2);font-size:13px;text-align:center}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}
+.legend span{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;color:var(--muted);padding:5px 10px;border-radius:9px;background:var(--panel)}
+.legend span i{width:16px;height:16px;border-radius:5px}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(30px);opacity:0;padding:12px 18px;border-radius:14px;background:var(--panel3);border:1px solid var(--line2);box-shadow:0 20px 50px -10px #000;z-index:90;transition:.35s;font-weight:600;pointer-events:none}
+.toast.on{opacity:1;transform:translateX(-50%)}
+.qz{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 14px;border-radius:14px;background:rgba(0,0,0,.2);border:1px solid var(--line);margin:8px 0}
+.qz .qq{font:600 16px var(--mono);min-width:170px}
+
+@media (max-width:1080px){
+  :root{--toc:0px}
+  #toc{transform:translateX(-105%);transition:transform .3s;width:290px}
+  #toc.open{transform:none}
+  #tocBtn{display:block}
+  #scrim{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:45}
+  #scrim.on{display:block}
+  main{padding:0 22px 100px}
+}
+@media (max-width:760px){
+  body{font-size:15.5px}
+  main{padding:0 12px 90px}
+  .hero{grid-template-columns:1fr;min-height:auto;padding:70px 0 20px;gap:10px}
+  .hero-art{max-width:320px;order:-1}
+  .hero-grid span{width:44px;height:44px;font-size:17px;border-radius:12px}
+  .hero-tag{display:none}
+  .grid2,.grid3{grid-template-columns:1fr}
+  .card{padding:18px 16px}
+  .ex{border-radius:18px;margin:18px -4px}
+  .ex-head,.ex-q{padding-left:14px;padding-right:14px}
+  .ex-src{margin-left:0;width:100%}
+  .stage{padding:20px 6px 16px}
+  .stage-in{gap:12px 10px}
+  .c{min-width:2.1em;min-height:2em;font-size:.93rem;border-radius:8px;padding:2px .3em}
+  .mx{gap:4px 3px;padding:4px 12px}
+  .walk-f{margin:0 10px;font-size:14.5px;padding:10px}
+  .walk-t{padding:12px 14px 2px}
+  .walk-ctl{padding:10px 10px 14px}
+  .walk-kbd{display:none}
+  .segs{order:9;flex-basis:100%}
+  .sec-head{gap:12px;flex-direction:column}
+  .sec-no{margin-top:0}
+  section.sec{padding-top:50px}
+  input.cell{width:3.4em;font-size:15px}
+  .formula{font-size:14.5px;padding:12px}
+  .ask{padding:6px 14px 14px}
+  .lab-box{padding:14px 12px}
+}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style></head><body>
+<div id="bar"></div>
+<button id="tocBtn" aria-label="Оглавление">☰</button>
+<div id="scrim"></div>
+<nav id="toc">
+  <div class="brand"><span class="logo"><i></i><i></i><i></i><i></i></span>Матрицы</div>
+  <div class="tprog" id="tprog"></div>
+  <div class="pbar" style="margin:0 4px 6px"><i id="tbar"></i></div>
+  <div id="tocList"></div>
+</nav>
+<main><div class="wrap">
+
+<header class="hero" id="top">
+  <div>
+    <span class="kick">Высшая математика · Линейная алгебра</span>
+    <h1>Матрицы и определители — <span class="grad">понятно до последней цифры</span></h1>
+    <p class="lead">Вся тема по шагам: от «что такое матрица» до обратной матрицы и матричных уравнений. В каждом решении числа подсвечиваются и перелетают — видно, <b>откуда берётся</b> каждая цифра и <b>почему</b>.</p>
+    <div class="cta">
+      <a class="btn pri" href="#s0">Начать с нуля →</a>
+      <a class="btn" href="#s-hw">📓 Моя домашка</a>
+      <a class="btn" href="#s-prac">🎯 Практика</a>
+    </div>
+  </div>
+  <div class="hero-art">
+    <div class="glow"></div>
+    <div class="hcard"><div class="hero-grid" id="heroGrid"></div><div class="hero-cap" id="heroCap"></div></div>
+    <div class="hero-tag" style="left:-8%;top:-1%">c<sub>21</sub> = <b>4 + 0</b> = 4</div>
+    <div class="hero-tag" style="right:-8%;top:44%;animation-delay:-2s">Δ = <b>−17</b></div>
+    <div class="hero-tag" style="left:-4%;bottom:-2%;animation-delay:-4s">A·A<sup>−1</sup> = <b>E</b></div>
+  </div>
+</header>
+
+<section class="sec" id="s0" data-toc="Как устроен курс" data-grp="Старт" data-no="0">
+  <div class="sec-head"><div class="sec-no">00</div><div><h2>Как этим пользоваться</h2><p class="sec-sub">5 минут на то, чтобы потом всё шло легко</p></div></div>
+  <div class="grid3">
+    <div class="card"><h4 style="margin-top:0">📖 Теория</h4><p class="muted" style="margin:0">Коротко и простыми словами. Сложные места — в розовых блоках «Почему так?». Открывай их, если хочешь понять, <b>откуда</b> правило.</p></div>
+    <div class="card"><h4 style="margin-top:0">▶️ Пример</h4><p class="muted" style="margin:0">Пошаговое решение. Жми <b>«Дальше»</b> (или <kbd>→</kbd>) — каждый шаг подсвечивает, какие числа участвуют и куда идёт результат.</p></div>
+    <div class="card"><h4 style="margin-top:0">✍️ Реши сам</h4><p class="muted" style="margin:0">Похожая задача. Решение <b>скрыто</b>. Реши на листочке, впиши ответ, нажми «Проверить» — потом сверься по шагам.</p></div>
+  </div>
+  <h4>Язык цветов (он везде одинаковый)</h4>
+  <div class="legend">
+    <span><i style="background:rgba(162,147,255,.6)"></i>первая матрица / строка</span>
+    <span><i style="background:rgba(76,211,255,.6)"></i>вторая матрица / столбец</span>
+    <span><i style="background:rgba(87,227,164,.6)"></i>результат, знак «+»</span>
+    <span><i style="background:rgba(255,95,120,.6)"></i>знак «−», вычеркнуто</span>
+    <span><i style="background:rgba(255,193,94,.6)"></i>множитель, итог</span>
+    <span><i style="background:linear-gradient(90deg,#4cd3ff,#ff72b0,#ffc15e)"></i>одинаковый цвет = одна пара</span>
+  </div>
+  <div class="idea good"><div class="ic">🧭</div><div><b>Порядок изучения.</b> Темы идут так, что каждая опирается на предыдущие: сначала действия с матрицами, потом определители, и в конце — обратная матрица (она использует всё сразу). Прогресс сохраняется в браузере: решённые задачи отмечаются ✓ в оглавлении.</div></div>
+  <div class="map" id="map"></div>
+</section>
+
+<section class="sec" id="s1" data-toc="Что такое матрица" data-grp="Матрицы" data-no="1">
+  <div class="sec-head"><div class="sec-no">01</div><div><h2>Что такое матрица</h2><p class="sec-sub">Таблица чисел, адрес элемента, размер и виды матриц</p></div></div>
+  <div class="card theory">
+    <p><b>Матрица</b> — это просто <b>прямоугольная таблица чисел</b> в круглых скобках. Как таблица в Excel, только без подписей.</p>
+    <div class="formula"><span data-m="5 7 9 1;4 3 -1 0;-2 4 4 -3" class="big"></span> &nbsp;← 3 строки, 4 столбца</div>
+    <ul class="clean">
+      <li><b>Строки</b> идут горизонтально (→), <b>столбцы</b> — вертикально (↓).</li>
+      <li><b>Размер</b> записывают как <b>m×n</b> = <b>строки × столбцы</b>. Эта матрица — <b>3×4</b> («три на четыре»).</li>
+      <li>Каждое число — <b>элемент</b> <i class="v">a</i><sub>ij</sub>. Первый индекс <b>i</b> — номер строки, второй <b>j</b> — номер столбца. Здесь <i class="v">a</i><sub>23</sub> = −1, <i class="v">a</i><sub>31</sub> = −2.</li>
+    </ul>
+    <div class="idea"><div class="ic">🎬</div><div><b>Как в кинотеатре:</b> билет «ряд 2, место 3» — это элемент <i class="v">a</i><sub>23</sub>. Сначала <b>ряд</b> (строка), потом <b>место</b> (столбец). Этот порядок везде: и в размере m×n, и в индексах <i class="v">a</i><sub>ij</sub>.</div></div>
+  </div>
+  <div data-w="explorer"></div>
+  <h3>Виды матриц</h3>
+  <p>У некоторых матриц есть особые имена — их постоянно используют в задачах. Наведи на карточку.</p>
+  <div class="types" id="types"></div>
+  <div class="def"><b>Равенство матриц</b>A = B, если у них <b>одинаковый размер</b> и <b>все элементы на одинаковых местах равны</b>. Матрицы 2×3 и 3×2 никогда не равны, даже если из одних и тех же чисел.</div>
+  <div data-card="c1a"></div>
+  <div data-card="c1b"></div>
+</section>
+
+<section class="sec" id="s2" data-toc="Транспонирование" data-grp="Матрицы" data-no="2">
+  <div class="sec-head"><div class="sec-no">02</div><div><h2>Транспонирование</h2><p class="sec-sub">Строки становятся столбцами</p></div></div>
+  <div class="card theory">
+    <p><b>Транспонированная</b> матрица <i class="v">A</i><sup>T</sup> получается, если <b>каждую строку записать столбцом</b>: 1-я строка → 1-й столбец, 2-я строка → 2-й столбец и т.д.</p>
+    <div class="formula"><span data-m="1 2 3;4 5 6"></span><sup>T</sup> = <span data-m="1 4;2 5;3 6"></span></div>
+    <ul class="clean">
+      <li>Размер «переворачивается»: было <b>m×n</b> → стало <b>n×m</b> (здесь 2×3 → 3×2).</li>
+      <li>Элемент с адресом (i, j) переезжает на адрес (j, i): <i class="v">a</i><sub>ij</sub> → <i class="v">a</i><sub>ji</sub>.</li>
+      <li>У квадратной матрицы это <b>зеркальное отражение</b> относительно главной диагонали — сама диагональ не двигается.</li>
+    </ul>
+  </div>
+  <div data-w="mirror"></div>
+  <div class="card"><h4 style="margin-top:0">Свойства (пригодятся позже)</h4>
+    <ul class="clean">
+      <li>(<i class="v">A</i><sup>T</sup>)<sup>T</sup> = <i class="v">A</i> — дважды отразить = вернуть как было.</li>
+      <li>(<i class="v">A</i> + <i class="v">B</i>)<sup>T</sup> = <i class="v">A</i><sup>T</sup> + <i class="v">B</i><sup>T</sup>, &nbsp; (k<i class="v">A</i>)<sup>T</sup> = k<i class="v">A</i><sup>T</sup>.</li>
+      <li>(<i class="v">AB</i>)<sup>T</sup> = <i class="v">B</i><sup>T</sup><i class="v">A</i><sup>T</sup> — порядок меняется!</li>
+      <li>det <i class="v">A</i><sup>T</sup> = det <i class="v">A</i> (про определители — в разделе 07).</li>
+    </ul>
+  </div>
+  <div data-card="c2a"></div>
+  <div data-card="c2b"></div>
+</section>
+
+<section class="sec" id="s3" data-toc="Сложение и вычитание" data-grp="Действия" data-no="3">
+  <div class="sec-head"><div class="sec-no">03</div><div><h2>Сложение и вычитание</h2><p class="sec-sub">Самое простое действие: клеточка к клеточке</p></div></div>
+  <div class="card theory">
+    <p>Складывать и вычитать можно <b>только матрицы одинакового размера</b>. Складываем числа, которые стоят <b>на одинаковых местах</b>, и ставим результат на то же место:</p>
+    <div class="formula"><span data-m="1 2 3;2 4 5"></span> + <span data-m="2 4 1;3 0 5"></span> = <span data-m="1+2 2+4 3+1;2+3 4+0 5+5"></span> = <span data-m="3 6 4;5 4 10"></span></div>
+    <ul class="clean">
+      <li><b>Противоположная</b> матрица −<i class="v">A</i>: у всех элементов меняем знак. <i class="v">A</i> − <i class="v">B</i> = <i class="v">A</i> + (−<i class="v">B</i>).</li>
+      <li><b>Нулевая</b> матрица <i class="v">O</i> (все нули) ведёт себя как ноль: <i class="v">A</i> + <i class="v">O</i> = <i class="v">A</i>, &nbsp;<i class="v">A</i> + (−<i class="v">A</i>) = <i class="v">O</i>.</li>
+      <li>Как с обычными числами: <i class="v">A</i> + <i class="v">B</i> = <i class="v">B</i> + <i class="v">A</i> и (<i class="v">A</i> + <i class="v">B</i>) + <i class="v">C</i> = <i class="v">A</i> + (<i class="v">B</i> + <i class="v">C</i>).</li>
+    </ul>
+    <div class="idea warn"><div class="ic">⚠️</div><div>Матрицу 2×2 и матрицу 2×3 сложить <b>нельзя</b>: у лишнего столбца нет «пары». Ответ в такой задаче — «не определено».</div></div>
+  </div>
+  <div data-card="c3a"></div>
+  <div data-card="c3b"></div>
+</section>
+
+<section class="sec" id="s4" data-toc="Умножение на число" data-grp="Действия" data-no="4">
+  <div class="sec-head"><div class="sec-no">04</div><div><h2>Умножение на число и комбинации</h2><p class="sec-sub">2A, A − 3B и одна частая ловушка</p></div></div>
+  <div class="card theory">
+    <p>Чтобы умножить матрицу на число, умножаем на это число <b>каждый элемент</b>:</p>
+    <div class="formula">2 · <span data-m="1 2 3;6 5 4;7 8 9"></span> = <span data-m="2 4 6;12 10 8;14 16 18"></span></div>
+    <p>Выражения вроде <b>A − 3B</b> считают по действиям, как в школе: сначала умножение (3B), потом вычитание.</p>
+    <div class="idea err"><div class="ic">🪤</div><div><b>Ловушка: матрица ≠ определитель.</b> Матрицу на число — умножаем <b>все</b> элементы. Определитель на число — умножаем <b>только одну</b> строку (или один столбец):
+      <div class="formula" style="margin:10px 0 0">2·<span data-m="1 2 3;6 5 4;7 8 9" data-b="|"></span> = <span data-m="2 4 6;6 5 4;7 8 9" data-b="|"></span> &nbsp;но&nbsp; 2·<span data-m="1 2 3;6 5 4;7 8 9"></span> = <span data-m="2 4 6;12 10 8;14 16 18"></span></div></div></div>
+    <p class="muted" style="margin:0">Свойства: (λμ)A = λ(μA), &nbsp;λ(A + B) = λA + λB, &nbsp;(λ + μ)A = λA + μA, &nbsp;0·A = O, &nbsp;1·A = A, &nbsp;(−1)·A = −A.</p>
+  </div>
+  <div class="idea err"><div class="ic">📓</div><div><b>Из твоей тетради (практика «Матрицы и операции над ними», A − 3B):</b> у B первый элемент −1, значит в 3B там должно стоять 3·(−1) = <b>−3</b>, а записано −1. Поэтому и в ответе первый элемент <b>1 − (−3) = 4</b>, а не 2. Верный ответ: <span data-m="4 29;0 6;-25 4"></span>. Пример ниже разбирает именно эту задачу.</div></div>
+  <div data-card="c4a"></div>
+  <div data-card="c4b"></div>
+</section>
+
+<section class="sec" id="s5" data-toc="Умножение матриц" data-grp="Действия" data-no="5">
+  <div class="sec-head"><div class="sec-no">05</div><div><h2>Умножение матриц</h2><p class="sec-sub">Главное правило темы: строка × столбец</p></div></div>
+  <h3 style="margin-top:0">Шаг 0. Можно ли вообще умножать?</h3>
+  <div class="card theory">
+    <p>A·B существует, только если <b>число столбцов A = числу строк B</b>. Удобно записать размеры рядом:</p>
+    <div class="dom ok" style="font-size:19px"><span class="d"><span class="out">3</span><span class="in">2</span></span> · <span class="d"><span class="in">2</span><span class="out" style="color:var(--c2)">4</span></span> → <span class="res"><span class="out">3</span>×<span style="color:var(--c2)">4</span></span></div>
+    <p style="text-align:center" class="muted">«<b class="k3">Внутренние</b> числа совпали — умножать можно. <b class="k1">Внешние</b> дают размер ответа».</p>
+  </div>
+  <div data-w="size"></div>
+  <h3>Шаг 1. Как умножать: строка × столбец</h3>
+  <div class="card theory">
+    <p>Элемент ответа <b>c<sub>ij</sub></b> (строка i, столбец j) получается так: берём <b class="k1">i-ю строку A</b> и <b class="k2">j-й столбец B</b>, перемножаем числа <b>попарно по порядку</b> (1-е с 1-м, 2-е со 2-м, …) и <b>складываем</b>:</p>
+    <div class="formula">c<sub>ij</sub> = <span class="q0">a<sub>i1</sub>·b<sub>1j</sub></span> + <span class="q1">a<sub>i2</sub>·b<sub>2j</sub></span> + … + <span class="q2">a<sub>in</sub>·b<sub>nj</sub></span></div>
+    <p>Например, для 2×2: <span data-m="1 -2;3 2"></span>·<span data-m="3 4;-4 1"></span> — элемент c<sub>11</sub> = <span class="q0">1·3</span> + <span class="q1">(−2)·(−4)</span> = 3 + 8 = 11.</p>
+    <p class="muted" style="margin:0">Номер строки ответа = номер строки из A, номер столбца ответа = номер столбца из B. Так и заполняем: c<sub>11</sub>, c<sub>12</sub>, … по строкам.</p>
+  </div>
+  <details class="why"><summary>Почему такое странное правило? (история про магазин)</summary><div>
+    <p>Аня купила 2 кофе, 1 булку, 3 сока; Боря — 0 кофе, 4 булки, 1 сок. Цены в двух магазинах разные. Сколько заплатит каждый в каждом магазине?</p>
+    <p>Чтобы узнать, сколько Аня заплатит в магазине 1, надо <b>её покупки</b> (строка) попарно умножить на <b>цены магазина 1</b> (столбец) и сложить: 2·120 + 1·40 + 3·80. Это и есть «строка × столбец»! Размеры должны совпасть, потому что у каждого товара должна быть цена. Нажимай на клетки ответа:</p>
+    <div data-w="shop"></div>
+    <p style="margin:0">Матрицы — это способ записать сразу много таких «сумм произведений». Поэтому умножение устроено именно так.</p>
+  </div></details>
+  <div data-card="c5a"></div>
+  <div data-card="c5b"></div>
+  <div data-w="sand"></div>
+  <div data-card="c5c"></div>
+  <h3>Порядок важен: AB ≠ BA</h3>
+  <div class="card theory">
+    <p>Для чисел 2·3 = 3·2. Для матриц — <b>в общем случае нет</b>. Бывает три ситуации:</p>
+    <ul class="clean">
+      <li><b>AB есть, а BA вообще нет</b> — например, (2×3)·(3×3) можно, а (3×3)·(2×3) нельзя.</li>
+      <li><b>Оба есть, но разного размера</b>: столбец·строка = большая матрица, строка·столбец = одно число (пример ниже).</li>
+      <li><b>Оба есть и одного размера, но разные</b> (пример ниже). Лишь иногда AB = BA — такие матрицы называют перестановочными.</li>
+    </ul>
+    <p style="margin:0">Поэтому в матричных выражениях <b>множители нельзя переставлять</b>. Например, (A + B)² = A² + AB + BA + B², а <b>не</b> A² + 2AB + B².</p>
+  </div>
+  <div data-card="c5d"></div>
+  <div data-card="c5e"></div>
+  <h3>Единичная матрица и свойства умножения</h3>
+  <div class="card theory">
+    <p><b>Единичная матрица E</b> — квадратная, на главной диагонали единицы, остальное нули: <span data-m="1 0 0;0 1 0;0 0 1"></span>. Она работает как число 1: <b>A·E = E·A = A</b>.</p>
+    <ul class="clean">
+      <li><b>(AB)C = A(BC)</b> — скобки можно ставить как удобно (порядок матриц при этом сохраняется). Это проверяет твоя домашка №2.</li>
+      <li><b>A(B + C) = AB + AC</b>, &nbsp;(A + B)C = AC + BC, &nbsp;λ(AB) = (λA)B = A(λB).</li>
+      <li><b>Сюрприз:</b> произведение двух ненулевых матриц может быть нулевым: <span data-m="1 1;1 1"></span>·<span data-m="1 1;-1 -1"></span> = <span data-m="0 0;0 0"></span>. Поэтому из AB = O <b>не следует</b>, что A = O или B = O.</li>
+    </ul>
+  </div>
+  <div data-card="c5f"></div>
+  <div data-w="quiz"></div>
+</section>
+
+<section class="sec" id="s6" data-toc="Степени матрицы" data-grp="Действия" data-no="6">
+  <div class="sec-head"><div class="sec-no">06</div><div><h2>Степени и многочлены от матрицы</h2><p class="sec-sub">A², A³, 2A² − 3A</p></div></div>
+  <div class="card theory">
+    <ul class="clean">
+      <li><b>A² = A·A</b>, &nbsp;<b>A³ = A²·A</b> и т.д. Степень есть <b>только у квадратных</b> матриц (иначе A·A не определено).</li>
+      <li><b>Внимание:</b> A² — это <b>не</b> «каждый элемент в квадрат»! Это умножение по правилу «строка × столбец».</li>
+      <li><b>Многочлен от матрицы</b>, например f(A) = 2A² − 3A + 5: число 5 превращается в <b>5E</b> (иначе матрицу и число не сложить). Считаем по действиям: степени → умножение на числа → сложение.</li>
+    </ul>
+  </div>
+  <div data-card="c6a"></div>
+  <div data-card="c6b"></div>
+</section>
+
+<section class="sec" id="s7" data-toc="Определитель 2×2" data-grp="Определители" data-no="7">
+  <div class="sec-head"><div class="sec-no">07</div><div><h2>Определитель 2×2</h2><p class="sec-sub">Одно число, которое многое говорит о матрице</p></div></div>
+  <div class="card theory">
+    <p><b>Определитель</b> (детерминант) — это <b>число</b>, которое считается по квадратной матрице. Обозначают прямыми чертами: |A|, det A или Δ. Для неквадратных матриц его <b>не бывает</b>.</p>
+    <div class="formula"><span data-m="a11 a12;a21 a22" data-b="|"></span> = <span class="k3">a<sub>11</sub>·a<sub>22</sub></span> − <span class="kr">a<sub>12</sub>·a<sub>21</sub></span> &nbsp;&nbsp;«<span class="k3">главная диагональ</span> минус <span class="kr">побочная</span>»</div>
+    <div class="idea warn"><div class="ic">👀</div><div>Не путай скобки: <span data-m="1 2;3 4"></span> — это <b>матрица</b> (таблица), а <span data-m="1 2;3 4" data-b="|"></span> = 1·4 − 2·3 = −2 — это <b>число</b>.</div></div>
+  </div>
+  <div data-w="geo"></div>
+  <details class="why"><summary>Зачем вообще нужен определитель?</summary><div>
+    <p>Картинка выше показывает главное: определитель — это «коэффициент растяжения площади». Если он равен <b>0</b>, матрица «сплющивает» плоскость в линию — информация теряется, и такую матрицу <b>нельзя обратить</b> (раздел 13). Поэтому определитель — первый шаг при поиске обратной матрицы и при решении систем уравнений.</p>
+    <p style="margin:0">Отсюда и свойства: поменяли строки местами — поменялась ориентация (знак); строки пропорциональны — стрелки на одной прямой, Δ = 0.</p>
+  </div></details>
+  <div data-card="c7a"></div>
+  <div data-card="c7b"></div>
+</section>
+
+<section class="sec" id="s8" data-toc="Определитель 3×3" data-grp="Определители" data-no="8">
+  <div class="sec-head"><div class="sec-no">08</div><div><h2>Определитель 3×3: правило треугольников</h2><p class="sec-sub">Шесть произведений: три с «+», три с «−»</p></div></div>
+  <div class="card theory">
+    <p>Определитель 3×3 — сумма <b>6 произведений</b> по три числа. В каждом произведении — ровно по одному числу из каждой строки и каждого столбца. Какие тройки брать, показывают картинки:</p>
+    <div class="grid2" id="triPics"></div>
+    <div class="formula">Δ = (<span class="k3">a<sub>11</sub>a<sub>22</sub>a<sub>33</sub> + a<sub>12</sub>a<sub>23</sub>a<sub>31</sub> + a<sub>13</sub>a<sub>21</sub>a<sub>32</sub></span>) − (<span class="kr">a<sub>13</sub>a<sub>22</sub>a<sub>31</sub> + a<sub>12</sub>a<sub>21</sub>a<sub>33</sub> + a<sub>11</sub>a<sub>23</sub>a<sub>32</sub></span>)</div>
+    <div class="idea"><div class="ic">💡</div><div><b>Если треугольники путаются — правило Саррюса.</b> Допиши справа первые два столбца ещё раз. Тогда все три «плюсовые» тройки — это три параллельные диагонали вниз-вправо, а «минусовые» — три диагонали вниз-влево. Результат тот же.</div></div>
+  </div>
+  <div data-card="c8a"></div>
+  <div data-card="c8b"></div>
+  <div class="card theory"><h4 style="margin-top:0">Уравнения с определителем</h4><p style="margin:0">Если в определителе есть <b>x</b>, считаем его по тем же правилам, только вместо чисел — выражения. Получится обычное уравнение (часто квадратное). Главное — аккуратно раскрывать скобки. Так устроен №2 из твоей домашки ↓</p></div>
+  <div data-card="c8c"></div>
+</section>
+
+<section class="sec" id="s9" data-toc="Миноры и дополнения" data-grp="Определители" data-no="9">
+  <div class="sec-head"><div class="sec-no">09</div><div><h2>Миноры и алгебраические дополнения</h2><p class="sec-sub">Ключ к определителям любого размера и к обратной матрице</p></div></div>
+  <div class="card theory">
+    <div class="def"><b>Минор M<sub>ij</sub></b>Определитель, который остаётся, если <b>вычеркнуть i-ю строку и j-й столбец</b> (те, где стоит элемент a<sub>ij</sub>). У 3×3 минор — это определитель 2×2, у 4×4 — 3×3.</div>
+    <div class="def"><b>Алгебраическое дополнение A<sub>ij</sub></b>Тот же минор, но со знаком: <b>A<sub>ij</sub> = (−1)<sup>i+j</sup>·M<sub>ij</sub></b>. Если i + j чётное — знак «+» (минор не меняется), нечётное — «−» (меняем знак минора).</div>
+    <div class="grid2" style="align-items:center">
+      <div><p>Вместо подсчёта (−1)<sup>i+j</sup> удобно помнить <b>шахматку знаков</b>: в левом верхнем углу всегда «+», дальше чередуется.</p><p class="muted" style="margin:0">Пример: a<sub>23</sub> → 2 + 3 = 5 (нечётное) → «−». В шахматке на месте (2, 3) тоже «−».</p></div>
+      <div style="text-align:center" id="chessPic"></div>
+    </div>
+  </div>
+  <div data-w="minor"></div>
+  <div data-card="c9a"></div>
+  <div data-card="c9b"></div>
+</section>
+
+<section class="sec" id="s10" data-toc="Разложение по строке" data-grp="Определители" data-no="10">
+  <div class="sec-head"><div class="sec-no">10</div><div><h2>Разложение по строке или столбцу</h2><p class="sec-sub">Универсальный способ: большой определитель → несколько маленьких</p></div></div>
+  <div class="card theory">
+    <p><b>Определитель = сумма произведений элементов любой строки (или столбца) на их алгебраические дополнения.</b> Например, по 1-й строке:</p>
+    <div class="formula">Δ = a<sub>11</sub>·A<sub>11</sub> + a<sub>12</sub>·A<sub>12</sub> + a<sub>13</sub>·A<sub>13</sub> = a<sub>11</sub>·M<sub>11</sub> − a<sub>12</sub>·M<sub>12</sub> + a<sub>13</sub>·M<sub>13</sub></div>
+    <ul class="clean">
+      <li>Работает для <b>любого</b> размера: 4×4 раскладывается в четыре определителя 3×3, те — в 2×2.</li>
+      <li>По <b>любой</b> строке или столбцу ответ один и тот же. Выбирай ту, где <b>больше нулей</b> — слагаемые с нулём исчезают.</li>
+      <li>Знаки берутся из шахматки. По 1-й строке: + − +, по 2-й: − + −.</li>
+    </ul>
+    <div class="idea"><div class="ic">🧩</div><div><b>Ещё одно свойство (понадобится для обратной матрицы):</b> если умножать элементы одной строки на алгебраические дополнения <b>другой</b> строки, сумма всегда равна <b>0</b>. Например, a<sub>11</sub>A<sub>21</sub> + a<sub>12</sub>A<sub>22</sub> + a<sub>13</sub>A<sub>23</sub> = 0.</div></div>
+  </div>
+  <div data-w="expandSwitch"></div>
+  <div data-card="c10b"></div>
+  <div data-card="c10c"></div>
+</section>
+
+<section class="sec" id="s11" data-toc="Свойства определителей" data-grp="Определители" data-no="11">
+  <div class="sec-head"><div class="sec-no">11</div><div><h2>Свойства определителей</h2><p class="sec-sub">Приёмы, которые экономят кучу вычислений</p></div></div>
+  <p>Всё, что сказано про строки, верно и для столбцов (из-за свойства 1).</p>
+  <div class="card tablew" style="padding:10px 16px"><table class="table">
+    <tr><th>№</th><th>Свойство</th><th>Пример</th></tr>
+    <tr><td class="k1 mono">1</td><td>При <b>транспонировании</b> определитель не меняется</td><td><span data-m="1 2;3 4" data-b="|"></span> = <span data-m="1 3;2 4" data-b="|"></span> = −2</td></tr>
+    <tr><td class="k1 mono">2</td><td><b>Поменяли две строки</b> местами → знак сменился</td><td><span data-m="3 4;1 2" data-b="|"></span> = +2</td></tr>
+    <tr><td class="k1 mono">3</td><td><b>Две одинаковые</b> (или пропорциональные) строки → Δ = 0</td><td><span data-m="1 2;2 4" data-b="|"></span> = 4 − 4 = 0</td></tr>
+    <tr><td class="k1 mono">4</td><td><b>Общий множитель строки</b> выносится за знак</td><td><span data-m="2 4;3 5" data-b="|"></span> = 2·<span data-m="1 2;3 5" data-b="|"></span></td></tr>
+    <tr><td class="k1 mono">5</td><td>Строка из <b>одних нулей</b> → Δ = 0</td><td><span data-m="0 0;3 5" data-b="|"></span> = 0</td></tr>
+    <tr><td class="k1 mono">6</td><td>К строке <b>прибавить другую, умноженную на число</b> — Δ не меняется</td><td><span data-m="1 2;3 5" data-b="|"></span> = <span data-m="1 2;0 -1" data-b="|"></span> <small class="muted">(R2 − 3·R1)</small></td></tr>
+    <tr><td class="k1 mono">7</td><td>Разложение по <b>любой</b> строке/столбцу даёт тот же ответ</td><td>раздел 10</td></tr>
+    <tr><td class="k1 mono">8</td><td>Элементы строки × дополнения <b>чужой</b> строки → сумма 0</td><td>нужно для обратной</td></tr>
+    <tr><td class="k4 mono">+</td><td><b>Треугольный</b> определитель = произведение главной диагонали</td><td><span data-m="2 5 1;0 3 7;0 0 -1" data-b="|"></span> = 2·3·(−1) = −6</td></tr>
+    <tr><td class="k4 mono">+</td><td><b>det(k·A) = k<sup>n</sup>·det A</b> (n — порядок), значит det(−A) = (−1)<sup>n</sup>·det A</td><td>3×3: все знаки сменили → Δ сменил знак</td></tr>
+    <tr><td class="k4 mono">+</td><td><b>det(AB) = det A · det B</b></td><td>|A| = 5, |B| = −2 → |AB| = −10</td></tr>
+  </table></div>
+  <div class="idea warn"><div class="ic">⚠️</div><div><b>det(A + B) ≠ det A + det B</b> и <b>det(2A) ≠ 2·det A</b> (для 3×3 это 8·det A — двойка выносится из каждой из трёх строк).</div></div>
+  <div data-w="lab"></div>
+  <div data-card="c11a"></div>
+  <div data-card="c11b"></div>
+</section>
+
+<section class="sec" id="s12" data-toc="Определители 4×4" data-grp="Определители" data-no="12">
+  <div class="sec-head"><div class="sec-no">12</div><div><h2>Определители 4-го порядка</h2><p class="sec-sub">Понижение порядка и приведение к треугольному виду</p></div></div>
+  <div class="card theory">
+    <p>Для 4×4 правила треугольников <b>нет</b>. Раскладывать «в лоб» по строке — 4 определителя 3×3, долго. Поэтому сначала <b>делаем нули</b> свойством 6, а потом:</p>
+    <div class="grid2">
+      <div><h4 style="margin-top:0">🪜 Понижение порядка</h4><p style="margin:0">Добиваемся, чтобы в какой-то строке (столбце) все элементы, <b>кроме одного</b>, стали нулями. Раскладываем по ней — остаётся <b>одно</b> слагаемое с определителем 3×3. Повторяем.</p></div>
+      <div><h4 style="margin-top:0">📐 Треугольный вид</h4><p style="margin:0">Делаем нули <b>под главной диагональю</b> — столбец за столбцом. Тогда Δ = произведение диагонали. Учитываем: перестановка строк → «−», вынесенный множитель → множитель впереди.</p></div>
+    </div>
+    <ol class="steps" style="margin-top:14px">
+      <li>Поставь наверх строку, у которой первый элемент <b>1</b> (или −1) — так множители будут целыми. Не забудь «−» за перестановку.</li>
+      <li>Из каждой нижней строки вычти первую, умноженную на такое число, чтобы в 1-м столбце получился 0: R<sub>i</sub> → R<sub>i</sub> − (a<sub>i1</sub>/a<sub>11</sub>)·R<sub>1</sub>.</li>
+      <li>Повтори то же для 2-го столбца (ниже диагонали), потом для 3-го.</li>
+      <li>Перемножь числа на диагонали и накопленный множитель.</li>
+    </ol>
+  </div>
+  <div data-card="c12a"></div>
+  <div data-card="c12b"></div>
+  <div data-card="c12c"></div>
+</section>
+
+<section class="sec" id="s13" data-toc="Обратная матрица" data-grp="Обратная матрица" data-no="13">
+  <div class="sec-head"><div class="sec-no">13</div><div><h2>Обратная матрица</h2><p class="sec-sub">Аналог деления: A·A<sup>−1</sup> = E</p></div></div>
+  <div class="card theory">
+    <p>Для числа 5 обратное — это 1/5, потому что 5·(1/5) = 1. Для матрицы роль единицы играет <b>E</b>, поэтому <b>обратная</b> матрица A<sup>−1</sup> — такая, что <b>A·A<sup>−1</sup> = A<sup>−1</sup>·A = E</b>.</p>
+    <ul class="clean">
+      <li>Бывает только у <b>квадратных</b> матриц.</li>
+      <li>Если |A| = 0, матрица <b>вырожденная</b> — обратной <b>нет</b> (как нельзя делить на 0). Если |A| ≠ 0 — <b>невырожденная</b>, обратная есть, причём ровно одна.</li>
+    </ul>
+    <h4>Алгоритм (запомни 4 шага)</h4>
+    <ol class="steps">
+      <li>Считаем <b>|A|</b>. Если 0 — стоп, обратной нет.</li>
+      <li>Для <b>каждого</b> элемента считаем <b>алгебраическое дополнение A<sub>ij</sub></b> (минор со знаком по шахматке). Получаем таблицу того же размера.</li>
+      <li><b>Транспонируем</b> эту таблицу — получаем <b>присоединённую</b> матрицу A* (дополнения строки → в столбец).</li>
+      <li>Делим всё на определитель: <b>A<sup>−1</sup> = <span class="fr"><span>1</span><span>|A|</span></span>·A*</b>. Проверяем: A·A<sup>−1</sup> = E.</li>
+    </ol>
+    <div class="idea good"><div class="ic">⚡</div><div><b>Для 2×2 есть короткий путь:</b> <span data-m="a b;c d"></span><sup>−1</sup> = <span class="fr"><span>1</span><span>ad − bc</span></span>·<span data-m="d -b;-c a"></span> — числа главной диагонали <b>меняем местами</b>, у побочной <b>меняем знак</b>, делим на определитель.</div></div>
+  </div>
+  <details class="why"><summary>Почему в шаге 3 надо транспонировать?</summary><div>
+    <p>Посмотрим, что получится при умножении A на A* (где в <b>j-м столбце</b> стоят дополнения <b>j-й строки</b>):</p>
+    <ul class="clean">
+      <li>Строка 1 матрицы A × столбец 1 матрицы A* = a<sub>11</sub>A<sub>11</sub> + a<sub>12</sub>A<sub>12</sub> + a<sub>13</sub>A<sub>13</sub> — это <b>разложение по 1-й строке</b>, то есть <b>|A|</b>.</li>
+      <li>Строка 1 × столбец 2 = a<sub>11</sub>A<sub>21</sub> + a<sub>12</sub>A<sub>22</sub> + a<sub>13</sub>A<sub>23</sub> — элементы одной строки на дополнения <b>чужой</b> — это <b>0</b> (свойство 8).</li>
+    </ul>
+    <p style="margin:0">Значит, A·A* = |A|·E: на диагонали |A|, остальное нули. Делим на |A| — получаем E. Без транспонирования в произведении стояли бы «чужие» суммы, и E бы не получилась.</p>
+  </div></details>
+  <div class="card"><h4 style="margin-top:0">Свойства обратной</h4>
+    <ul class="clean" style="margin:0">
+      <li>(A<sup>−1</sup>)<sup>−1</sup> = A, &nbsp;|A<sup>−1</sup>| = 1 / |A|, &nbsp;(A<sup>T</sup>)<sup>−1</sup> = (A<sup>−1</sup>)<sup>T</sup>.</li>
+      <li><b>(AB)<sup>−1</sup> = B<sup>−1</sup>A<sup>−1</sup></b> — порядок меняется (как носки и ботинки: надевали носки, потом ботинки — снимаем в обратном порядке).</li>
+    </ul>
+  </div>
+  <div data-card="c13a"></div>
+  <div data-card="c13b"></div>
+  <div data-card="c13c"></div>
+</section>
+
+<section class="sec" id="s14" data-toc="Матричные уравнения" data-grp="Обратная матрица" data-no="14">
+  <div class="sec-head"><div class="sec-no">14</div><div><h2>Матричные уравнения</h2><p class="sec-sub">AX = B и XA = B — зачем нужна обратная матрица</p></div></div>
+  <div class="card theory">
+    <p>Делить на матрицу нельзя, но можно <b>умножить на обратную</b>. Важно, <b>с какой стороны</b>: множители переставлять нельзя!</p>
+    <div class="grid2">
+      <div class="formula" style="margin:0">AX = B<br>A<sup>−1</sup>·AX = A<sup>−1</sup>·B<br>EX = A<sup>−1</sup>B<br><b class="k3">X = A<sup>−1</sup>·B</b></div>
+      <div class="formula" style="margin:0">XA = B<br>XA·A<sup>−1</sup> = B·A<sup>−1</sup><br>XE = BA<sup>−1</sup><br><b class="k2">X = B·A<sup>−1</sup></b></div>
+    </div>
+    <p style="margin:14px 0 0">Правило: A стоит <b>слева</b> от X — умножаем на A<sup>−1</sup> <b>слева</b>; A <b>справа</b> — умножаем справа. Ответы при этом разные!</p>
+  </div>
+  <div data-card="c14a"></div>
+  <div data-card="c14b"></div>
+</section>
+
+<section class="sec" id="s-hw" data-toc="Моя домашка" data-grp="Практика" data-no="★">
+  <div class="sec-head"><div class="sec-no">ДЗ</div><div><h2>Твоя домашка</h2><p class="sec-sub">Задачи из тетради — с проверкой и пошаговым решением</p></div></div>
+  <p>Реши сам, впиши ответ, нажми «Проверить». Решение открывается кнопкой. №4 (самостоятельная по матрицам и операциям) — это как раз разделы 01–06 и блок «Практика» ниже.</p>
+  <div data-card="hw1"></div>
+  <div data-card="hw2"></div>
+  <div data-card="hw3a"></div>
+  <div data-card="hw3b"></div>
+  <div data-card="hw3c"></div>
+</section>
+
+<section class="sec" id="s-check" data-toc="Проверка тетради" data-grp="Практика" data-no="✓">
+  <div class="sec-head"><div class="sec-no">✓</div><div><h2>Что я нашёл в твоей тетради</h2><p class="sec-sub">Проверил все вычисления с фото практик. Большая часть верна, но есть места, которые стоит перепроверить</p></div></div>
+  <div class="idea err"><div class="ic">1</div><div><b>A − 3B</b> (матрицы <span data-m="1 8;0 9;-7 1"></span> и <span data-m="-1 -7;0 1;6 -1"></span>): в 3B первый элемент должен быть 3·(−1) = <b>−3</b>, а записан −1. Правильно: A − 3B = <span data-m="4 29;0 6;-25 4"></span> (в тетради в углу 2).</div></div>
+  <div class="idea err"><div class="ic">2</div><div><b>(AB)·C</b> с A = <span data-m="3 1;5 -6;7 -8"></span>: во 2-й строке c<sub>21</sub> = (−8)·5 + (−29)·(−2) = −40 + 58 = <b>18</b> (в тетради похоже на −18), а c<sub>32</sub> = (−10)·14 + (−39)·30 = <b>−1310</b>. Верно: <span data-m="43 156;18 -982;28 -1310"></span>.</div></div>
+  <div class="idea warn"><div class="ic">3</div><div><b>Определитель</b> <span data-m="0 0 1;4 2 3;4 1 5" data-b="|"></span>: если числа прочитаны верно, по 1-й строке он равен 1·(4·1 − 2·4) = <b>−4</b>, а в тетради −8. Сверь с условием.</div></div>
+  <div class="idea warn"><div class="ic">4</div><div><b>Уравнение</b> <span data-m="1 0 x;1 x-1 2;2 1 -1" data-b="|"></span>: определитель равен −2x² + 2x − 1. В условии записано «= 5», а в решении «= −5». С <b>−5</b> получается x = −1 и x = 2 (как в тетради), а с <b>5</b> действительных корней нет. Проверь, какое условие правильное.</div></div>
+  <div class="idea warn"><div class="ic">5</div><div><b>ДЗ, определитель 4×4:</b> в первой записи в строке 1 стоит (6 0 <b>−7</b> 1), а дальше в решении — (6 0 <b>−1</b> 1). С −1 ответ <b>47</b> (как у тебя), с −7 было бы <b>197</b>. Проверь условие. Разбор этой задачи — в разделе 12.</div></div>
+  <div class="idea good"><div class="ic">✓</div><div>Остальное сходится: A+B, 2A, AB и BA для 3×3, BA и AC, A·B и B·A для столбца/строки (3×3 и 13), A³ = <span data-m="37 -54;-81 118"></span>, 2A² − 3A = <span data-m="11 -14;-21 32"></span>, A<sup>T</sup>·C, определители −36, 0, 204, минор M<sub>24</sub> = 5, уравнение из ДЗ (x = 0; 1) и ответы ДЗ №1 и №2.</div></div>
+</section>
+
+<section class="sec" id="s-prac" data-toc="Практика" data-grp="Практика" data-no="🎯">
+  <div class="sec-head"><div class="sec-no">🎯</div><div><h2>Практика на самопроверку</h2><p class="sec-sub">От простого к сложному. После каждой задачи — скрытое пошаговое решение</p></div></div>
+  <div class="card" style="padding:16px 20px"><div class="score" style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><span class="muted">Решено в этом блоке:</span><b id="pracScore" style="font:700 24px var(--disp)">0</b><div class="pbar" style="flex:1;min-width:160px"><i id="pracBar"></i></div></div></div>
+  <div id="pracList"></div>
+</section>
+
+<section class="sec" id="s-train" data-toc="Тренажёр" data-grp="Практика" data-no="∞">
+  <div class="sec-head"><div class="sec-no">∞</div><div><h2>Бесконечный тренажёр</h2><p class="sec-sub">Случайные задачи по любой теме — пока не станет скучно</p></div></div>
+  <div data-w="trainer"></div>
+</section>
+
+<section class="sec" id="s-cheat" data-toc="Шпаргалка" data-grp="Практика" data-no="📌">
+  <div class="sec-head"><div class="sec-no">📌</div><div><h2>Шпаргалка</h2><p class="sec-sub">Вся тема на одном экране — для повторения перед парой</p></div></div>
+  <div class="cheat">
+    <div class="card"><h4>Размер и элементы</h4><p>m×n = строки × столбцы. a<sub>ij</sub>: i — строка, j — столбец.</p></div>
+    <div class="card"><h4>Транспонирование</h4><p>Строки → столбцы, a<sub>ij</sub> → a<sub>ji</sub>, m×n → n×m. (AB)<sup>T</sup> = B<sup>T</sup>A<sup>T</sup>.</p></div>
+    <div class="card"><h4>A ± B, kA</h4><p>Только одинаковый размер, поэлементно. kA — на k умножается <b>каждый</b> элемент.</p></div>
+    <div class="card"><h4>A·B</h4><p>(m×<b>n</b>)·(<b>n</b>×p) = m×p. c<sub>ij</sub> = строка i × столбец j (пары, сумма). AB ≠ BA. AE = EA = A.</p></div>
+    <div class="card"><h4>Степени</h4><p>A² = A·A (только квадратные!). Число в многочлене → число·E. (A+B)² = A² + AB + BA + B².</p></div>
+    <div class="card"><h4>Определитель 2×2</h4><p><span data-m="a b;c d" data-b="|"></span> = ad − bc. Главная минус побочная.</p></div>
+    <div class="card"><h4>Определитель 3×3</h4><p>(главная + 2 треугольника) − (побочная + 2 треугольника). Или разложение по строке.</p></div>
+    <div class="card"><h4>Минор, дополнение</h4><p>M<sub>ij</sub> — вычеркнуть строку i и столбец j. A<sub>ij</sub> = (−1)<sup>i+j</sup>M<sub>ij</sub>. Шахматка: + в углу.</p></div>
+    <div class="card"><h4>Разложение</h4><p>Δ = Σ a<sub>ij</sub>A<sub>ij</sub> по любой строке/столбцу. Бери ту, где больше нулей.</p></div>
+    <div class="card"><h4>Свойства Δ</h4><p>Aᵀ — не меняется. Перестановка строк — знак «−». Множитель строки — выносится. Одинаковые/нулевая строка — 0. R<sub>i</sub> + k·R<sub>j</sub> — не меняется. det(kA) = k<sup>n</sup>det A. det(AB) = det A·det B.</p></div>
+    <div class="card"><h4>4×4</h4><p>Сделай нули свойством 6 → разложи (понижение порядка) или доведи до треугольного вида → произведение диагонали.</p></div>
+    <div class="card"><h4>Обратная</h4><p>|A| ≠ 0 → таблица A<sub>ij</sub> → транспонировать (A*) → разделить на |A|. Проверка: A·A<sup>−1</sup> = E. 2×2: диагональ поменять, побочной сменить знак.</p></div>
+    <div class="card"><h4>Уравнения</h4><p>AX = B → X = A<sup>−1</sup>B. &nbsp;XA = B → X = BA<sup>−1</sup>.</p></div>
+  </div>
+  <div class="foot">Сделано по твоим лекциям §1 «Определители и их свойства», §2 «Матрицы и операции над ними» и фото практик/ДЗ. Прогресс хранится только в этом браузере. <a href="#" id="resetProg">Сбросить прогресс</a></div>
+</section>
+
+</div></main>
+<script>
+'use strict';
+/* =====================================================================
+   ДВИЖОК: дроби, матрицы, форматирование, сцена, пошаговый плеер, задачи
+   ===================================================================== */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+function el(tag, cls, html) { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
+const SVGNS = 'http://www.w3.org/2000/svg';
+function sv(tag, attrs = {}) { const e = document.createElementNS(SVGNS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; }
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+/* ---------- рациональные числа ---------- */
+function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) [a, b] = [b, a % b]; return a || 1; }
+class Q {
+  constructor(n, d = 1) {
+    if (d === 0) throw new Error('деление на ноль');
+    if (d < 0) { n = -n; d = -d; }
+    const g = gcd(n, d); this.n = n / g || 0; this.d = d / g;
+  }
+  static of(x) {
+    if (x instanceof Q) return x;
+    if (typeof x === 'number') {
+      if (Number.isInteger(x)) return new Q(x, 1);
+      let d = 1; while (!Number.isInteger(x * d) && d < 1e6) d *= 10; return new Q(Math.round(x * d), d);
+    }
+    return parseQ(x);
+  }
+  add(o) { o = Q.of(o); return new Q(this.n * o.d + o.n * this.d, this.d * o.d); }
+  sub(o) { o = Q.of(o); return new Q(this.n * o.d - o.n * this.d, this.d * o.d); }
+  mul(o) { o = Q.of(o); return new Q(this.n * o.n, this.d * o.d); }
+  div(o) { o = Q.of(o); return new Q(this.n * o.d, this.d * o.n); }
+  neg() { return new Q(-this.n, this.d); }
+  get z() { return this.n === 0; }
+  get isInt() { return this.d === 1; }
+  get sgn() { return Math.sign(this.n); }
+  eq(o) { o = Q.of(o); return this.n === o.n && this.d === o.d; }
+  valueOf() { return this.n / this.d; }
+  toString() { return T(this); }
+}
+function parseQ(s) {
+  if (s == null) return null;
+  s = String(s).trim().replace(/[−–—]/g, '-').replace(/,/g, '.').replace(/\s+/g, '');
+  if (!s) return null;
+  let m = s.match(/^([+-]?\d+(?:\.\d+)?)(?:\/([+-]?\d+(?:\.\d+)?))?$/);
+  if (!m) return null;
+  const a = Q.of(parseFloat(m[1]));
+  if (m[2] === undefined) return a;
+  const b = Q.of(parseFloat(m[2])); if (b.z) return null;
+  return a.div(b);
+}
+const q = x => Q.of(x);
+
+/* ---------- форматирование ---------- */
+const MINUS = '−';
+function isQ(v) { return v instanceof Q || typeof v === 'number'; }
+/* текст: −3, 2/5 */
+function T(v) {
+  if (!isQ(v)) return String(v);
+  v = q(v); const s = v.n < 0 ? MINUS : '', a = Math.abs(v.n);
+  return v.d === 1 ? s + a : s + a + '/' + v.d;
+}
+/* html: дроби этажом */
+function H(v) {
+  if (!isQ(v)) return String(v);
+  v = q(v); const s = v.n < 0 ? MINUS : '', a = Math.abs(v.n);
+  return v.d === 1 ? s + a : s + `<span class="fr"><span>${a}</span><span>${v.d}</span></span>`;
+}
+/* в скобках, если отрицательное (для произведений/сумм) */
+function P(v) { if (!isQ(v)) { const s = String(v); return /[+−\-]/.test(s.slice(1)) ? '(' + s + ')' : s; } return q(v).n < 0 ? '(' + H(v) + ')' : H(v); }
+const C = (k, s) => `<span class="tk ${k}">${s}</span>`;
+const sub = (i, j) => `<sub>${i + 1}${j + 1}</sub>`;
+const aij = (ch, i, j) => `<i class="v">${ch}</i>${sub(i, j)}`;
+const Mij = (i, j) => `<i class="v">M</i>${sub(i, j)}`;
+const Aij = (i, j) => `<i class="v">A</i>${sub(i, j)}`;
+const NV = s => `<i class="v">${s}</i>`;
+const BR = '<br>';
+/* сумма слагаемых с правильными знаками: [3, -2, 5] -> 3 − 2 + 5 */
+function sumStr(vals, colors) {
+  return vals.map((v, k) => {
+    const x = q(v); let s;
+    if (k === 0) s = H(x); else s = (x.n < 0 ? ' − ' : ' + ') + H(x.n < 0 ? x.neg() : x);
+    if (colors && colors[k]) { const sign = k === 0 ? '' : s.slice(0, 3); const body = k === 0 ? s : s.slice(3); return sign + C(colors[k], body); }
+    return s;
+  }).join('');
+}
+const sumQ = arr => arr.reduce((a, b) => a.add(b), q(0));
+const signStr = (i, j) => ((i + j) % 2 ? MINUS + '1' : '+1');
+const sizeStr = M => `${M.length}×${M[0].length}`;
+
+/* ---------- матрицы ---------- */
+function M(str) { // "1 2; 3 4"
+  return str.trim().split(';').map(r => r.trim().split(/[\s,]+/).map(x => { const v = parseQ(x); return v == null ? x.replace(/-/g, MINUS) : v; }));
+}
+const clone = A => A.map(r => r.slice());
+const madd = (A, B) => A.map((r, i) => r.map((x, j) => q(x).add(B[i][j])));
+const msub = (A, B) => A.map((r, i) => r.map((x, j) => q(x).sub(B[i][j])));
+const mscale = (k, A) => A.map(r => r.map(x => q(x).mul(k)));
+const mT = A => A[0].map((_, j) => A.map(r => r[j]));
+function mmul(A, B) { return A.map(r => B[0].map((_, j) => sumQ(r.map((x, k) => q(x).mul(B[k][j]))))); }
+const minor = (A, i, j) => A.filter((_, r) => r !== i).map(r => r.filter((_, c) => c !== j));
+function det(A) {
+  const n = A.length; if (n === 1) return q(A[0][0]);
+  if (n === 2) return q(A[0][0]).mul(A[1][1]).sub(q(A[0][1]).mul(A[1][0]));
+  let s = q(0);
+  for (let j = 0; j < n; j++) { const a = q(A[0][j]); if (a.z) continue; const t = a.mul(det(minor(A, 0, j))); s = j % 2 ? s.sub(t) : s.add(t); }
+  return s;
+}
+const cof = (A, i, j) => ((i + j) % 2 ? det(minor(A, i, j)).neg() : det(minor(A, i, j)));
+function adj(A) { const n = A.length; return A[0].map((_, i) => A.map((_, j) => cof(A, j, i))); }
+function inv(A) { const d = det(A); if (d.z) return null; return mscale(q(1).div(d), adj(A)); }
+const eye = n => Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => q(i === j ? 1 : 0)));
+const meq = (A, B) => A.length === B.length && A[0].length === B[0].length && A.every((r, i) => r.every((x, j) => q(x).eq(B[i][j])));
+const zeros = (m, n) => Array.from({ length: m }, () => Array(n).fill(q(0)));
+
+/* 2×2 определитель строкой: a·d − b·c = … */
+function det2Str(A, withRes = true) {
+  const [a, b] = A[0], [c, d] = A[1];
+  let s = `${P(a)}·${P(d)} − ${P(b)}·${P(c)}`;
+  if (withRes) {
+    const x = q(a).mul(d), y = q(b).mul(c);
+    s += ` = ${H(x)} ${y.n < 0 ? '+ ' + H(y.neg()) : '− ' + H(y)} = ${H(x.sub(y))}`;
+  }
+  return s;
+}
+/* 3×3 правило треугольников строкой */
+const SAR_P = [[[0, 0], [1, 1], [2, 2]], [[0, 1], [1, 2], [2, 0]], [[1, 0], [2, 1], [0, 2]]];
+const SAR_M = [[[0, 2], [1, 1], [2, 0]], [[0, 1], [1, 0], [2, 2]], [[1, 2], [2, 1], [0, 0]]];
+function sarProd(A, pts) { return pts.reduce((a, [i, j]) => a.mul(A[i][j]), q(1)); }
+function det3Str(A) {
+  const pp = SAR_P.map(p => sarProd(A, p)), mm = SAR_M.map(p => sarProd(A, p));
+  const P1 = sumQ(pp), M1 = sumQ(mm);
+  return `(${sumStr(pp)}) − (${sumStr(mm)}) = ${H(P1)} ${M1.n < 0 ? '+ ' + H(M1.neg()) : '− ' + H(M1)} = ${H(P1.sub(M1))}`;
+}
+/* инлайн-матрица для текста/формул */
+function mm(A, br = '(', extra = '') {
+  const n = A[0].length;
+  return `<span class="mm${br === '|' ? ' b' : ''} ${extra}" style="grid-template-columns:repeat(${n},auto)">${A.map(r => r.map(x => `<span>${H(x)}</span>`).join('')).join('')}</span>`;
+}
+function hydrateMM(root = document) {
+  $$('[data-m]', root).forEach(e => {
+    const A = M(e.dataset.m); const tmp = el('span', '', mm(A, e.dataset.b || '(', e.className)); e.replaceWith(tmp.firstChild);
+  });
+}
+
+/* ---------- сцена ---------- */
+/* блок-спеки: {t:'m', k, v, br:'('|'|'|'', lab, cap, capCls, st:(i,j)=>классы}
+               {t:'o', s}  {t:'x', h} */
+const mat = (k, v, o = {}) => Object.assign({ t: 'm', k, v, br: '(' }, o);
+const dt = (k, v, o = {}) => Object.assign({ t: 'm', k, v, br: '|' }, o);
+const op = (s, k) => ({ t: 'o', s, k });
+const tx = (h, k) => ({ t: 'x', h, k });
+
+class MatBlock {
+  constructor(spec) {
+    this.el = el('div', 'mxc'); this.w = el('div', 'mxw'); this.lab = el('span', 'lab'); this.g = el('div', 'mx');
+    this.cap = el('div', 'cap'); this.w.append(this.lab, this.g); this.el.append(this.w, this.cap);
+    this.m = spec.v.length; this.n = spec.v[0].length; this.cells = []; this.vals = []; this.hid = [];
+    this.g.style.gridTemplateColumns = `repeat(${this.n},auto)`;
+    for (let i = 0; i < this.m; i++) {
+      this.cells.push([]); this.vals.push([]); this.hid.push([]);
+      for (let j = 0; j < this.n; j++) { const c = el('div', 'c'); const v = el('span', 'v'); c.append(v); this.g.append(c); this.cells[i].push(c); this.vals[i].push(null); this.hid[i].push(null); }
+    }
+  }
+  ok(spec) { return spec.t === 'm' && spec.v.length === this.m && spec.v[0].length === this.n; }
+  update(spec, anim, fresh) {
+    this.g.className = 'mx ' + (spec.br === '|' ? 'bars' : spec.br === '' ? 'none' : 'paren');
+    this.lab.innerHTML = spec.lab ? spec.lab + (spec.noeq ? '' : ' =') : '';
+    this.cap.innerHTML = spec.cap || ''; this.cap.className = 'cap ' + (spec.capCls || '');
+    for (let i = 0; i < this.m; i++) for (let j = 0; j < this.n; j++) {
+      const c = this.cells[i][j], raw = spec.v[i][j], html = H(raw);
+      let cls = (spec.st ? spec.st(i, j) : '') || '';
+      const hidden = /\b(q|blank)\b/.test(cls);
+      const changed = this.vals[i][j] !== null && this.vals[i][j] !== html;
+      if (this.vals[i][j] !== html) { c.firstChild.innerHTML = html; this.vals[i][j] = html; }
+      if (anim && !fresh) {
+        if (this.hid[i][j] === true && !hidden) cls += ' pop';
+        else if (changed && !hidden) cls += ' chg';
+      }
+      this.hid[i][j] = hidden;
+      if (spec.click) { cls += ' hov'; c.onclick = () => spec.click(i, j); } else c.onclick = null;
+      c.onmouseenter = spec.hover ? () => spec.hover(i, j) : null;
+      const want = 'c ' + cls;
+      if (c.className !== want) {
+        // перезапуск анимации pop/chg
+        if (/\b(pop|chg)\b/.test(cls)) { c.className = 'c'; void c.offsetWidth; }
+        c.className = want;
+      }
+    }
+  }
+}
+class TextBlock {
+  constructor(spec) { this.t = spec.t; this.el = el('div', spec.t === 'o' ? 'opb' : 'txb'); }
+  ok(spec) { return spec.t === this.t; }
+  update(spec) { const h = spec.t === 'o' ? spec.s : spec.h; if (this.h !== h) { this.el.innerHTML = h; this.h = h; } }
+}
+
+class Stage {
+  constructor(host) {
+    this.host = host; host.classList.add('stage');
+    this.inn = el('div', 'stage-in'); this.svg0 = sv('svg', { class: 'ov under' }); this.svg = sv('svg', { class: 'ov' });
+    host.append(this.inn); this.inn.append(this.svg0, this.svg);
+    this.blocks = new Map(); this.lines = [];
+    if (window.ResizeObserver) new ResizeObserver(() => this.drawLines(false)).observe(this.inn);
+  }
+  cell(k, i, j) { const b = this.blocks.get(k); return b && b.cells && b.cells[i] && b.cells[i][j]; }
+  render(scene, opt = {}) {
+    const anim = !!opt.anim;
+    const first = new Map();
+    if (anim) for (const [k, b] of this.blocks) first.set(k, b.el.getBoundingClientRect());
+    const keep = new Set(), order = [];
+    (scene.b || []).forEach((spec, idx) => {
+      const key = spec.k != null ? spec.k : '_' + idx + spec.t;
+      keep.add(key);
+      let blk = this.blocks.get(key), fresh = false;
+      if (blk && !blk.ok(spec)) { blk.el.remove(); this.blocks.delete(key); blk = null; }
+      if (!blk) { blk = spec.t === 'm' ? new MatBlock(spec) : new TextBlock(spec); blk.key = key; this.blocks.set(key, blk); fresh = true; }
+      blk.fresh = fresh; blk.update(spec, anim, fresh); order.push(blk);
+    });
+    for (const [k, b] of this.blocks) if (!keep.has(k)) { b.el.remove(); this.blocks.delete(k); }
+    order.forEach((b, idx) => { if (this.inn.children[idx] !== b.el) this.inn.insertBefore(b.el, this.inn.children[idx] || this.svg0); });
+    if (anim) order.forEach(b => {
+      if (b.fresh) { b.el.animate([{ opacity: 0, transform: 'translateY(10px) scale(.95)' }, { opacity: 1, transform: 'none' }], { duration: 420, easing: 'cubic-bezier(.2,.8,.2,1)' }); return; }
+      const f = first.get(b.key); if (!f) return; const l = b.el.getBoundingClientRect();
+      const dx = f.left - l.left, dy = f.top - l.top;
+      if (Math.abs(dx) > 1 || Math.abs(dy) > 1) b.el.animate([{ transform: `translate(${dx}px,${dy}px)` }, { transform: 'none' }], { duration: 480, easing: 'cubic-bezier(.2,.8,.2,1)' });
+    });
+    this.lines = scene.lines || [];
+    const draw = () => this.drawLines(anim);
+    anim ? setTimeout(draw, 500) : requestAnimationFrame(draw);
+    if (anim && opt.fly && scene.fly) this.fly(scene.fly);
+  }
+  center(k, i, j) {
+    const c = this.cell(k, i, j); if (!c) return null;
+    const r = c.getBoundingClientRect(), o = this.inn.getBoundingClientRect();
+    return [r.left - o.left + r.width / 2, r.top - o.top + r.height / 2, r.width, r.height];
+  }
+  drawLines(anim) {
+    this.svg.innerHTML = ''; this.svg0.innerHTML = '';
+    this.lines.forEach((L, n) => {
+      let pts = L.pts.map(([i, j]) => this.center(L.k, i, j)).filter(Boolean);
+      if (pts.length < 2) return;
+      if (L.ext) { // продлеваем концы (зачёркивание строки/столбца)
+        const [a, b] = [pts[0], pts[pts.length - 1]]; const dx = b[0] - a[0], dy = b[1] - a[1], len = Math.hypot(dx, dy) || 1, e = 20;
+        pts = [[a[0] - dx / len * e, a[1] - dy / len * e], [b[0] + dx / len * e, b[1] + dy / len * e]];
+      }
+      const d = 'M' + pts.map(p => p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' L') + (L.close ? ' Z' : '');
+      const color = L.c || 'var(--c3)', lay = L.ext && L.w === 2 ? this.svg : this.svg0;
+      if (L.close) lay.append(sv('path', { d, fill: color, 'fill-opacity': .08, stroke: 'none' }));
+      const p = sv('path', { d, fill: 'none', stroke: color, 'stroke-width': L.w || 2.5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', opacity: L.op || .9 });
+      if (L.dash) p.setAttribute('stroke-dasharray', '6 6');
+      lay.append(p);
+      if (anim && !L.dash) {
+        const len = p.getTotalLength(); p.style.strokeDasharray = len; p.style.strokeDashoffset = len;
+        p.animate([{ strokeDashoffset: len }, { strokeDashoffset: 0 }], { duration: 520, delay: n * 90, easing: 'ease-out', fill: 'forwards' });
+      }
+      if (L.dots) pts.forEach(pt => lay.append(sv('circle', { cx: pt[0], cy: pt[1], r: 3.2, fill: color })));
+    });
+  }
+  fly(list) {
+    list.forEach((f, n) => {
+      const s = this.cell(...f.from), d = this.cell(...f.to); if (!s || !d) return;
+      d.classList.add('wait');
+      const a = s.getBoundingClientRect(), b = d.getBoundingClientRect();
+      const g = el('div', 'ghost', f.html != null ? f.html : s.firstChild.innerHTML);
+      if (f.color) { g.style.background = f.color; g.style.boxShadow = '0 0 22px ' + f.color; }
+      Object.assign(g.style, { left: a.left + 'px', top: a.top + 'px', width: a.width + 'px', height: a.height + 'px', opacity: 0 });
+      document.body.append(g);
+      const dx = b.left - a.left + (b.width - a.width) / 2, dy = b.top - a.top + (b.height - a.height) / 2;
+      const an = g.animate([
+        { transform: 'translate(0,0) scale(1)', opacity: 0 },
+        { transform: 'translate(0,0) scale(1.15)', opacity: 1, offset: .15 },
+        { transform: `translate(${dx}px,${dy}px) scale(1)`, opacity: 1, offset: .85 },
+        { transform: `translate(${dx}px,${dy}px) scale(1)`, opacity: 0 }
+      ], { duration: f.dur || 750, delay: (f.delay != null ? f.delay : n * 70), easing: 'cubic-bezier(.5,0,.2,1)', fill: 'both' });
+      an.onfinish = () => { g.remove(); d.classList.remove('wait'); d.classList.remove('pop'); void d.offsetWidth; d.classList.add('pop'); };
+    });
+  }
+}
+
+/* ---------- пошаговый плеер ---------- */
+let activeWalk = null;
+const walks = [];
+class Walk {
+  constructor(host, steps, opt = {}) {
+    this.steps = steps; this.i = -1; this.opt = opt;
+    this.el = el('div', 'walk'); host.append(this.el);
+    this.chip = el('div', 'walk-chip'); this.el.append(this.chip);
+    const st = el('div'); this.el.append(st); this.stage = new Stage(st);
+    this.f = el('div', 'walk-f'); this.t = el('div', 'walk-t');
+    this.el.append(this.f, this.t);
+    const ctl = el('div', 'walk-ctl');
+    this.bFirst = el('button', 'ib', '⟲'); this.bFirst.title = 'В начало';
+    this.bPrev = el('button', 'ib', '←'); this.bPrev.title = 'Назад';
+    this.cnt = el('div', 'cnt');
+    this.bNext = el('button', 'ib next', 'Дальше →');
+    this.bPlay = el('button', 'ib play', '▶'); this.bPlay.title = 'Автопросмотр';
+    this.segs = el('div', 'segs');
+    steps.forEach((_, k) => { const s = el('i'); s.onclick = e => { e.stopPropagation(); this.go(k); }; this.segs.append(s); });
+    ctl.append(this.bFirst, this.bPrev, this.cnt, this.bNext, this.bPlay, this.segs);
+    this.el.append(ctl);
+    const kb = el('div', 'walk-kbd', 'Подсказка: клавиши <kbd>←</kbd> <kbd>→</kbd> листают шаги этого разбора, <kbd>Пробел</kbd> — автопросмотр.');
+    this.el.append(kb);
+    this.bFirst.onclick = () => this.go(0);
+    this.bPrev.onclick = () => this.go(this.i - 1);
+    this.bNext.onclick = () => { if (this.i >= this.steps.length - 1) { this.stop(); this.go(0); } else this.go(this.i + 1); };
+    this.bPlay.onclick = () => this.toggle();
+    this.el.addEventListener('pointerdown', () => { activeWalk = this; });
+    walks.push(this); if (walkIO) walkIO.observe(this.el);
+    this.go(0, true);
+  }
+  go(k, init) {
+    k = Math.max(0, Math.min(this.steps.length - 1, k));
+    const fwd = k === this.i + 1; const s = this.steps[k]; this.i = k;
+    this.stage.host.style.display = (s.b && s.b.length) ? '' : 'none';
+    this.stage.render(s, { anim: !init, fly: fwd && !init });
+    this.chip.innerHTML = s.ch || ''; this.chip.classList.toggle('on', !!s.ch);
+    this.f.innerHTML = s.f || ''; this.t.innerHTML = s.t || '';
+    if (!init) { [this.f, this.t].forEach(e => { e.classList.remove('fade'); void e.offsetWidth; e.classList.add('fade'); }); }
+    this.cnt.innerHTML = `<b>${k + 1}</b> / ${this.steps.length}`;
+    this.bPrev.disabled = k === 0; this.bFirst.disabled = k === 0;
+    const end = k === this.steps.length - 1;
+    this.bNext.innerHTML = end ? '↺ Сначала' : 'Дальше →'; this.bNext.classList.toggle('end', end);
+    [...this.segs.children].forEach((e, n) => e.className = n < k ? 'sd' : n === k ? 'sc' : '');
+    if (end) this.stop();
+  }
+  toggle() { this.timer ? this.stop() : this.play(); }
+  play() {
+    if (this.i >= this.steps.length - 1) this.go(0);
+    this.bPlay.classList.add('on'); this.bPlay.innerHTML = '❚❚';
+    const tick = () => {
+      const s = this.steps[this.i]; const len = ((s.f || '') + (s.t || '')).replace(/<[^>]+>/g, '').length;
+      this.timer = setTimeout(() => { if (!this.timer) return; this.go(this.i + 1); if (this.i < this.steps.length - 1) tick(); }, Math.min(6500, 1900 + len * 28));
+    };
+    tick();
+  }
+  stop() { clearTimeout(this.timer); this.timer = null; this.bPlay.classList.remove('on'); this.bPlay.innerHTML = '▶'; }
+}
+const walkIO = window.IntersectionObserver ? new IntersectionObserver(es => {
+  es.forEach(e => { if (e.isIntersecting && e.intersectionRatio > .55) activeWalk = walks.find(w => w.el === e.target) || activeWalk; });
+}, { threshold: [0, .55, 1] }) : null;
+document.addEventListener('keydown', e => {
+  if (!activeWalk || /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) || e.metaKey || e.ctrlKey || e.altKey) return;
+  const r = activeWalk.el.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight || !r.height) return;
+  if (e.key === 'ArrowRight') { e.preventDefault(); activeWalk.go(activeWalk.i + 1); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); activeWalk.go(activeWalk.i - 1); }
+  else if (e.key === ' ') { e.preventDefault(); activeWalk.toggle(); }
+});
+
+/* ---------- прогресс (localStorage) ---------- */
+const STORE = 'matrix-course-v1';
+const store = (() => { try { return JSON.parse(localStorage.getItem(STORE)) || {}; } catch (e) { return {}; } })();
+function save() { try { localStorage.setItem(STORE, JSON.stringify(store)); } catch (e) { } }
+store.solved = store.solved || {};
+const onSolvedHooks = [];
+function markSolved(id) { if (!id || store.solved[id]) return; store.solved[id] = 1; save(); onSolvedHooks.forEach(f => f(id)); }
+function toast(msg) {
+  let t = $('.toast'); if (!t) { t = el('div', 'toast'); document.body.append(t); }
+  t.innerHTML = msg; t.classList.add('on'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('on'), 2200);
+}
+
+/* ---------- карточки: пример / «реши сам» / задача ---------- */
+/* opt: {tag:'Пример'|'Реши сам'|'Задача'|'ДЗ', kind:'ex'|'try'|'task'|'hw', title, src, q (условие html),
+         steps: ()=>[...], ans: {m:[[..]], br} | {n:v} | {list:[..], labels:[..], unordered} | {choice:[..], right},
+         hint, id } */
+function Card(host, opt) {
+  const box = el('div', 'ex'); host.append(box);
+  const kind = opt.kind || 'ex';
+  const head = el('div', 'ex-head');
+  const tag = el('span', 'ex-tag ' + (kind === 'ex' ? '' : kind), opt.tag || 'Пример');
+  head.append(tag, el('span', 'ex-title', opt.title || ''));
+  if (opt.src) head.append(el('span', 'ex-src', opt.src));
+  box.append(head);
+  if (opt.q) { const qq = el('div', 'ex-q', opt.q); box.append(qq); }
+  if (kind === 'ex') { new Walk(box, typeof opt.steps === 'function' ? opt.steps() : opt.steps); return box; }
+  const done = () => { tag.classList.add('done'); tag.textContent = '✓ ' + (opt.tag || 'Решено'); };
+  if (opt.id && store.solved[opt.id]) done();
+  let checkFn = null;
+  if (opt.ans) {
+    const ask = el('div', 'ask'); box.append(ask);
+    ask.append(el('div', 'lbl', opt.ansLabel || 'Твой ответ'));
+    const row = el('div', 'ask-row'); ask.append(row);
+    const verdict = el('span', 'verdict');
+    const a = opt.ans; let inputs = [];
+    if (a.m) {
+      const pre = a.pre ? el('span', 'txb', a.pre) : null; if (pre) row.append(pre);
+      const g = el('div', 'ingrid'); g.style.gridTemplateColumns = `repeat(${a.m[0].length},auto)`;
+      a.m.forEach(r => r.forEach(() => { const inp = el('input', 'cell'); inp.inputMode = 'text'; inp.autocomplete = 'off'; inp.placeholder = '·'; g.append(inp); inputs.push(inp); }));
+      row.append(g);
+      checkFn = () => {
+        let all = true; const flat = a.m.flat();
+        inputs.forEach((inp, k) => { const v = parseQ(inp.value); const good = v && v.eq(flat[k]); inp.classList.remove('good', 'bad'); void inp.offsetWidth; inp.classList.add(good ? 'good' : 'bad'); if (!good) all = false; });
+        return all;
+      };
+    } else if (a.n != null || a.list) {
+      const vals = a.list || [a.n]; const labels = a.labels || [a.label || ''];
+      vals.forEach((_, k) => { if (labels[k]) row.append(el('span', 'txb', labels[k])); const inp = el('input', 'cell wide'); inp.autocomplete = 'off'; inp.placeholder = '?'; row.append(inp); inputs.push(inp); });
+      checkFn = () => {
+        const got = inputs.map(i => parseQ(i.value)); let all = true;
+        if (a.unordered) {
+          const pool = vals.map(q); inputs.forEach((inp, k) => { const idx = got[k] ? pool.findIndex(p => p && p.eq(got[k])) : -1; const good = idx >= 0; if (good) pool[idx] = null; inp.classList.remove('good', 'bad'); void inp.offsetWidth; inp.classList.add(good ? 'good' : 'bad'); if (!good) all = false; });
+        } else inputs.forEach((inp, k) => { const good = got[k] && got[k].eq(vals[k]); inp.classList.remove('good', 'bad'); void inp.offsetWidth; inp.classList.add(good ? 'good' : 'bad'); if (!good) all = false; });
+        return all;
+      };
+    } else if (a.choice) {
+      const chips = el('div', 'chips'); let pick = -1;
+      a.choice.forEach((c, k) => { const ch = el('button', 'chip', c); ch.onclick = () => { pick = k; [...chips.children].forEach((x, n) => x.className = 'chip' + (n === k ? ' on' : '')); }; chips.append(ch); });
+      row.append(chips);
+      checkFn = () => { const good = pick === a.right; [...chips.children].forEach((x, n) => { x.className = 'chip' + (n === pick ? (good ? ' good' : ' bad') : ''); }); return good; };
+    }
+    inputs.forEach((inp, k) => inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); btnC.click(); } }));
+    const btns = el('div', 'ask-row');
+    const btnC = el('button', 'btn pri sm', 'Проверить');
+    btns.append(btnC);
+    let hintEl = null;
+    if (opt.hint) { const bh = el('button', 'btn sm', '💡 Подсказка'); hintEl = el('div', 'hint', opt.hint); bh.onclick = () => hintEl.classList.toggle('on'); btns.append(bh); }
+    btns.append(verdict); ask.append(btns); if (hintEl) ask.append(hintEl);
+    let tries = 0;
+    btnC.onclick = () => {
+      if (a.choice == null && inputs.some(i => !i.value.trim())) { verdict.className = 'verdict on bad'; verdict.textContent = 'Заполни все поля (дроби пиши как −1/3)'; return; }
+      const ok = checkFn(); tries++;
+      verdict.className = 'verdict on ' + (ok ? 'good' : 'bad');
+      verdict.textContent = ok ? ['Верно! 🔥', 'Точно в цель! ✨', 'Отлично, всё сходится ✓'][tries % 3] : (tries > 1 ? 'Пока не так. Загляни в подсказку или решение ↓' : 'Есть ошибки — красные поля неверны');
+      if (ok) { markSolved(opt.id); done(); if (opt.onok && !opt._okd) { opt._okd = 1; opt.onok(); } }
+    };
+  }
+  const lock = el('div', 'sol-lock');
+  const bs = el('button', 'btn sm', '👁 Показать решение');
+  lock.append(bs, el('span', 'muted', kind === 'try' ? 'Сначала попробуй сам — потом сверься по шагам.' : 'Решение пошаговое, как в примерах.'));
+  box.append(lock);
+  const sol = el('div', 'sol'); box.append(sol);
+  let built = false;
+  bs.onclick = () => {
+    const on = !sol.classList.contains('on');
+    if (on && !built) { built = true; new Walk(sol, typeof opt.steps === 'function' ? opt.steps() : opt.steps); }
+    sol.classList.toggle('on', on); bs.innerHTML = on ? '🙈 Скрыть решение' : '👁 Показать решение';
+  };
+  return box;
+}
+/* вставка карточки в плейсхолдер <div data-card="id"> */
+const CARDS = {};
+function mountCards() {
+  $$('[data-card]').forEach(ph => { const f = CARDS[ph.dataset.card]; if (!f) { ph.textContent = '[нет карточки ' + ph.dataset.card + ']'; return; } const o = f(); o.id = o.id || ph.dataset.card; Card(ph, o); });
+}
+/* =====================================================================
+   ГЕНЕРАТОРЫ ПОШАГОВЫХ РЕШЕНИЙ
+   Каждый возвращает массив шагов {b:[блоки], lines, fly, f, t, ch}
+   ===================================================================== */
+const HL = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
+function S(o = {}) {
+  return (i, j) => {
+    let c = '';
+    if (o.row && o.row[i] != null) c += ' ' + o.row[i];
+    if (o.col && o.col[j] != null) c += ' ' + o.col[j];
+    if (o.hl) for (const t of o.hl) if (t[0] === i && t[1] === j) c += ' ' + t[2];
+    if (o.f) c += ' ' + (o.f(i, j) || '');
+    if (o.x && ((o.x.r && o.x.r.includes(i)) || (o.x.c && o.x.c.includes(j))) && !/h\d|p\d/.test(c)) c += ' x';
+    if (o.hide && o.hide(i, j)) c += ' q';
+    if (o.dim && !c.trim()) c += ' dim';
+    return c.trim();
+  };
+}
+const QM = A => A.map(r => r.map(x => (isQ(x) ? q(x) : x)));
+function chain(parts) { const out = []; parts.forEach(p => p.steps.forEach(s => { if (p.ch && !s.ch) s.ch = p.ch; out.push(s); })); return out; }
+const rowStr = r => '(' + r.map(H).join(', ') + ')';
+const VIO = 'rgba(162,147,255,.45)', CYA = 'rgba(76,211,255,.45)';
+
+/* ---------------- сложение / вычитание ---------------- */
+function genAdd(A, B, o = {}) {
+  A = QM(A); B = QM(B);
+  const s = o.sign || 1, opS = s > 0 ? '+' : '−', na = o.na || 'A', nb = o.nb || 'B', nc = o.nc || `${na} ${opS} ${nb}`;
+  const m = A.length, n = A[0].length, R = s > 0 ? madd(A, B) : msub(A, B);
+  const steps = [];
+  const sc = (sa, sb, sr, caps) => ({
+    b: [mat('A', A, { st: S(sa), cap: caps ? `${na} · ${m}×${n}` : na }), op(opS), mat('B', B, { st: S(sb), cap: caps ? `${nb} · ${m}×${n}` : nb }), op('='),
+    mat('R', R, { st: S(sr), cap: caps ? `${nc} · ${m}×${n}` : nc, capCls: caps ? 'ok' : '' })]
+  });
+  const hideUpTo = k => (i, j) => i * n + j >= k;
+  steps.push(Object.assign(sc({}, {}, { hide: () => true }, true), {
+    f: `${na}: ${m}×${n} &nbsp; ${nb}: ${m}×${n} &nbsp;→&nbsp; ${C('k3', 'размеры совпадают ✓')}`,
+    t: `${s < 0 ? 'Вычитать' : 'Складывать'} можно <b>только матрицы одинакового размера</b>. Ответ будет того же размера ${m}×${n}. Работаем «клеточка к клеточке».`
+  }));
+  const cellStep = (i, j, first) => {
+    const a = A[i][j], b = B[i][j], r = R[i][j];
+    const st = Object.assign(sc({ hl: [[i, j, 'h1']], dim: 1 }, { hl: [[i, j, 'h2']], dim: 1 }, { hl: [[i, j, 'h3']], hide: hideUpTo(i * n + j + 1) }), {
+      f: `${aij('c', i, j)} = ${C('k1', aij('a', i, j))} ${opS} ${C('k2', aij('b', i, j))} = ${C('k1', H(a))} ${opS} ${C('k2', P(b))} = ${C('k3', H(r))}`,
+      t: first ? `Берём элементы, которые стоят <b>на одном и том же месте</b> (строка ${i + 1}, столбец ${j + 1}) в обеих матрицах, и ${s > 0 ? 'складываем' : 'вычитаем'}. Результат ставим на то же место.` : `Строка ${i + 1}, столбец ${j + 1}.`
+    });
+    st.fly = [{ from: ['A', i, j], to: ['R', i, j], color: VIO }, { from: ['B', i, j], to: ['R', i, j], color: CYA }];
+    return st;
+  };
+  const big = m * n > 6;
+  for (let i = 0; i < m; i++) {
+    if (!big || i === 0) { for (let j = 0; j < n; j++) steps.push(cellStep(i, j, i === 0 && j === 0)); continue; }
+    const st = Object.assign(sc({ row: { [i]: 'h1' }, dim: 1 }, { row: { [i]: 'h2' }, dim: 1 }, { row: { [i]: 'h3' }, hide: hideUpTo((i + 1) * n) }), {
+      f: A[i].map((a, j) => `${C('k1', H(a))} ${opS} ${C('k2', P(B[i][j]))} = ${C('k3', H(R[i][j]))}`).join(' &nbsp;│&nbsp; '),
+      t: `Строка ${i + 1} — по тому же правилу, каждую клетку отдельно.`
+    });
+    st.fly = A[i].map((_, j) => ({ from: ['B', i, j], to: ['R', i, j], color: CYA }));
+    steps.push(st);
+  }
+  steps.push(Object.assign(sc({}, {}, { f: () => 'h3' }), { f: `${nc} = ${mm(R)}`, t: o.fin || 'Готово! Каждое число ответа — это сумма (разность) чисел, стоявших на том же месте.' }));
+  return steps;
+}
+/* ---------------- умножение на число ---------------- */
+function genScalar(k, A, o = {}) {
+  A = QM(A); k = q(k);
+  const na = o.na || 'A', nc = o.nc || `${H(k)}${na}`, m = A.length, n = A[0].length, R = mscale(k, A);
+  const steps = [];
+  const sc = (sa, sr) => ({ b: [tx(`<span class="k4">${H(k)}</span> ·`), mat('A', A, { st: S(sa), cap: na }), op('='), mat('R', R, { st: S(sr), cap: nc })] });
+  const hideUpTo = c => (i, j) => i * n + j >= c;
+  steps.push(Object.assign(sc({ f: () => 'soft' }, { hide: () => true }), {
+    f: `${H(k)} · ${na} &nbsp;→&nbsp; ${C('k4', H(k))} умножаем на <b>каждый</b> элемент`,
+    t: `При умножении матрицы на число на это число умножается <b>каждый</b> элемент (в отличие от определителя, где умножается только одна строка!). Размер не меняется: ${m}×${n}.`
+  }));
+  const big = m * n > 6;
+  for (let i = 0; i < m; i++) {
+    if (!big || i === 0) {
+      for (let j = 0; j < n; j++) {
+        const st = Object.assign(sc({ hl: [[i, j, 'h1']], dim: 1 }, { hl: [[i, j, 'h3']], hide: hideUpTo(i * n + j + 1) }), {
+          f: `${C('k4', H(k))} · ${C('k1', P(A[i][j]))} = ${C('k3', H(R[i][j]))}`,
+          t: i === 0 && j === 0 ? `Элемент строки 1, столбца 1 умножаем на ${H(k)} и ставим на то же место.` : `Строка ${i + 1}, столбец ${j + 1}.`
+        });
+        st.fly = [{ from: ['A', i, j], to: ['R', i, j] }];
+        steps.push(st);
+      }
+      continue;
+    }
+    const st = Object.assign(sc({ row: { [i]: 'h1' }, dim: 1 }, { row: { [i]: 'h3' }, hide: hideUpTo((i + 1) * n) }), {
+      f: A[i].map((a, j) => `${H(k)}·${P(a)} = ${C('k3', H(R[i][j]))}`).join(' &nbsp;│&nbsp; '), t: `Строка ${i + 1} целиком.`
+    });
+    st.fly = A[i].map((_, j) => ({ from: ['A', i, j], to: ['R', i, j] }));
+    steps.push(st);
+  }
+  steps.push(Object.assign(sc({}, { f: () => 'h3' }), { f: `${nc} = ${mm(R)}`, t: o.fin || 'Готово.' }));
+  return steps;
+}
+/* линейная комбинация αA + βB */
+function genCombo(A, B, al, be, o = {}) {
+  const na = o.na || 'A', nb = o.nb || 'B'; al = q(al); be = q(be);
+  const parts = []; let A2 = QM(A), B2 = QM(B), n1 = na, n2 = nb;
+  if (!al.eq(1)) { parts.push({ ch: `Этап ${parts.length + 1} · ${H(al)}${na}`, steps: genScalar(al, A, { na }) }); A2 = mscale(al, A); n1 = H(al) + na; }
+  const bb = be.n < 0 ? be.neg() : be;
+  if (!bb.eq(1)) { parts.push({ ch: `Этап ${parts.length + 1} · ${H(bb)}${nb}`, steps: genScalar(bb, B, { na: nb }) }); B2 = mscale(bb, B); n2 = H(bb) + nb; }
+  parts.push({ ch: `Этап ${parts.length + 1} · ${n1} ${be.n < 0 ? '−' : '+'} ${n2}`, steps: genAdd(A2, B2, { na: n1, nb: n2, sign: be.n < 0 ? -1 : 1 }) });
+  return chain(parts);
+}
+/* ---------------- транспонирование ---------------- */
+function genTranspose(A, o = {}) {
+  A = QM(A); const na = o.na || 'A', m = A.length, n = A[0].length, R = mT(A);
+  const cl = k => HL[k % 5];
+  const sc = (sa, sr) => ({ b: [mat('A', A, { st: S(sa), cap: `${na} · ${m}×${n}` }), op('⟶'), mat('R', R, { st: S(sr), cap: `${na}<sup>T</sup> · ${n}×${m}` })] });
+  const steps = [];
+  steps.push(Object.assign(sc({}, { hide: () => true }), {
+    f: `${m}×${n} &nbsp;⟶&nbsp; ${n}×${m}`, t: `Транспонирование: <b>строки становятся столбцами</b>. Было ${m} строк и ${n} столбцов — станет ${n} строк и ${m} столбцов.`
+  }));
+  for (let i = 0; i < m; i++) {
+    const rowCls = {}; for (let r = 0; r <= i; r++) rowCls[r] = cl(r);
+    const st = Object.assign(sc({ row: rowCls, dim: 1 }, { col: rowCls, hide: (a, b) => b > i }), {
+      f: `строка ${i + 1}: ${C('k' + ((i % 5) + 1), rowStr(A[i]))} &nbsp;⟶&nbsp; столбец ${i + 1}`,
+      t: i === 0 ? `Первую строку <b>ставим вертикально</b> — она становится первым столбцом. Порядок чисел сохраняется: слева направо → сверху вниз.` : `Строка ${i + 1} становится столбцом ${i + 1}.`
+    });
+    st.fly = A[i].map((_, j) => ({ from: ['A', i, j], to: ['R', j, i], delay: j * 90 }));
+    steps.push(st);
+  }
+  const jj = n > 1 ? 1 : 0;
+  steps.push(Object.assign(sc({ f: (i) => cl(i) }, { f: (i, j) => cl(j) }), {
+    f: `${aij('a', 0, jj)} = ${H(A[0][jj])} &nbsp;⟶&nbsp; в ${na}<sup>T</sup> стоит на месте (${jj + 1}, 1)`,
+    t: `Общее правило: элемент с адресом (i, j) переезжает на адрес (j, i). ${m === n ? 'Главная диагональ остаётся на месте — это «зеркало», относительно которого матрица отражается.' : ''}`
+  }));
+  return steps;
+}
+/* ---------------- умножение матриц ---------------- */
+function genMul(A, B, o = {}) {
+  A = QM(A); B = QM(B);
+  const na = o.na || 'A', nb = o.nb || 'B', nc = o.nc || na + '·' + nb;
+  const m = A.length, n = A[0].length, n2 = B.length, p = B[0].length;
+  const capA = `${na} · ${m}×<b class="k3">${n}</b>`, capB = `${nb} · <b class="k3">${n2}</b>×${p}`;
+  if (n !== n2) {
+    return [{
+      b: [mat('A', A, { cap: `${na} · ${m}×<b class="kr">${n}</b>`, capCls: 'bad' }), op('·'), mat('B', B, { cap: `${nb} · <b class="kr">${n2}</b>×${p}`, capCls: 'bad' })],
+      f: `(${m}×${C('kr', n)}) · (${C('kr', n2)}×${p}) &nbsp;→&nbsp; ${C('kr', n + ' ≠ ' + n2 + ' — нельзя!')}`,
+      t: `Число <b>столбцов</b> первой матрицы (${n}) не равно числу <b>строк</b> второй (${n2}). Строке из ${n} чисел не с кем «спариться» в столбце из ${n2} чисел — произведение <b>не существует</b>.`
+    }];
+  }
+  const R = mmul(A, B), steps = [];
+  const sc = (sa, sb, sr, caps) => ({
+    b: [mat('A', A, { st: S(sa), cap: caps ? capA : na }), op('·'), mat('B', B, { st: S(sb), cap: caps ? capB : nb }), op('='),
+    mat('R', R, { st: S(sr), cap: caps ? `${nc} · ${m}×${p}` : nc, capCls: caps ? 'ok' : '' })]
+  });
+  const hideUpTo = c => (i, j) => i * p + j >= c;
+  steps.push(Object.assign(sc({}, {}, { hide: () => true }, true), {
+    f: `(${m}×${C('k3', n)}) · (${C('k3', n2)}×${p}) &nbsp;→&nbsp; ${C('k1', m)}×${C('k2', p)}`,
+    t: `<b>Проверка размеров.</b> Внутренние числа совпали (${n} = ${n2}) → умножать можно. Внешние дают размер ответа: <b>${m}×${p}</b> (строк — как у ${na}, столбцов — как у ${nb}).`
+  }));
+  const pairsA = i => (a, b) => (a === i ? 'p' + (b % 6) : '');
+  const pairsB = j => (a, b) => (b === j ? 'p' + (a % 6) : '');
+  const formula = (i, j, full) => {
+    const terms = A[i].map((a, k) => C('q' + (k % 6), `${P(a)}·${P(B[k][j])}`)).join(' + ');
+    const prods = A[i].map((a, k) => q(a).mul(B[k][j]));
+    let s = `${aij('c', i, j)} = ${terms}`;
+    if (!full) return s;
+    if (n > 1) s += ` = ${sumStr(prods, prods.map((_, k) => 'q' + (k % 6)))}`;
+    return s + ` = ${C('k3', H(R[i][j]))}`;
+  };
+  steps.push(Object.assign(sc({ row: { 0: 'h1' }, dim: 1 }, { dim: 1 }, { hide: () => true }), {
+    f: `${aij('c', 0, 0)} = ? &nbsp;→&nbsp; ${C('k1', '1-я строка ' + na)} × ${C('k2', '1-й столбец ' + nb)}`,
+    t: `Каждое число ответа <b>c<sub>ij</sub></b> = (строка i первой матрицы) × (столбец j второй). Для c<sub>11</sub> берём <b class="k1">1-ю строку ${na}</b>…`
+  }));
+  steps.push(Object.assign(sc({ row: { 0: 'h1' }, dim: 1 }, { col: { 0: 'h2' }, dim: 1 }, { hl: [[0, 0, 'h3']], hide: () => true }), {
+    f: `${C('k1', rowStr(A[0]))} &nbsp;×&nbsp; ${C('k2', mm(B.map(r => [r[0]])))}`,
+    t: `…и <b class="k2">1-й столбец ${nb}</b>. В строке и в столбце по ${n} чисел — поэтому размеры и должны были совпасть.`
+  }));
+  steps.push(Object.assign(sc({ f: pairsA(0), dim: 1 }, { f: pairsB(0), dim: 1 }, { hl: [[0, 0, 'h3']], hide: () => true }), {
+    f: formula(0, 0, false),
+    t: n > 1 ? `Соединяем в пары <b>по порядку</b>: 1-е число строки × 1-е число столбца, 2-е × 2-е${n > 2 ? ', 3-е × 3-е' : ''}. Одинаковый цвет = одна пара.` : 'В строке одно число и в столбце одно — пара всего одна.'
+  }));
+  steps.push(Object.assign(sc({ f: pairsA(0), dim: 1 }, { f: pairsB(0), dim: 1 }, { hl: [[0, 0, 'h3']], hide: hideUpTo(1) }), {
+    f: formula(0, 0, true), t: n > 1 ? `Произведения пар <b>складываем</b> — получается одно число. Это и есть c<sub>11</sub>.` : 'Это и есть c<sub>11</sub>.'
+  }));
+  for (let i = 0; i < m; i++) for (let j = 0; j < p; j++) {
+    if (i === 0 && j === 0) continue;
+    steps.push(Object.assign(sc({ f: pairsA(i), dim: 1 }, { f: pairsB(j), dim: 1 }, { hl: [[i, j, 'h3']], hide: hideUpTo(i * p + j + 1) }), {
+      f: formula(i, j, true),
+      t: `${C('k1', 'Строка ' + (i + 1))} × ${C('k2', 'столбец ' + (j + 1))} → место (${i + 1}, ${j + 1}).` + (i === 0 && j === 1 ? ' Строка та же, столбец — следующий.' : '') + (i === 1 && j === 0 ? ' Переходим ко 2-й строке — снова с 1-го столбца.' : '')
+    }));
+  }
+  steps.push(Object.assign(sc({}, {}, { f: () => 'h3' }), { f: `${nc} = ${mm(R)}`, t: o.fin || 'Готово! Запомни: <b>строка × столбец</b>, пары по порядку, сумма произведений.' }));
+  return steps;
+}
+/* ---------------- определитель 2×2 ---------------- */
+function genDet2(A, o = {}) {
+  A = QM(A); const lab = o.lab || 'Δ';
+  const num = isQ(A[0][0]) && isQ(A[1][1]) && isQ(A[0][1]) && isQ(A[1][0]);
+  const x = num ? q(A[0][0]).mul(A[1][1]) : null, y = num ? q(A[0][1]).mul(A[1][0]) : null;
+  const sy = o.sym || {};
+  const d1 = [[0, 0], [1, 1]], d2 = [[0, 1], [1, 0]];
+  const sc = (st, lines) => ({ b: [dt('D', A, { lab, st: S(st) })], lines: lines || [] });
+  return [
+    Object.assign(sc({}), { f: `${lab} = ${C('k3', aij('a', 0, 0) + '·' + aij('a', 1, 1))} − ${C('kr', aij('a', 0, 1) + '·' + aij('a', 1, 0))}`, t: o.t0 || 'Определитель 2×2 — это одно <b>число</b>: произведение <b class="k3">главной диагонали</b> минус произведение <b class="kr">побочной</b>.' }),
+    Object.assign(sc({ hl: [[0, 0, 'h3'], [1, 1, 'h3']], dim: 1 }, [{ k: 'D', pts: d1, c: 'var(--c3)', ext: true }]), {
+      f: `${C('k3', 'главная')}: ${P(A[0][0])} · ${P(A[1][1])} = ${C('k3', sy.p1 || H(x))}`, t: sy.t1 || '<b>Главная диагональ</b> — из левого верхнего угла в правый нижний. Перемножаем.'
+    }),
+    Object.assign(sc({ hl: [[0, 1, 'h6'], [1, 0, 'h6']], dim: 1 }, [{ k: 'D', pts: d2, c: 'var(--red)', ext: true }]), {
+      f: `${C('kr', 'побочная')}: ${P(A[0][1])} · ${P(A[1][0])} = ${C('kr', sy.p2 || H(y))}`, t: sy.t2 || '<b>Побочная диагональ</b> — из правого верхнего угла в левый нижний. Тоже перемножаем.'
+    }),
+    Object.assign(sc({ hl: [[0, 0, 'h3'], [1, 1, 'h3'], [0, 1, 'h6'], [1, 0, 'h6']] }, [{ k: 'D', pts: d1, c: 'var(--c3)', ext: true, op: .5 }, { k: 'D', pts: d2, c: 'var(--red)', ext: true, op: .5 }]), {
+      f: sy.res || `${lab} = ${C('k3', P(x))} − ${C('kr', P(y))} = ${C('k4', H(x.sub(y)))}`, t: o.fin || 'Из главной вычитаем побочную. Определитель — это <b>одно число</b>, а не матрица.'
+    })
+  ];
+}
+/* ---------------- определитель 3×3: правило треугольников ---------------- */
+function genSarrus(A, o = {}) {
+  A = QM(A); const lab = o.lab || 'Δ', sy = o.sym;
+  const sc = (st, lines) => ({ b: [dt('D', A, { lab, st: S(st) })], lines: lines || [] });
+  const name = pts => pts.map(([i, j]) => aij('a', i, j)).join('·');
+  const vals = pts => pts.map(([i, j]) => P(A[i][j])).join('·');
+  const steps = [], pv = [], mv = [];
+  steps.push(Object.assign(sc({}), {
+    f: `${lab} = ${C('k3', '(… + … + …)')} − ${C('kr', '(… + … + …)')}`,
+    t: 'Считаем <b>6 произведений</b> по 3 числа. Три идут со знаком <b class="k3">+</b> (главная диагональ и два треугольника «вдоль» неё), три — со знаком <b class="kr">−</b> (побочная диагональ и два треугольника вдоль неё). В каждом произведении — ровно одно число из каждой строки и каждого столбца.'
+  }));
+  const tp = ['<b>Главная диагональ</b>.', 'Треугольник: две клетки параллельно главной диагонали (' + aij('a', 0, 1) + ', ' + aij('a', 1, 2) + ') + противоположный угол ' + aij('a', 2, 0) + '.', 'Второй треугольник: ' + aij('a', 1, 0) + ', ' + aij('a', 2, 1) + ' + угол ' + aij('a', 0, 2) + '.'];
+  const tm = ['<b>Побочная диагональ</b> — со знаком минус.', 'Треугольник вдоль побочной: ' + aij('a', 0, 1) + ', ' + aij('a', 1, 0) + ' + угол ' + aij('a', 2, 2) + '.', 'Второй: ' + aij('a', 1, 2) + ', ' + aij('a', 2, 1) + ' + угол ' + aij('a', 0, 0) + '.'];
+  SAR_P.forEach((pts, k) => {
+    const v = sy ? null : sarProd(A, pts); pv.push(v);
+    steps.push(Object.assign(sc({ hl: pts.map(p => [...p, 'h3']), dim: 1 }, [{ k: 'D', pts, c: 'var(--c3)', close: k > 0, ext: k === 0, dots: true }]), {
+      f: `${C('k3', '+')} ${name(pts)} = ${vals(pts)} = ${C('k3', sy ? sy.p[k] : H(v))}`,
+      t: tp[k] + (sy ? '' : ` <small>Плюсы: ${pv.map(H).join(', ')}</small>`)
+    }));
+  });
+  SAR_M.forEach((pts, k) => {
+    const v = sy ? null : sarProd(A, pts); mv.push(v);
+    steps.push(Object.assign(sc({ hl: pts.map(p => [...p, 'h6']), dim: 1 }, [{ k: 'D', pts, c: 'var(--red)', close: k > 0, ext: k === 0, dots: true }]), {
+      f: `${C('kr', '−')} ${name(pts)} = ${vals(pts)} = ${C('kr', sy ? sy.m[k] : H(v))}`,
+      t: tm[k] + (sy ? '' : ` <small>Минусы: ${mv.map(H).join(', ')}</small>`)
+    }));
+  });
+  if (sy) sy.fin.forEach((f, k) => steps.push(Object.assign(sc({}), { f, t: sy.fint ? sy.fint[k] : '' })));
+  else {
+    const P1 = sumQ(pv), M1 = sumQ(mv);
+    steps.push(Object.assign(sc({}), {
+      f: `${lab} = ${C('k3', '(' + sumStr(pv) + ')')} − ${C('kr', '(' + sumStr(mv) + ')')} = ${C('k3', H(P1))} − ${C('kr', P(M1))} = ${C('k4', H(P1.sub(M1)))}`,
+      t: o.fin || 'Сумма «плюсовых» минус сумма «минусовых». Главное — аккуратно со знаками: минус перед скобкой меняет знак каждого слагаемого.'
+    }));
+  }
+  return steps;
+}
+/* ---------------- минор и алгебраическое дополнение ---------------- */
+function signGrid(n) { return Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => ((i + j) % 2 ? '−' : '+'))); }
+function minorValueStr(Mn) { const n = Mn.length; if (n === 1) return H(Mn[0][0]); if (n === 2) return det2Str(Mn); if (n === 3) return det3Str(Mn); return H(det(Mn)); }
+function strikeLines(k, i, j, n) { return [{ k, pts: [[i, 0], [i, n - 1]], c: 'var(--red)', ext: true, w: 2, op: .65 }, { k, pts: [[0, j], [n - 1, j]], c: 'var(--red)', ext: true, w: 2, op: .65 }]; }
+function minorFly(src, dst, i, j, n) { const f = []; for (let r = 0, a = 0; r < n; r++) { if (r === i) continue; for (let c = 0, b = 0; c < n; c++) { if (c === j) continue; f.push({ from: [src, r, c], to: [dst, a, b], delay: f.length * 55 }); b++; } a++; } return f; }
+function genCofactor(A, i, j, o = {}) {
+  A = QM(A); const n = A.length, Mn = minor(A, i, j), mv = det(Mn), sg = (i + j) % 2 ? -1 : 1, cv = sg < 0 ? mv.neg() : mv;
+  const x = { r: [i], c: [j] }, strike = strikeLines('D', i, j, n), mk = 'Mn' + i + j;
+  const chess = mat('S', signGrid(n), { br: '', cap: 'шахматка знаков', st: S({ hl: [[i, j, sg > 0 ? 'h3' : 'h6']], dim: 1 }) });
+  return [
+    { b: [dt('D', A, { st: S({ hl: [[i, j, 'h1']] }) })], f: `элемент ${aij('a', i, j)} = ${C('k1', H(A[i][j]))} &nbsp;(строка ${i + 1}, столбец ${j + 1})`, t: 'Находим элемент. Первый индекс — номер <b>строки</b>, второй — номер <b>столбца</b>.' },
+    { b: [dt('D', A, { st: S({ hl: [[i, j, 'h1']], x }) })], lines: strike, f: `вычёркиваем ${C('kr', 'строку ' + (i + 1))} и ${C('kr', 'столбец ' + (j + 1))}`, t: 'Вычёркиваем строку и столбец, на пересечении которых стоит элемент.' },
+    { b: [dt('D', A, { st: S({ hl: [[i, j, 'h1']], x }) }), op('→'), dt(mk, Mn, { lab: Mij(i, j), st: S({ f: () => 'h2' }) })], lines: strike, fly: minorFly('D', mk, i, j, n), f: `${Mij(i, j)} = ${minorValueStr(Mn)}`, t: `Оставшиеся числа «сдвигаем» вместе — получаем определитель ${n - 1}×${n - 1}. Это <b>минор</b> ${Mij(i, j)}. Считаем его.` },
+    { b: [dt('D', A, { st: S({ hl: [[i, j, 'h1']], x }) }), op('→'), dt(mk, Mn, { lab: Mij(i, j), st: S({ f: () => 'h2' }) }), chess], lines: strike, f: `${Aij(i, j)} = (−1)<sup>${i + 1}+${j + 1}</sup> · ${Mij(i, j)} = ${C(sg > 0 ? 'k3' : 'kr', '(' + signStr(i, j) + ')')} · ${P(mv)} = ${C('k4', H(cv))}`, t: `<b>Алгебраическое дополнение</b> = минор со знаком (−1)<sup>i+j</sup>. Здесь ${i + 1}+${j + 1} = ${i + j + 2} — ${sg > 0 ? '<b class="k3">чётное → «+»</b>, минор не меняется' : '<b class="kr">нечётное → «−»</b>, у минора меняем знак'}. Быстрее — посмотреть на «шахматку».` }
+  ];
+}
+/* ---------------- разложение по строке / столбцу ---------------- */
+function genExpand(A, line, o = {}) {
+  A = QM(A); const n = A.length, lab = o.lab || 'Δ';
+  const isR = line.r != null, L = isR ? line.r : line.c;
+  const els = [...Array(n).keys()].map(k => (isR ? [L, k] : [k, L]));
+  const lineSt = isR ? { row: { [L]: 'h4' } } : { col: { [L]: 'h4' } };
+  const chessAll = st => mat('S', signGrid(n), { br: '', cap: 'знаки', st });
+  const steps = [];
+  const genF = els.map(([i, j]) => `${aij('a', i, j)}·${Aij(i, j)}`).join(' + ');
+  steps.push({ b: [dt('D', A, { lab, st: S(lineSt) }), chessAll(S(Object.assign({ dim: 1 }, isR ? { row: { [L]: 'soft' } } : { col: { [L]: 'soft' } })))], f: `${lab} = ${genF}`, t: `Раскладываем по <b>${isR ? L + 1 + '-й строке' : L + 1 + '-му столбцу'}</b>: каждый её элемент умножаем на его <b>алгебраическое дополнение</b> и всё складываем. ${o.why || ''}` });
+  const terms = []; let k = 0;
+  for (const [i, j] of els) {
+    const a = A[i][j];
+    if (q(a).z) {
+      terms.push(q(0));
+      steps.push({ b: [dt('D', A, { lab, st: S({ hl: [[i, j, 'h6']], dim: 1 }) }), chessAll(S({ hl: [[i, j, 'soft']], dim: 1 }))], f: `${aij('a', i, j)} = 0 &nbsp;→&nbsp; 0 · ${Aij(i, j)} = ${C('k3', '0')}`, t: '<b>Ноль — лучший друг!</b> Слагаемое равно нулю, минор можно даже не считать. Поэтому выгодно раскладывать по строке/столбцу, где больше нулей.' });
+      k++; continue;
+    }
+    const Mn = minor(A, i, j), mv = det(Mn), sg = (i + j) % 2 ? -1 : 1, term = q(a).mul(mv).mul(sg);
+    terms.push(term);
+    const key = 'Mn' + k;
+    steps.push({
+      b: [dt('D', A, { lab, st: S({ hl: [[i, j, 'h1']], x: { r: [i], c: [j] } }) }), op('→'), dt(key, Mn, { lab: Mij(i, j), st: S({ f: () => 'h2' }) }), chessAll(S({ hl: [[i, j, sg > 0 ? 'h3' : 'h6']], dim: 1 }))],
+      lines: strikeLines('D', i, j, n), fly: minorFly('D', key, i, j, n),
+      f: `${Mij(i, j)} = ${minorValueStr(Mn)}${BR}${aij('a', i, j)}·${Aij(i, j)} = ${C('k1', H(a))} · ${C(sg > 0 ? 'k3' : 'kr', '(' + signStr(i, j) + ')')} · ${C('k2', P(mv))} = ${C('k4', H(term))}`,
+      t: `Элемент ${aij('a', i, j)} = ${C('k1', H(a))}. Вычёркиваем строку ${i + 1} и столбец ${j + 1} → минор. Знак по шахматке: ${sg > 0 ? '<b class="k3">+</b>' : '<b class="kr">−</b>'} (${i + 1}+${j + 1} = ${i + j + 2}). <small>Слагаемые: ${terms.map(H).join(' ; ')}</small>`
+    });
+    k++;
+  }
+  const res = sumQ(terms);
+  steps.push({ b: [dt('D', A, { lab, st: S(lineSt) })], f: `${lab} = ${sumStr(terms)} = ${C('k4', H(res))}`, t: o.fin || 'Складываем все слагаемые. По любой строке или столбцу получится одно и то же число!' });
+  return steps;
+}
+/* ---------------- преобразования определителя ----------------
+   ops: {swap:[a,b]} {add:[цель,источник,k]} {factor:[r,k]} (c:1 — столбцы) {expand:{r}|{c}} {tri:1} {fin2:1} {fin3:1}; t — своё пояснение */
+function genOps(A, ops, o = {}) {
+  let cur = QM(A), pref = q(1), v = 0; const steps = [], lab0 = o.lab || 'Δ';
+  const pl = (p, first) => (first ? lab0 + ' = ' : '') + (p.eq(1) ? '' : p.eq(-1) ? MINUS : H(p) + ' ·');
+  const R = i => 'R' + (i + 1), Cc = j => 'C' + (j + 1);
+  steps.push({ b: [dt('M0', cur, { lab: lab0 })], f: o.f0 || `${lab0} = ?`, t: o.t0 || 'Исходный определитель. Будем упрощать его, следя, чтобы значение не менялось (или аккуратно учитывая изменения).' });
+  for (const s of ops) {
+    const before = cur, pb = pref, n = cur.length; let after = clone(cur), stB = {}, stA = {}, f = '', t = '', fly = [], lines = [];
+    if (s.swap) {
+      const [a, b] = s.swap, c = s.c, nmF = c ? Cc : R;
+      if (c) after.forEach(r => { [r[a], r[b]] = [r[b], r[a]]; }); else [after[a], after[b]] = [after[b], after[a]];
+      pref = pref.neg();
+      stB = c ? { col: { [a]: 'h1', [b]: 'h2' } } : { row: { [a]: 'h1', [b]: 'h2' } };
+      stA = c ? { col: { [a]: 'h2', [b]: 'h1' } } : { row: { [a]: 'h2', [b]: 'h1' } };
+      f = `${nmF(a)} ↔ ${nmF(b)} &nbsp;→&nbsp; знак меняется: множитель ${C('k4', H(pb))} → ${C('k4', H(pref))}`;
+      t = s.t || `Меняем местами ${c ? 'столбцы' : 'строки'} ${a + 1} и ${b + 1}. <b>При перестановке двух ${c ? 'столбцов' : 'строк'} определитель меняет знак</b> — учитываем это множителем впереди.`;
+      for (let k = 0; k < n; k++) {
+        fly.push(c ? { from: ['M' + v, k, a], to: ['M' + (v + 1), k, b] } : { from: ['M' + v, a, k], to: ['M' + (v + 1), b, k] });
+        fly.push(c ? { from: ['M' + v, k, b], to: ['M' + (v + 1), k, a] } : { from: ['M' + v, b, k], to: ['M' + (v + 1), a, k] });
+      }
+    } else if (s.add) {
+      const [tg, sr, kk] = s.add, k = q(kk), c = s.c, nmF = c ? Cc : R;
+      if (c) after.forEach(r => { r[tg] = q(r[tg]).add(k.mul(r[sr])); }); else after[tg] = after[tg].map((x, j) => q(x).add(k.mul(cur[sr][j])));
+      stB = c ? { col: { [sr]: 'h2', [tg]: 'h1' } } : { row: { [sr]: 'h2', [tg]: 'h1' } };
+      stA = c ? { col: { [sr]: 'h2', [tg]: 'h3' } } : { row: { [sr]: 'h2', [tg]: 'h3' } };
+      const vt = c ? cur.map(r => r[tg]) : cur[tg], vs = c ? cur.map(r => r[sr]) : cur[sr], vn = c ? after.map(r => r[tg]) : after[tg];
+      f = `${C('k1', nmF(tg))} → ${C('k1', nmF(tg))} + ${P(k)}·${C('k2', nmF(sr))}${BR}${C('k1', rowStr(vt))} + ${P(k)}·${C('k2', rowStr(vs))} = ${C('k3', rowStr(vn))}`;
+      t = s.t || `К ${c ? 'столбцу' : 'строке'} ${tg + 1} прибавляем ${c ? 'столбец' : 'строку'} ${sr + 1}, умноженн${c ? 'ый' : 'ую'} на ${H(k)}. <b>Определитель от этого не меняется</b> (свойство 6). Цель — получить нули.`;
+    } else if (s.factor) {
+      const [r, kk] = s.factor, k = q(kk), c = s.c;
+      if (c) after.forEach(row => { row[r] = q(row[r]).div(k); }); else after[r] = after[r].map(x => q(x).div(k));
+      pref = pref.mul(k);
+      stB = c ? { col: { [r]: 'h4' } } : { row: { [r]: 'h4' } }; stA = stB;
+      f = `из ${c ? Cc(r) : R(r)} выносим ${C('k4', H(k))}: ${rowStr(c ? cur.map(x => x[r]) : cur[r])} = ${H(k)}·${rowStr(c ? after.map(x => x[r]) : after[r])}`;
+      t = s.t || `У всех чисел ${c ? 'столбца' : 'строки'} ${r + 1} есть общий множитель ${H(k)} — <b>выносим его за знак определителя</b> (свойство 4). Числа станут меньше — считать проще.`;
+    } else if (s.expand) {
+      const isR = s.expand.r != null, L = isR ? s.expand.r : s.expand.c;
+      let ii = -1, jj = -1;
+      for (let k = 0; k < n; k++) { const [i, j] = isR ? [L, k] : [k, L]; if (!q(cur[i][j]).z) { ii = i; jj = j; } }
+      const a = q(cur[ii][jj]), sg = (ii + jj) % 2 ? -1 : 1;
+      after = minor(cur, ii, jj); pref = pref.mul(a).mul(sg);
+      stB = { hl: [[ii, jj, 'h1']], x: { r: [ii], c: [jj] } };
+      stA = { f: () => 'h2' };
+      lines = strikeLines('M' + v, ii, jj, n);
+      f = `по ${isR ? R(L) : Cc(L)}: ${aij('a', ii, jj)}·${Aij(ii, jj)} = ${C('k1', H(a))} · ${C(sg > 0 ? 'k3' : 'kr', '(' + signStr(ii, jj) + ')')} · ${Mij(ii, jj)} &nbsp;→&nbsp; множитель ${pb.eq(1) ? '' : P(pb) + '·'}${P(a)}·(${signStr(ii, jj)}) = ${C('k4', H(pref))}`;
+      t = s.t || `В ${isR ? 'строке' : 'столбце'} ${L + 1} все элементы, кроме одного, — нули. От разложения остаётся <b>одно слагаемое</b>: ${aij('a', ii, jj)}·${Aij(ii, jj)}. Порядок определителя понижается на 1!`;
+      fly = minorFly('M' + v, 'M' + (v + 1), ii, jj, n);
+    } else if (s.tri || s.fin2 || s.fin3) {
+      let d, str;
+      if (s.tri) { const diag = cur.map((r, i) => r[i]); d = diag.reduce((x, y) => x.mul(y), q(1)); str = diag.map(P).join('·'); }
+      else if (s.fin2) { d = det(cur); str = det2Str(cur, false); }
+      else { d = det(cur); str = det3Str(cur).split(' = ')[0]; }
+      const res = pref.mul(d), n2 = cur.length;
+      steps.push({
+        b: [dt('M' + v, cur, { lab: pl(pref, true), noeq: true, st: S(s.tri ? { f: (i, j) => (i === j ? 'h3' : i > j ? 'dim' : '') } : { f: () => 'soft' }) })],
+        lines: s.tri ? [{ k: 'M' + v, pts: [[0, 0], [n2 - 1, n2 - 1]], c: 'var(--c3)', ext: true, op: .5 }] : [],
+        f: `${lab0} = ${pref.eq(1) ? '' : P(pref) + ' · '}(${str}) = ${pref.eq(1) ? '' : P(pref) + ' · ' + P(d) + ' = '}${C('k4', H(res))}`,
+        t: s.t || (s.tri ? '<b>Треугольный вид!</b> Под главной диагональю одни нули → определитель равен произведению чисел главной диагонали (и не забываем множитель впереди).' : 'Остался маленький определитель — считаем его и умножаем на накопленный множитель.')
+      });
+      continue;
+    }
+    steps.push({
+      b: [dt('M' + v, before, { lab: pl(pb, true), noeq: true, st: S(stB) }), op('='), dt('M' + (v + 1), after, { lab: pl(pref, false), noeq: true, st: S(stA) })],
+      lines, fly, f, t
+    });
+    cur = after; v++;
+  }
+  return steps;
+}
+function autoTriOps(A) {
+  let cur = QM(A); const n = cur.length, ops = [];
+  const one = v => Math.abs(v.n) === 1 && v.d === 1;
+  for (let c = 0; c < n - 1; c++) {
+    let best = -1;
+    for (let r = c; r < n; r++) { const v = q(cur[r][c]); if (v.z) continue; if (best < 0 || (one(v) && !one(q(cur[best][c])))) best = r; }
+    if (best < 0) continue;
+    if (best !== c) { ops.push({ swap: [c, best] }); [cur[c], cur[best]] = [cur[best], cur[c]]; }
+    for (let r = c + 1; r < n; r++) {
+      const v = q(cur[r][c]); if (v.z) continue; const k = v.div(cur[c][c]).neg();
+      ops.push({ add: [r, c, k] }); cur[r] = cur[r].map((x, j) => q(x).add(k.mul(cur[c][j])));
+    }
+  }
+  ops.push({ tri: 1 });
+  return ops;
+}
+/* ---------------- обратная матрица ---------------- */
+function genInverse(A, o = {}) {
+  A = QM(A); const n = A.length, d = det(A), na = o.na || 'A';
+  const steps = [];
+  steps.push({ ch: 'Шаг 1 · определитель', b: [dt('A', A, { lab: `|${na}|` })], f: `|${na}| = ${n === 2 ? det2Str(A) : det3Str(A)}`, t: `Сначала определитель. Если он равен 0 — матрица <b>вырожденная</b> и обратной нет. ${d.z ? '' : `Здесь |${na}| = ${H(d)} ≠ 0 → обратная <b class="k3">существует</b>.`}` });
+  if (d.z) { steps[0].t = `|${na}| = 0 → матрица вырожденная, <b class="kr">обратной матрицы не существует</b>. Дальше считать не нужно.`; return steps; }
+  const Cf = A.map((r, i) => r.map((_, j) => cof(A, i, j)));
+  const order = []; for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) order.push([i, j]);
+  order.forEach(([i, j], k) => {
+    const Mn = minor(A, i, j), mv = det(Mn), sg = (i + j) % 2 ? -1 : 1;
+    steps.push({
+      ch: `Шаг 2 · алгебраические дополнения (${k + 1} из ${n * n})`,
+      b: [mat('A', A, { cap: na, st: S({ hl: [[i, j, 'h1']], x: { r: [i], c: [j] } }) }), op('→'), mat('Cf', Cf, { cap: 'таблица A<sub>ij</sub>', st: S({ hl: [[i, j, sg > 0 ? 'h3' : 'h6']], hide: (a, b) => a * n + b > k }) })],
+      lines: strikeLines('A', i, j, n),
+      f: `${Aij(i, j)} = ${C(sg > 0 ? 'k3' : 'kr', '(' + signStr(i, j) + ')')} · ${n === 2 ? H(Mn[0][0]) : mm(Mn, '|')} = ${C(sg > 0 ? 'k3' : 'kr', '(' + signStr(i, j) + ')')} · ${n === 2 ? P(mv) : '(' + det2Str(Mn) + ')'} = ${C('k4', H(Cf[i][j]))}`,
+      t: k === 0 ? `Для <b>каждого</b> элемента: вычёркиваем его строку и столбец → минор, ставим знак по шахматке (${n === 2 ? 'для 2×2 минор — это просто одно оставшееся число' : '<b>+ − +</b> / <b>− + −</b> / <b>+ − +</b>'}). Записываем в таблицу <b>на то же место</b>.` : `Элемент (${i + 1}, ${j + 1}): знак ${sg > 0 ? '<b class="k3">+</b>' : '<b class="kr">−</b>'}.`
+    });
+  });
+  const Ad = mT(Cf), cl = k => HL[k % 5];
+  steps.push({
+    ch: 'Шаг 3 · транспонируем → присоединённая A*',
+    b: [mat('Cf', Cf, { cap: 'таблица A<sub>ij</sub>', st: S({ f: i => cl(i) }) }), op('⟶'), mat('Ad', Ad, { cap: `${na}* (присоединённая)`, st: S({ f: (i, j) => cl(j) }) })],
+    fly: order.map(([i, j], k) => ({ from: ['Cf', i, j], to: ['Ad', j, i], delay: k * 55 })),
+    f: `${na}* = (таблица A<sub>ij</sub>)<sup>T</sup>: &nbsp;A<sub>12</sub> → место (2,1), &nbsp;A<sub>21</sub> → место (1,2)…`,
+    t: '<b>Самое коварное место!</b> Дополнения <b>строки</b> i записываем в <b>столбец</b> i (транспонируем). Цвета показывают, куда переехала каждая строка. <small>Почему так — см. блок «Почему транспонируем?» в теории.</small>'
+  });
+  const Iv = inv(A);
+  steps.push({
+    ch: 'Шаг 4 · делим на определитель',
+    b: [tx(`${na}<sup>−1</sup> = <span class="fr"><span>1</span><span>${T(d)}</span></span> ·`), mat('Ad', Ad, { st: S({ f: () => 'soft' }) }), op('='), mat('Iv', Iv, { st: S({ f: () => 'h3' }) })],
+    fly: order.map(([i, j], k) => ({ from: ['Ad', i, j], to: ['Iv', i, j], delay: k * 45 })),
+    f: `${na}<sup>−1</sup> = <span class="fr"><span>1</span><span>|${na}|</span></span> · ${na}* = <span class="fr"><span>1</span><span>${T(d)}</span></span> · ${na}*`,
+    t: `Каждый элемент присоединённой матрицы делим на |${na}| = ${H(d)}. Дроби сокращаем.`
+  });
+  const E = eye(n);
+  const c11 = A[0].map((a, k) => `${P(a)}·${P(Iv[k][0])}`).join(' + ');
+  const c12 = A[0].map((a, k) => `${P(a)}·${P(Iv[k][1])}`).join(' + ');
+  steps.push({
+    ch: 'Шаг 5 · проверка',
+    b: [mat('A', A, { cap: na, st: S({ row: { 0: 'h1' } }) }), op('·'), mat('Iv', Iv, { cap: `${na}<sup>−1</sup>`, st: S({ col: { 0: 'h2' } }) }), op('='), mat('E', E, { cap: 'E', st: S({ f: (i, j) => (i === j ? 'h3' : '') }) })],
+    f: `c<sub>11</sub> = ${c11} = ${C('k3', '1')}${BR}c<sub>12</sub> = ${c12} = ${C('k3', '0')}`,
+    t: `<b>Проверка:</b> ${na}·${na}<sup>−1</sup> должно дать единичную матрицу E (единицы на диагонали, остальное нули). Сходится ✓ — обратная найдена верно.`
+  });
+  return steps;
+}
+/* 2×2 — быстрое правило */
+function genInverse2(A, o = {}) {
+  A = QM(A); const d = det(A), na = o.na || 'A';
+  const [[a, b], [c, dd]] = A; const sw = [[dd, q(b).neg()], [q(c).neg(), a]], Iv = inv(A);
+  return [
+    { b: [mat('A', A, { cap: na })], f: `|${na}| = ${det2Str(A)}`, t: `Определитель ≠ 0 → обратная существует.` },
+    { b: [mat('A', A, { cap: na, st: S({ hl: [[0, 0, 'h1'], [1, 1, 'h1']], dim: 1 }) }), op('→'), mat('W', [[dd, b], [c, a]], { st: S({ hl: [[0, 0, 'h1'], [1, 1, 'h1']], dim: 1 }) })], fly: [{ from: ['A', 0, 0], to: ['W', 1, 1] }, { from: ['A', 1, 1], to: ['W', 0, 0] }], f: `${C('k1', 'главная диагональ')}: ${H(a)} и ${H(dd)} меняем местами`, t: 'Числа на главной диагонали <b>меняются местами</b>.' },
+    { b: [mat('A', A, { cap: na, st: S({ hl: [[0, 1, 'h5'], [1, 0, 'h5']], dim: 1 }) }), op('→'), mat('W', sw, { cap: na + '*', st: S({ hl: [[0, 1, 'h5'], [1, 0, 'h5']], f: (i, j) => (i === j ? 'h1' : '') }) })], f: `${C('k5', 'побочная диагональ')}: ${H(b)} → ${H(q(b).neg())}, &nbsp;${H(c)} → ${H(q(c).neg())}`, t: 'У чисел побочной диагонали <b>меняем знак</b> (сами остаются на местах). Это и есть присоединённая матрица A*.' },
+    { b: [tx(`<span class="fr"><span>1</span><span>${T(d)}</span></span> ·`), mat('W', sw, { st: S({ f: () => 'soft' }) }), op('='), mat('Iv', Iv, { cap: na + '<sup>−1</sup>', st: S({ f: () => 'h3' }) })], fly: [[0, 0], [0, 1], [1, 0], [1, 1]].map(([i, j], k) => ({ from: ['W', i, j], to: ['Iv', i, j], delay: k * 60 })), f: `${na}<sup>−1</sup> = <span class="fr"><span>1</span><span>${T(d)}</span></span> · ${mm(sw)} = ${mm(Iv)}`, t: 'Делим всё на определитель. Готово! Результат тот же, что по общему алгоритму, — просто быстрее.' }
+  ];
+}
+/* =====================================================================
+   ИНТЕРАКТИВНЫЕ ВИДЖЕТЫ
+   ===================================================================== */
+function labBox(host, title, sub) {
+  const b = el('div', 'lab-box');
+  b.innerHTML = `<div class="lab-top"><span class="ex-tag">Интерактив</span><span class="ttl">${title}</span>${sub ? `<span class="sub">${sub}</span>` : ''}</div>`;
+  host.append(b); return b;
+}
+function stepperEl(val, min, max, on) {
+  const s = el('div', 'stepper'); const a = el('button', '', '−'), v = el('span', '', val), b = el('button', '', '+');
+  a.onclick = () => { if (val > min) { val--; v.textContent = val; on(val); } };
+  b.onclick = () => { if (val < max) { val++; v.textContent = val; on(val); } };
+  s.append(a, v, b); return s;
+}
+const ri = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+const rnz = (a, b) => { let x; do x = ri(a, b); while (x === 0); return x; };
+const randM = (m, n, a = -5, b = 5) => Array.from({ length: m }, () => Array.from({ length: n }, () => q(ri(a, b))));
+const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = ri(0, i); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const PP = x => (isQ(x) && q(x).n < 0 ? '(' + H(x) + ')' : H(x));
+
+function heroAnim() {
+  const g = $('#heroGrid'), cap = $('#heroCap'); if (!g) return;
+  const vals = [3, -1, 4, 0, 5, -2, 7, 1, 6];
+  g.innerHTML = vals.map(v => `<span>${T(v)}</span>`).join('');
+  const cells = [...g.children]; let k = 0;
+  const modes = [
+    () => { const i = ri(0, 2), j = ri(0, 2); cells.forEach((c, n) => c.className = n === i * 3 + j ? 'a' : ''); cap.innerHTML = `a<sub>${i + 1}${j + 1}</sub> = <b>${T(vals[i * 3 + j])}</b> · строка ${i + 1}, столбец ${j + 1}`; },
+    () => { const i = ri(0, 2); cells.forEach((c, n) => c.className = Math.floor(n / 3) === i ? 'b' : ''); cap.innerHTML = `${i + 1}-я строка`; },
+    () => { cells.forEach((c, n) => c.className = n % 4 === 0 ? 'g' : ''); cap.innerHTML = `главная диагональ`; },
+    () => { const j = ri(0, 2); cells.forEach((c, n) => c.className = n % 3 === j ? 'a' : ''); cap.innerHTML = `${j + 1}-й столбец`; }
+  ];
+  const tick = () => { modes[k % modes.length](); k++; };
+  tick(); setInterval(tick, 2100);
+}
+function wExplorer(host) {
+  const box = labBox(host, 'Наведи (или нажми) на клетку', 'Меняй число строк и столбцов — смотри, как меняется размер и тип матрицы.');
+  let m = 3, n = 4, sel = [1, 2];
+  const fix = () => { sel = [Math.min(sel[0], m - 1), Math.min(sel[1], n - 1)]; draw(); };
+  const ctl = el('div', 'lab-ctl');
+  ctl.append(el('span', 'muted', 'строк:'), stepperEl(m, 1, 5, v => { m = v; fix(); }), el('span', 'muted', '&nbsp; столбцов:'), stepperEl(n, 1, 5, v => { n = v; fix(); }));
+  const st = el('div'); const stage = new Stage(st); const info = el('div', 'lab-info');
+  box.append(ctl, st, info);
+  const typeOf = () => m === 1 && n === 1 ? 'одно число (1×1)' : m === 1 ? '<b class="k2">матрица-строка</b>' : n === 1 ? '<b class="k2">матрица-столбец</b>' : m === n ? `<b class="k3">квадратная</b>, порядок ${n}` : '<b class="k4">прямоугольная</b>';
+  function draw() {
+    const V = Array.from({ length: m }, (_, i) => Array.from({ length: n }, (_, j) => `a<sub>${i + 1}${j + 1}</sub>`));
+    const pick = (i, j) => { if (sel[0] === i && sel[1] === j) return; sel = [i, j]; draw(); };
+    stage.render({ b: [mat('E', V, { cap: `${m}×${n}`, st: S({ row: { [sel[0]]: 'soft' }, col: { [sel[1]]: 'soft' }, hl: [[sel[0], sel[1], 'h1']] }), click: pick, hover: pick })] }, { anim: false });
+    info.innerHTML = `${C('k1', `a<sub>${sel[0] + 1}${sel[1] + 1}</sub>`)} → ${C('k1', 'строка ' + (sel[0] + 1))}, ${C('k1', 'столбец ' + (sel[1] + 1))} &nbsp;·&nbsp; размер <b>${m}×${n}</b> (${m} × ${n}) — ${typeOf()}`;
+  }
+  draw();
+}
+function wMirror(host) {
+  const box = labBox(host, 'Транспонирование = отражение относительно главной диагонали', 'Наведи на число — подсветится его «пара». Нажми кнопку — матрица отразится.');
+  let A = M('1 2 3;4 5 6;7 8 9'), sel = [0, 1], flipped = false;
+  const st = el('div'); const stage = new Stage(st); const info = el('div', 'lab-info');
+  const ctl = el('div', 'lab-ctl'); const b = el('button', 'btn pri sm', '⤡ Транспонировать'); ctl.append(b);
+  box.append(st, info, ctl);
+  function draw() {
+    const [i, j] = sel;
+    const pick = (a, c) => { if (sel[0] === a && sel[1] === c) return; sel = [a, c]; draw(); };
+    stage.render({ b: [mat('A', A, { cap: flipped ? 'A<sup>T</sup>' : 'A', st: S({ f: (a, c) => (a === i && c === j ? 'h1' : a === j && c === i ? 'h2' : a === c ? 'soft' : '') }), click: pick, hover: pick })], lines: [{ k: 'A', pts: [[0, 0], [2, 2]], c: 'var(--c3)', ext: true, dash: true, op: .5 }] }, { anim: false });
+    info.innerHTML = i === j ? `${C('k1', `a<sub>${i + 1}${j + 1}</sub> = ${H(A[i][j])}`)} стоит на главной диагонали — при транспонировании <b>не двигается</b>.` : `${C('k1', `a<sub>${i + 1}${j + 1}</sub> = ${H(A[i][j])}`)} &nbsp;⟷&nbsp; ${C('k2', `a<sub>${j + 1}${i + 1}</sub> = ${H(A[j][i])}`)} — при транспонировании меняются местами`;
+  }
+  b.onclick = () => {
+    const blk = stage.blocks.get('A'); b.disabled = true; const anims = [];
+    for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) {
+      const c = blk.cells[i][j], t = blk.cells[j][i], r1 = c.getBoundingClientRect(), r2 = t.getBoundingClientRect();
+      anims.push(c.animate([{ transform: 'none' }, { transform: `translate(${r2.left - r1.left}px,${r2.top - r1.top}px)` }], { duration: 850, easing: 'cubic-bezier(.6,0,.2,1)', fill: 'forwards' }));
+    }
+    anims[0].onfinish = () => { A = mT(A); flipped = !flipped; draw(); anims.forEach(a => a.cancel()); b.disabled = false; };
+  };
+  draw();
+}
+function wSize(host) {
+  const box = labBox(host, 'Можно ли умножить? Какой будет размер?', 'Меняй размеры матриц A и B.');
+  let m = 2, n = 3, p = 3, k = 2;
+  const ctl = el('div', 'lab-ctl');
+  ctl.append(el('span', 'muted', 'A:'), stepperEl(m, 1, 4, v => { m = v; draw(); }), el('span', 'muted', '×'), stepperEl(n, 1, 4, v => { n = v; draw(); }), el('span', 'muted', '&nbsp;&nbsp; B:'), stepperEl(p, 1, 4, v => { p = v; draw(); }), el('span', 'muted', '×'), stepperEl(k, 1, 4, v => { k = v; draw(); }));
+  const dom = el('div', 'dom'); const st = el('div'); const stage = new Stage(st); const info = el('div', 'lab-info');
+  box.append(ctl, dom, st, info);
+  function draw() {
+    const ok = n === p;
+    dom.className = 'dom ' + (ok ? 'ok' : 'no');
+    dom.innerHTML = `<span class="d"><span class="out">${m}</span><span class="in">${n}</span></span> · <span class="d"><span class="in">${p}</span><span class="out" style="color:var(--c2)">${k}</span></span> → ` + (ok ? `<span class="res"><span class="out">${m}</span>×<span style="color:var(--c2)">${k}</span></span>` : `<span class="res no">✗ нельзя: ${n} ≠ ${p}</span>`);
+    const dots = (r, c) => Array.from({ length: r }, () => Array(c).fill('•'));
+    const b = [mat('A' + m + n, dots(m, n), { cap: `A ${m}×${n}`, st: S({ row: { 0: 'h1' } }) }), op('·'), mat('B' + p + k, dots(p, k), { cap: `B ${p}×${k}`, st: S({ col: { 0: 'h2' } }) })];
+    if (ok) b.push(op('='), mat('R' + m + k, dots(m, k), { cap: `AB ${m}×${k}`, capCls: 'ok', st: S({ hl: [[0, 0, 'h3']] }) }));
+    stage.render({ b }, { anim: true });
+    info.innerHTML = ok
+      ? `Внутренние числа совпали (${n} = ${p}) ✓ В <b class="k1">строке A</b> и в <b class="k2">столбце B</b> по ${n} — их можно разбить на пары. Ответ: <b>${m}×${k}</b>.`
+      : `В <b class="k1">строке A</b> ${n} эл., а в <b class="k2">столбце B</b> — ${p}. Пары не составить → <b class="kr">умножение не определено</b>.` + (k === m ? `<br><small>Зато B·A можно: (${p}×${k})·(${m}×${n}) → ${p}×${n}. Порядок важен!</small>` : '');
+  }
+  draw();
+}
+function wMulSand(host, preset) {
+  const P = preset || { A: M('1 2 0;-1 3 2'), B: M('2 1;0 -1;4 3') };
+  const box = labBox(host, P.title || 'Песочница: меняй числа и нажимай на клетки ответа', P.sub || 'Нажми на любое число результата — увидишь, из каких пар оно собрано.');
+  let A = P.A.map(r => r.map(q)), B = P.B.map(r => r.map(q)), sel = [0, 0];
+  const row = el('div', 'lab-stage');
+  const mkGrid = (X, rl, cl) => {
+    const wrap = el('div', ''); wrap.style.cssText = 'display:inline-grid;align-items:center;gap:4px 6px;grid-template-columns:auto auto';
+    const g = el('div', 'ingrid'); g.style.gridTemplateColumns = `repeat(${X[0].length},auto)`;
+    const inputs = X.map((r, i) => r.map((v, j) => { const inp = el('input', 'cell'); inp.value = T(v).replace('−', '-'); inp.oninput = () => { const x = parseQ(inp.value); if (x) { X[i][j] = x; draw(); } }; g.append(inp); return inp; }));
+    if (cl) { wrap.append(el('span', '')); const h = el('div', ''); h.style.cssText = `display:grid;grid-template-columns:repeat(${X[0].length},4.1em);gap:6px;padding:0 16px;font-size:11.5px;color:var(--muted);text-align:center;line-height:1.2`; cl.forEach(c => h.append(el('span', '', c))); wrap.append(h); }
+    if (rl) { const h = el('div', ''); h.style.cssText = 'display:grid;gap:6px;font-size:12px;color:var(--muted);text-align:right'; rl.forEach(c => { const s = el('span', '', c); s.style.cssText = 'height:2.5em;display:flex;align-items:center;justify-content:flex-end'; h.append(s); }); wrap.append(h); } else wrap.append(el('span', ''));
+    wrap.append(g); return { wrap, inputs };
+  };
+  const GA = mkGrid(A, P.rlA, P.clA), GB = mkGrid(B, P.rlB, P.clB);
+  const rst = el('div'); const stage = new Stage(rst); rst.style.padding = '0';
+  row.append(GA.wrap, el('span', 'opb', '·'), GB.wrap, el('span', 'opb', '='), rst);
+  const info = el('div', 'lab-info'); box.append(row, info);
+  function draw() {
+    const R = mmul(A, B), [i, j] = sel;
+    GA.inputs.forEach((r, a) => r.forEach((inp, b) => { inp.className = 'cell ' + (a === i ? 'p' + (b % 4) : 'dimi'); }));
+    GB.inputs.forEach((r, a) => r.forEach((inp, b) => { inp.className = 'cell ' + (b === j ? 'p' + (a % 4) : 'dimi'); }));
+    stage.render({ b: [mat('R', R, { cap: P.capR || 'нажми на клетку', st: S({ hl: [[i, j, 'h3']] }), click: (a, b) => { sel = [a, b]; draw(); } })] }, { anim: false });
+    const terms = A[i].map((a, k) => C('q' + (k % 4), `${PP(a)}·${PP(B[k][j])}`)).join(' + ');
+    const prods = A[i].map((a, k) => q(a).mul(B[k][j]));
+    info.innerHTML = (P.explain ? P.explain(i, j, R[i][j]) + '<br>' : '') + `c<sub>${i + 1}${j + 1}</sub> = ${terms} = ${sumStr(prods, prods.map((_, k) => 'q' + (k % 4)))} = ${C('k3', H(R[i][j]))}`;
+  }
+  draw();
+}
+function wGeo(host) {
+  const box = labBox(host, 'Что такое определитель на самом деле', 'Строки матрицы — это две стрелки. Перетаскивай их концы (кружки). Определитель = площадь параллелограмма со знаком.');
+  const S0 = 6;
+  const svg = sv('svg', { viewBox: `${-S0} ${-S0} ${2 * S0} ${2 * S0}`, class: 'geo' });
+  let u = [3, 1], v = [1, 2];
+  const g = sv('g');
+  for (let k = -S0; k <= S0; k++) { const c = k ? 'rgba(255,255,255,.07)' : 'rgba(255,255,255,.28)'; g.append(sv('line', { x1: k, y1: -S0, x2: k, y2: S0, stroke: c, 'stroke-width': .03 })); g.append(sv('line', { x1: -S0, y1: k, x2: S0, y2: k, stroke: c, 'stroke-width': .03 })); }
+  const poly = sv('polygon', { 'stroke-width': .05 });
+  const lu = sv('line', { stroke: '#a293ff', 'stroke-width': .13, 'stroke-linecap': 'round' }), lv = sv('line', { stroke: '#4cd3ff', 'stroke-width': .13, 'stroke-linecap': 'round' });
+  const hu = sv('circle', { r: .42, fill: '#a293ff', class: 'hd' }), hv = sv('circle', { r: .42, fill: '#4cd3ff', class: 'hd' });
+  const txt = c => sv('text', { fill: c, 'font-size': .48, 'font-family': 'JetBrains Mono,monospace', 'font-weight': 700 });
+  const tu = txt('#a293ff'), tv = txt('#4cd3ff'), ta = txt('#fff'); ta.setAttribute('text-anchor', 'middle');
+  svg.append(g, poly, lu, lv, tu, tv, ta, hu, hv);
+  const row = el('div', 'grid2'); row.style.alignItems = 'center';
+  const left = el('div'); left.append(svg);
+  const right = el('div'); const st = el('div'); const stage = new Stage(st); const info = el('div', 'lab-info');
+  right.append(st, info); row.append(left, right); box.append(row);
+  const cl = x => { x = Math.abs(x); return x % 10 === 1 && x % 100 !== 11 ? 'клеточка' : [2, 3, 4].includes(x % 10) && ![12, 13, 14].includes(x % 100) ? 'клеточки' : 'клеточек'; };
+  function draw() {
+    const d = u[0] * v[1] - u[1] * v[0];
+    const Pt = (x, y) => `${x},${-y}`;
+    poly.setAttribute('points', [Pt(0, 0), Pt(u[0], u[1]), Pt(u[0] + v[0], u[1] + v[1]), Pt(v[0], v[1])].join(' '));
+    poly.setAttribute('fill', d > 0 ? 'rgba(162,147,255,.25)' : d < 0 ? 'rgba(255,114,176,.25)' : 'transparent');
+    poly.setAttribute('stroke', d > 0 ? 'rgba(162,147,255,.8)' : d < 0 ? 'rgba(255,114,176,.8)' : 'rgba(255,95,120,.9)');
+    [[lu, u], [lv, v]].forEach(([l, w]) => { l.setAttribute('x1', 0); l.setAttribute('y1', 0); l.setAttribute('x2', w[0]); l.setAttribute('y2', -w[1]); });
+    hu.setAttribute('cx', u[0]); hu.setAttribute('cy', -u[1]); hv.setAttribute('cx', v[0]); hv.setAttribute('cy', -v[1]);
+    tu.setAttribute('x', u[0] + .5); tu.setAttribute('y', -u[1] - .4); tu.textContent = `(${u[0]}; ${u[1]})`;
+    tv.setAttribute('x', v[0] + .5); tv.setAttribute('y', -v[1] - .4); tv.textContent = `(${v[0]}; ${v[1]})`;
+    ta.setAttribute('x', (u[0] + v[0]) / 2); ta.setAttribute('y', -(u[1] + v[1]) / 2 + .22); ta.textContent = d ? 'S=' + Math.abs(d) : '';
+    stage.render({ b: [dt('D', [[q(u[0]), q(u[1])], [q(v[0]), q(v[1])]], { lab: 'Δ', st: S({ row: { 0: 'h1', 1: 'h2' } }) })] }, { anim: false });
+    info.innerHTML = `Δ = ${C('k1', T(u[0]))}·${C('k2', PP(v[1]))} − ${C('k1', PP(u[1]))}·${C('k2', PP(v[0]))} = <b class="${d > 0 ? 'k1' : d < 0 ? 'k5' : 'kr'}" style="font-size:1.3em">${T(d)}</b><br>` +
+      (d === 0 ? '<b class="kr">Стрелки на одной прямой</b> → параллелограмм сплющился, площадь 0. Такая матрица «вырожденная» (строки пропорциональны).' : `Площадь = ${Math.abs(d)} ${cl(d)}. Знак ${d > 0 ? '«+»: от фиолетовой стрелки к голубой — против часовой' : '«−»: от фиолетовой к голубой — по часовой стрелке'}.`);
+  }
+  let drag = null;
+  const pt = e => { const r = svg.getBoundingClientRect(); return [Math.round((e.clientX - r.left) / r.width * 2 * S0 - S0), Math.round(-((e.clientY - r.top) / r.height * 2 * S0 - S0))].map(x => Math.max(-S0 + 1, Math.min(S0 - 1, x))); };
+  [[hu, 'u'], [hv, 'v']].forEach(([h, w]) => h.addEventListener('pointerdown', e => { drag = w; svg.setPointerCapture(e.pointerId); e.preventDefault(); }));
+  svg.addEventListener('pointermove', e => { if (!drag) return; const p = pt(e); if (drag === 'u') u = p; else v = p; draw(); });
+  svg.addEventListener('pointerup', () => { drag = null; });
+  const ctl = el('div', 'lab-ctl');
+  [['единичная E (S = 1)', [1, 0], [0, 1]], ['поменять строки местами', null, null], ['строки пропорциональны', [2, 1], [4, 2]], ['R2 × 2', 'k2', null]].forEach(([t, a, b]) => { const bt = el('button', 'btn sm', t); bt.onclick = () => { if (a === 'k2') v = [Math.max(-5, Math.min(5, v[0] * 2)), Math.max(-5, Math.min(5, v[1] * 2))]; else if (!a) [u, v] = [v, u]; else { u = a; v = b; } draw(); }; ctl.append(bt); });
+  box.append(ctl);
+  draw();
+}
+function wMinor(host) {
+  const box = labBox(host, 'Нажми на любой элемент', 'Увидишь, что вычёркивается, какой получается минор и какой знак у алгебраического дополнения.');
+  const presets = { 3: M('2 -1 3;4 0 1;-2 5 6'), 4: M('2 3 1 -1;1 2 1 -2;1 1 -2 1;1 2 -2 1') };
+  let n = 3, A = presets[3], sel = [0, 1];
+  const ctl = el('div', 'chips');
+  [3, 4].forEach(k => { const c = el('button', 'chip' + (k === 3 ? ' on' : ''), `${k}×${k}`); c.onclick = () => { n = k; A = presets[k]; sel = [0, 1]; [...ctl.children].forEach(x => x.classList.remove('on')); c.classList.add('on'); draw(); }; ctl.append(c); });
+  const st = el('div'); const stage = new Stage(st); const info = el('div', 'lab-info');
+  box.append(ctl, st, info);
+  function draw() {
+    const [i, j] = sel, Mn = minor(A, i, j), mv = det(Mn), sg = (i + j) % 2 ? -1 : 1;
+    stage.render({
+      b: [dt('D', A, { st: S({ hl: [[i, j, 'h1']], x: { r: [i], c: [j] } }), click: (a, b) => { sel = [a, b]; draw(); } }), op('→'), dt('Mn' + n, Mn, { lab: Mij(i, j), st: S({ f: () => 'h2' }) }), mat('S', signGrid(n), { br: '', cap: 'знаки', st: S({ hl: [[i, j, sg > 0 ? 'h3' : 'h6']], dim: 1 }) })],
+      lines: strikeLines('D', i, j, n)
+    }, { anim: true });
+    info.innerHTML = `${Mij(i, j)} = ${n === 3 ? det2Str(Mn) : C('k2', H(mv)) + ' <small class="muted">(3×3 — по правилу треугольников)</small>'}<br>${Aij(i, j)} = (−1)<sup>${i + 1}+${j + 1}</sup>·${Mij(i, j)} = ${C(sg > 0 ? 'k3' : 'kr', signStr(i, j))}·${P(mv)} = ${C('k4', H(sg > 0 ? mv : mv.neg()))}`;
+  }
+  draw();
+}
+function wPropLab(host) {
+  const box = labBox(host, 'Лаборатория свойств определителя', 'Делай операции со строками — и смотри, что происходит с определителем. Каждое действие подписано.');
+  const A0 = M('2 1 3;1 0 2;4 1 1'); let A = clone(A0), k = 2, hl = {};
+  const st = el('div'); const stage = new Stage(st);
+  const dv = el('div', 'lab-info'); const log = el('div', 'log');
+  const ctl = el('div', 'lab-ctl'), ctl2 = el('div', 'lab-ctl');
+  const kSel = el('select', 'sel'); [2, 3, -1, -2].forEach(x => { const o = el('option', '', 'k = ' + T(x)); o.value = x; kSel.append(o); }); kSel.onchange = () => { k = +kSel.value; };
+  box.append(st, dv, ctl, ctl2, log);
+  function draw(msg, anim = true) {
+    const d = det(A);
+    stage.render({ b: [dt('D', A, { lab: 'Δ', st: S(hl) })] }, { anim });
+    dv.innerHTML = `Δ = <span class="big-det ${d.z ? 'kr' : 'k4'}">${H(d)}</span>`;
+    if (msg) log.prepend(el('div', '', msg));
+  }
+  const act = (name, fn) => { const b = el('button', 'btn sm', name); b.onclick = () => { const d0 = det(A); const [msg, h] = fn(); hl = h || {}; draw(`${msg} → Δ: ${H(d0)} → <b>${H(det(A))}</b>`); }; return b; };
+  ctl.append(
+    act('R1 ↔ R2', () => { [A[0], A[1]] = [A[1], A[0]]; return ['Поменяли строки: <b class="k5">знак сменился</b> (св-во 2)', { row: { 0: 'h2', 1: 'h1' } }]; }),
+    act('R2 · k', () => { A[1] = A[1].map(x => q(x).mul(k)); return [`Строку 2 умножили на ${T(k)}: <b class="k5">Δ умножился на ${T(k)}</b> (св-во 4)`, { row: { 1: 'h4' } }]; }),
+    act('R3 + k·R1', () => { A[2] = A[2].map((x, j) => q(x).add(q(A[0][j]).mul(k))); return [`К R3 прибавили ${T(k)}·R1: <b class="k3">Δ не изменился</b> (св-во 6)`, { row: { 2: 'h3', 0: 'h2' } }]; }),
+    act('Aᵀ', () => { A = mT(A); return ['Транспонировали: <b class="k3">Δ не изменился</b> (св-во 1)', {}]; }),
+    kSel);
+  ctl2.append(
+    act('все знаки → противоположные', () => { A = A.map(r => r.map(x => q(x).neg())); return ['Сменили знак у <b>всех</b> элементов: это (−1) из каждой из 3 строк → <b class="k5">Δ·(−1)³ = −Δ</b>', { f: () => 'h5' }]; }),
+    act('R3 := R1', () => { A[2] = A[0].slice(); return ['Две одинаковые строки → <b class="kr">Δ = 0</b> (св-во 3)', { row: { 0: 'h6', 2: 'h6' } }]; }),
+    act('R2 := 0', () => { A[1] = A[1].map(() => q(0)); return ['Строка из нулей → <b class="kr">Δ = 0</b> (св-во 5)', { row: { 1: 'h6' } }]; }),
+    (() => { const b = el('button', 'btn sm', '↺ сброс'); b.onclick = () => { A = clone(A0); hl = {}; draw('Сброс'); }; return b; })());
+  draw('Начальная матрица', false);
+}
+function wQuiz(host) {
+  const box = labBox(host, 'Квиз на скорость: какой размер у произведения?', 'Правило «внутренние совпали — внешние дают ответ» должно стать рефлексом.');
+  const qz = el('div', 'qz'); const qq = el('div', 'qq'); const chips = el('div', 'chips'); const sc = el('div', 'muted');
+  qz.append(qq, chips); box.append(qz, sc);
+  let right = 0, total = 0, streak = 0;
+  function next() {
+    const m = ri(1, 4), n = ri(1, 4), k = ri(1, 4); const p = Math.random() < .65 ? n : ri(1, 4);
+    qq.innerHTML = `(${m}×${n}) · (${p}×${k}) = ?`;
+    const good = n === p ? `${m}×${k}` : 'нельзя';
+    let opts = [...new Set([good, 'нельзя', `${m}×${k}`, `${n}×${p}`, `${k}×${m}`, `${m}×${p}`, `${n}×${k}`])];
+    opts = [good, ...shuffle(opts.filter(o => o !== good)).slice(0, 3)]; shuffle(opts);
+    chips.innerHTML = '';
+    opts.forEach(o => {
+      const c = el('button', 'chip', o);
+      c.onclick = () => {
+        total++; const ok = o === good;
+        if (ok) { right++; streak++; c.classList.add('good'); } else { streak = 0; c.classList.add('bad'); [...chips.children].find(x => x.textContent === good).classList.add('good'); }
+        sc.innerHTML = `Верно: <b>${right}</b> из ${total}${streak > 2 ? ` · серия ${streak} 🔥` : ''}` + (ok ? '' : ` · ${n === p ? `внутренние ${n} = ${p}, внешние → ${m}×${k}` : `внутренние ${n} ≠ ${p}`}`);
+        [...chips.children].forEach(x => x.onclick = null); setTimeout(next, ok ? 700 : 2000);
+      };
+      chips.append(c);
+    });
+  }
+  next();
+}
+/* ---------- тренажёр: бесконечные задачи ---------- */
+function luMatrix(n, diagOpts, lo = -2, hi = 2) {
+  const L = eye(n), U = zeros(n, n).map(r => r.slice());
+  for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) { if (i > j) L[i][j] = q(ri(lo, hi)); if (i < j) U[i][j] = q(ri(-3, 3)); if (i === j) U[i][j] = q(diagOpts[ri(0, diagOpts.length - 1)]); }
+  return mmul(L, U);
+}
+const TOPICS = [
+  { id: 'add', name: 'Сложение', gen() { const [m, n] = [[2, 3], [3, 2], [2, 2]][ri(0, 2)]; const A = randM(m, n), B = randM(m, n), s = Math.random() < .5 ? 1 : -1; return { q: `Найди ${s > 0 ? 'A + B' : 'A − B'}, если A = ${mm(A)}, B = ${mm(B)}`, ans: { m: s > 0 ? madd(A, B) : msub(A, B) }, steps: () => genAdd(A, B, { sign: s }) }; } },
+  { id: 'combo', name: 'αA + βB', gen() { const [m, n] = [[2, 2], [2, 3]][ri(0, 1)]; const A = randM(m, n, -4, 4), B = randM(m, n, -4, 4), al = [1, 2, 3][ri(0, 2)], be = [-3, -2, 2, 3][ri(0, 3)]; const R = madd(mscale(al, A), mscale(be, B)); return { q: `Найди ${al === 1 ? '' : al}A ${be < 0 ? '−' : '+'} ${Math.abs(be)}B, если A = ${mm(A)}, B = ${mm(B)}`, ans: { m: R }, steps: () => genCombo(A, B, al, be) }; } },
+  { id: 'tr', name: 'Транспонирование', gen() { const [m, n] = [[2, 3], [3, 2], [2, 4], [3, 3]][ri(0, 3)]; const A = randM(m, n, -9, 9); return { q: `Найди A<sup>T</sup>, если A = ${mm(A)}`, ans: { m: mT(A) }, steps: () => genTranspose(A) }; } },
+  { id: 'mul', name: 'Умножение', gen() { const m = ri(2, 3), n = ri(2, 3), p = ri(1, 3); const A = randM(m, n, -4, 4), B = randM(n, p, -4, 4); return { q: `Найди A·B, если A = ${mm(A)}, B = ${mm(B)}`, ans: { m: mmul(A, B) }, steps: () => genMul(A, B) }; } },
+  { id: 'd2', name: 'Определитель 2×2', gen() { const A = randM(2, 2, -9, 9); return { q: `Вычисли ${mm(A, '|')}`, ans: { n: det(A), label: 'Δ =' }, steps: () => genDet2(A) }; } },
+  { id: 'd3', name: 'Определитель 3×3', gen() { const A = randM(3, 3, -4, 5); return { q: `Вычисли по правилу треугольников ${mm(A, '|')}`, ans: { n: det(A), label: 'Δ =' }, steps: () => genSarrus(A) }; } },
+  { id: 'cof', name: 'Минор и алг. дополнение', gen() { const A = randM(3, 3, -5, 6), i = ri(0, 2), j = ri(0, 2); return { q: `Для ${mm(A, '|')} найди минор ${Mij(i, j)} и алгебраическое дополнение ${Aij(i, j)}`, ans: { list: [det(minor(A, i, j)), cof(A, i, j)], labels: [Mij(i, j) + ' =', Aij(i, j) + ' ='] }, steps: () => genCofactor(A, i, j) }; } },
+  { id: 'exp', name: 'Разложение по строке', gen() { const A = randM(3, 3, -4, 5), k = ri(0, 2), byC = Math.random() < .4; if (byC) A[ri(0, 2)][k] = q(0); else A[k][ri(0, 2)] = q(0); return { q: `Вычисли ${mm(A, '|')}, разложив по ${byC ? k + 1 + '-му столбцу' : k + 1 + '-й строке'}`, ans: { n: det(A), label: 'Δ =' }, steps: () => genExpand(A, byC ? { c: k } : { r: k }) }; } },
+  { id: 'd4', name: 'Определитель 4×4', gen() { const A = luMatrix(4, [1, -1, 2, -2, 3], -2, 2); return { q: `Вычисли определитель 4-го порядка (приведи к треугольному виду) ${mm(A, '|')}`, ans: { n: det(A), label: 'Δ =' }, steps: () => genOps(A, autoTriOps(A)) }; } },
+  { id: 'inv2', name: 'Обратная 2×2', gen() { let A; do A = randM(2, 2, -5, 6); while (![1, -1, 2, -2].includes(+det(A))); return { q: `Найди A<sup>−1</sup>, если A = ${mm(A)}. <small class="muted">Дроби вводи как 1/2 или −3/2.</small>`, ans: { m: inv(A), pre: 'A<sup>−1</sup> =' }, steps: () => genInverse2(A) }; } },
+  { id: 'inv3', name: 'Обратная 3×3', gen() { let A; do A = luMatrix(3, [1, -1], -2, 2); while (A.flat().some(x => Math.abs(+x) > 7)); return { q: `Найди A<sup>−1</sup>, если A = ${mm(A)}`, ans: { m: inv(A), pre: 'A<sup>−1</sup> =' }, steps: () => genInverse(A) }; } }
+];
+function wTrainer(host) {
+  const box = labBox(host, 'Бесконечный тренажёр', 'Выбери тему — задача сгенерируется случайно. Реши, проверь, посмотри пошаговое решение. Сколько угодно раз.');
+  let topic = TOPICS[3], solved = 0, n = 0;
+  const chips = el('div', 'chips');
+  TOPICS.forEach(t => { const c = el('button', 'chip' + (t === topic ? ' on' : ''), t.name); c.onclick = () => { topic = t; [...chips.children].forEach(x => x.classList.remove('on')); c.classList.add('on'); make(); }; chips.append(c); });
+  const bar = el('div', 'lab-ctl'); bar.style.justifyContent = 'flex-start';
+  const bn = el('button', 'btn pri sm', '🎲 Новая задача'); const cnt = el('span', 'muted'); bar.append(bn, cnt);
+  const area = el('div');
+  box.append(chips, bar, area);
+  bn.onclick = () => make();
+  function make() {
+    n++; area.innerHTML = '';
+    const g = topic.gen(); const id = 'trainer-' + n;
+    Card(area, { kind: 'task', tag: 'Тренажёр', title: topic.name, q: g.q, ans: g.ans, steps: g.steps, id: null, onok: () => { solved++; cnt.innerHTML = `Решено в тренажёре: <b>${solved}</b>`; } });
+  }
+  make();
+}
+/* =====================================================================
+   КОНТЕНТ: примеры, задачи, практика, навигация
+   ===================================================================== */
+function genAddress(A, name, qs) {
+  A = QM(A); const m = A.length, n = A[0].length, lo = name.toLowerCase();
+  const sc = st => ({ b: [mat('A', A, { lab: name, st: S(st) })] });
+  const steps = [
+    Object.assign(sc({}), { f: `${name}: ?×?`, t: 'Размер — это «строки × столбцы». Посчитаем их по очереди.' }),
+    Object.assign(sc({ f: i => HL[i % 5] }), { f: `строк: ${C('k1', m)}`, t: '<b>Строки</b> — горизонтальные ряды (→). Каждая подсвечена своим цветом.' }),
+    Object.assign(sc({ f: (i, j) => HL[j % 5] }), { f: `столбцов: ${C('k2', n)}`, t: '<b>Столбцы</b> — вертикальные (↓).' }),
+    Object.assign(sc({}), { f: `размер ${name}: ${C('k1', m)}×${C('k2', n)}`, t: `Сначала строки, потом столбцы: <b>${m}×${n}</b>.` })
+  ];
+  qs.forEach(([i, j]) => steps.push(Object.assign(sc({ row: { [i]: 'soft' }, col: { [j]: 'soft' }, hl: [[i, j, 'h3']] }), {
+    f: `${aij(lo, i, j)}: ${C('k1', 'строка ' + (i + 1))}, ${C('k2', 'столбец ' + (j + 1))} → ${C('k3', H(A[i][j]))}`,
+    t: `Идём в ${i + 1}-ю строку, в ней — в ${j + 1}-й столбец. На пересечении стоит ${H(A[i][j])}.`
+  })));
+  return steps;
+}
+const T_ = {
+  hw3A: M('5 7 9 1;4 3 -1 0;-2 4 4 -3'), hw3B: M('-4 1 -8 1;0 1 -2 3;2 5 11 7'),
+  p3A: M('1 8;0 9;-7 1'), p3B: M('-1 -7;0 1;6 -1'),
+  p6A: M('1 0 2;0 -1 3;4 0 5'), p6B: M('2 7 1;3 2 -4;1 -3 5'),
+  p10A: M('1 -2;-3 4'), e18: M('1 2 0;3 2 1;0 1 2'),
+  eqA: M('2 1;5 3'), eqB: M('1 2;3 4')
+};
+Object.assign(CARDS, {
+  c1a: () => ({ title: 'Размер и элементы матрицы', src: 'матрица A из ДЗ №3', q: `Определи размер матрицы A = ${mm(T_.hw3A)} и найди a<sub>23</sub>, a<sub>31</sub>, a<sub>14</sub>.`, steps: () => genAddress(T_.hw3A, 'A', [[1, 2], [2, 0], [0, 3]]) }),
+  c1b: () => ({ kind: 'try', tag: 'Реши сам', title: 'Размер и элементы', src: 'матрица B из ДЗ №3', q: `B = ${mm(T_.hw3B)}. Сколько строк и столбцов? Чему равны b<sub>24</sub> и b<sub>33</sub>?`, ans: { list: [3, 4, 3, 11], labels: ['строк:', 'столбцов:', 'b<sub>24</sub> =', 'b<sub>33</sub> ='] }, hint: 'b<sub>24</sub>: 2-я строка, в ней 4-е число.', steps: () => genAddress(T_.hw3B, 'B', [[1, 3], [2, 2]]) }),
+  c2a: () => ({ title: 'Транспонирование 2×3', src: 'практика 2: A из Aᵀ·C', q: `Найди A<sup>T</sup>, если A = ${mm(M('1 2 3;4 5 6'))}.`, steps: () => genTranspose(M('1 2 3;4 5 6')) }),
+  c2b: () => ({ kind: 'try', tag: 'Реши сам', title: 'Транспонируй 3×3', src: 'практика 1, задача про |Aᵀ|', q: `Найди A<sup>T</sup>, если A = ${mm(M('1 -2 3;4 0 6;-7 8 9'))}.`, ans: { m: mT(M('1 -2 3;4 0 6;-7 8 9')), pre: 'A<sup>T</sup> =' }, hint: '1-я строка (1, −2, 3) становится 1-м столбцом. Диагональ 1, 0, 9 остаётся на месте.', steps: () => genTranspose(M('1 -2 3;4 0 6;-7 8 9')) }),
+  c3a: () => ({ title: 'Сумма A + B', src: 'практика 1', q: `A = ${mm(T_.p3A)}, B = ${mm(T_.p3B)}. Найди A + B.`, steps: () => genAdd(T_.p3A, T_.p3B) }),
+  c3b: () => ({ kind: 'try', tag: 'Реши сам', title: 'Разность A − B', q: `A = ${mm(M('3 -1 4;0 2 -5'))}, B = ${mm(M('1 2 -3;-4 2 1'))}. Найди A − B.`, ans: { m: M('2 -3 7;4 0 -6'), pre: 'A − B =' }, hint: 'Осторожно с минусами: 4 − (−3) = 7, 0 − (−4) = 4.', steps: () => genAdd(M('3 -1 4;0 2 -5'), M('1 2 -3;-4 2 1'), { sign: -1 }) }),
+  c4a: () => ({ title: 'A − 3B (задача из тетради)', src: 'практика 1', q: `A = ${mm(T_.p3A)}, B = ${mm(T_.p3B)}. Найди A − 3B.`, steps: () => genCombo(T_.p3A, T_.p3B, 1, -3) }),
+  c4b: () => ({ kind: 'try', tag: 'Реши сам', title: '3A − 2B', q: `A = ${mm(M('2 0 -1;1 3 4'))}, B = ${mm(M('1 -2 0;3 1 2'))}. Найди 3A − 2B.`, ans: { m: M('4 4 -3;-3 7 8'), pre: '3A − 2B =' }, hint: 'Сначала 3A и 2B отдельно, потом вычитай поэлементно.', steps: () => genCombo(M('2 0 -1;1 3 4'), M('1 -2 0;3 1 2'), 3, -2) }),
+  c5a: () => ({ title: '(3×2) · (2×2)', src: 'практика 2', q: `A = ${mm(M('3 1;5 -6;7 -8'))}, B = ${mm(M('2 -1;3 4'))}. Найди A·B.`, steps: () => genMul(M('3 1;5 -6;7 -8'), M('2 -1;3 4')) }),
+  c5b: () => ({ title: '(3×3) · (3×3)', src: 'практика 2', q: `A = ${mm(T_.p6A)}, B = ${mm(T_.p6B)}. Найди A·B.`, steps: () => genMul(T_.p6A, T_.p6B) }),
+  c5c: () => ({ kind: 'try', tag: 'Реши сам', title: 'B·A', src: 'практика 2', q: `B = ${mm(M('0 -1;1 1'))}, A = ${mm(M('1 -1 3;2 0 2'))}. Найди B·A. <small class="muted">Сначала проверь размеры: (2×2)·(2×3) → ?</small>`, ans: { m: M('-2 0 -2;3 -1 5'), pre: 'BA =' }, hint: 'c<sub>11</sub> = 0·1 + (−1)·2 = −2. Строка B × столбец A.', steps: () => genMul(M('0 -1;1 1'), M('1 -1 3;2 0 2'), { na: 'B', nb: 'A' }) }),
+  c5d: () => { const A = M('3 -1;-1 2'), B = M('1 1;3 1'); return { title: 'AB и BA — разные!', src: 'лекция, пример 14', q: `A = ${mm(A)}, B = ${mm(B)}. Сравним AB и BA.`, steps: () => chain([{ ch: 'Часть 1 · A·B', steps: genMul(A, B, { fin: `AB = ${mm(mmul(A, B))}. Теперь поменяем порядок.` }) }, { ch: 'Часть 2 · B·A', steps: genMul(B, A, { na: 'B', nb: 'A', fin: `BA = ${mm(mmul(B, A))} ≠ AB = ${mm(mmul(A, B))}. Порядок множителей <b>важен</b>!` }) }]) }; },
+  c5e: () => { const A = M('3;4;2'), B = M('5 -2 3'); return { title: 'Столбец · строка и строка · столбец', src: 'практика 2', q: `A = ${mm(A)}, B = ${mm(B)}. Найди AB и BA.`, steps: () => chain([{ ch: 'Часть 1 · A·B (3×1)·(1×3)', steps: genMul(A, B, { fin: 'Столбец × строка = <b>целая матрица 3×3</b>: каждое число — одно произведение.' }) }, { ch: 'Часть 2 · B·A (1×3)·(3×1)', steps: genMul(B, A, { na: 'B', nb: 'A', fin: 'Строка × столбец = <b>одно число</b> (матрица 1×1). Из одних и тех же матриц — совсем разные результаты.' }) }]) }; },
+  c5f: () => { const A = M('1 2 3;4 5 6'), Cm = M('0 -1 1 2;1 -2 0 -1'); return { kind: 'try', tag: 'Реши сам', title: 'Aᵀ · C', src: 'практика 2', q: `A = ${mm(A)}, C = ${mm(Cm)}. Найди A<sup>T</sup>·C.`, ans: { m: mmul(mT(A), Cm), pre: 'A<sup>T</sup>C =' }, hint: 'Сначала A<sup>T</sup> (3×2). Потом (3×2)·(2×4) = 3×4.', steps: () => chain([{ ch: 'Этап 1 · Aᵀ', steps: genTranspose(A) }, { ch: 'Этап 2 · Aᵀ·C', steps: genMul(mT(A), Cm, { na: 'A<sup>T</sup>', nb: 'C', nc: 'A<sup>T</sup>C' }) }]) }; }
+});
+Object.assign(CARDS, {
+  c6a: () => { const A = T_.p10A, A2 = mmul(A, A); return { title: 'A³', src: 'практика 2', q: `A = ${mm(A)}. Найди A³.`, steps: () => chain([{ ch: 'Этап 1 · A² = A·A', steps: genMul(A, A, { nc: 'A²', fin: `A² = ${mm(A2)}. Теперь A³ = A²·A.` }) }, { ch: 'Этап 2 · A³ = A²·A', steps: genMul(A2, A, { na: 'A²', nb: 'A', nc: 'A³' }) }]) }; },
+  c6b: () => { const A = T_.p10A, A2 = mmul(A, A); return { kind: 'try', tag: 'Реши сам', title: '2A² − 3A', src: 'практика 2', q: `A = ${mm(A)}. Найди 2A² − 3A.`, ans: { m: msub(mscale(2, A2), mscale(3, A)), pre: '2A² − 3A =' }, hint: 'A² = A·A уже посчитан в примере выше. Потом 2A², 3A и вычитание.', steps: () => chain([{ ch: 'Этап 1 · A²', steps: genMul(A, A, { nc: 'A²' }) }, { ch: 'Этап 2 · 2A²', steps: genScalar(2, A2, { na: 'A²', nc: '2A²' }) }, { ch: 'Этап 3 · 3A', steps: genScalar(3, A) }, { ch: 'Этап 4 · 2A² − 3A', steps: genAdd(mscale(2, A2), mscale(3, A), { na: '2A²', nb: '3A', sign: -1 }) }]) }; },
+  c7a: () => ({ title: 'Определитель 2×2', src: 'лекция, пример 3', q: `Вычисли ${mm(M('5 2;1 -3'), '|')}.`, steps: () => genDet2(M('5 2;1 -3')) }),
+  c7b: () => ({ kind: 'try', tag: 'Реши сам', title: 'Определитель с корнями', src: 'ДЗ из тетради, №1', q: `Вычисли ${mm([['1+√2', '2−√5'], ['2+√5', '1−√2']], '|')}.`, ans: { n: 0, label: 'Δ =' }, hint: 'Разность квадратов: (a + b)(a − b) = a² − b². Например, (1 + √2)(1 − √2) = 1 − 2.', steps: () => genDet2([['1+√2', '2−√5'], ['2+√5', '1−√2']], { sym: { p1: '1² − (√2)² = 1 − 2 = −1', p2: '2² − (√5)² = 4 − 5 = −1', t1: 'Главная диагональ: (1 + √2)(1 − √2) — это разность квадратов a² − b².', t2: 'Побочная: (2 − √5)(2 + √5) — снова разность квадратов.', res: `Δ = ${C('k3', '(−1)')} − ${C('kr', '(−1)')} = −1 + 1 = ${C('k4', '0')}` }, fin: 'Ответ 0 — совпадает с тетрадью ✓' }) }),
+  c8a: () => ({ title: 'Правило треугольников', src: 'лекция, пример 5', q: `Вычисли ${mm(M('2 1 -2;1 0 -1;5 3 3'), '|')}.`, steps: () => genSarrus(M('2 1 -2;1 0 -1;5 3 3')) }),
+  c8b: () => ({ kind: 'try', tag: 'Реши сам', title: 'Определитель 3×3', src: 'практика 1', q: `Вычисли ${mm(M('-1 3 2;2 8 1;1 1 2'), '|')}.`, ans: { n: -36, label: 'Δ =' }, hint: 'Плюсы: (−1)·8·2, 3·1·1, 2·2·1. Минусы: 2·8·1, 3·2·2, (−1)·1·1.', steps: () => genSarrus(M('-1 3 2;2 8 1;1 1 2')) }),
+  c8c: () => ({ kind: 'try', tag: 'Реши сам', title: 'Уравнение с определителем', src: 'ДЗ из тетради, №2', q: `Реши уравнение ${mm(M('1 1 1;1 1-x 1;1 1 2-x'), '|')} = 0.`, ans: { list: [0, 1], labels: ['x<sub>1</sub> =', 'x<sub>2</sub> ='], unordered: true }, hint: 'Раскрой (1 − x)(2 − x) = x² − 3x + 2. Должно получиться x² − x = 0.', steps: () => genSarrus(M('1 1 1;1 1-x 1;1 1 2-x'), { sym: { p: ['(1−x)(2−x) = x² − 3x + 2', '1', '1'], m: ['1 − x', '2 − x', '1'], fin: [`Δ = (x² − 3x + 2 + 1 + 1) − (1 − x + 2 − x + 1) = (x² − 3x + 4) − (4 − 2x)`, `Δ = x² − 3x + 4 − 4 + 2x = ${C('k4', 'x² − x')}`, `x² − x = 0 &nbsp;→&nbsp; x(x − 1) = 0 &nbsp;→&nbsp; ${C('k3', 'x₁ = 0, x₂ = 1')}`], fint: ['Складываем плюсы и минусы. Минус перед второй скобкой меняет знак у каждого слагаемого.', 'Приводим подобные: −3x + 2x = −x, 4 − 4 = 0.', 'Выносим x за скобку. Произведение равно нулю, когда один из множителей равен нулю. Ответ совпадает с тетрадью ✓'] } }) }),
+  c9a: () => ({ title: 'Минор и дополнение в 4×4', src: 'практика 1: M₂₄', q: `Для ${mm(M('2 3 1 -1;1 2 1 -2;1 1 -2 1;1 2 -2 1'), '|')} найди M<sub>24</sub> и A<sub>24</sub>.`, steps: () => genCofactor(M('2 3 1 -1;1 2 1 -2;1 1 -2 1;1 2 -2 1'), 1, 3) }),
+  c9b: () => ({ kind: 'try', tag: 'Реши сам', title: 'Минор и дополнение', q: `Для ${mm(T_.e18, '|')} найди M<sub>12</sub> и A<sub>12</sub>.`, ans: { list: [6, -6], labels: ['M<sub>12</sub> =', 'A<sub>12</sub> ='] }, hint: 'Вычеркни 1-ю строку и 2-й столбец — останется |3 1; 0 2|. Знак на месте (1,2) — «−».', steps: () => genCofactor(T_.e18, 0, 1) }),
+  c10b: () => ({ title: '4×4 разложением по строке с нулями', src: 'лекция, пример 6', q: `Вычисли ${mm(M('1 0 3 0;2 -1 -1 1;0 4 -1 3;-1 2 0 1'), '|')}, разложив по 1-й строке.`, steps: () => genExpand(M('1 0 3 0;2 -1 -1 1;0 4 -1 3;-1 2 0 1'), { r: 0 }, { why: 'В 1-й строке два нуля — считать придётся всего два минора 3×3.' }) }),
+  c10c: () => ({ kind: 'try', tag: 'Реши сам', title: 'Разложение по строке', src: 'практика 1', q: `Вычисли ${mm(M('0 0 1;4 2 3;4 1 5'), '|')}, разложив по 1-й строке.`, ans: { n: -4, label: 'Δ =' }, hint: 'Два нуля в 1-й строке! Остаётся одно слагаемое: 1·A<sub>13</sub>.', steps: () => genExpand(M('0 0 1;4 2 3;4 1 5'), { r: 0 }) }),
+  c11a: () => { const A = M('1 -2 4;3 5 1;0 -1 7'), N = mscale(-1, A); return { title: 'Все знаки поменяли — что с определителем?', src: 'вопрос с практики 1', q: `Известно, что ${mm(A, '|')} = ${H(det(A))}. Чему равен ${mm(N, '|')}?`, steps: () => genOps(N, [{ factor: [0, -1], t: 'Из 1-й строки выносим (−1).' }, { factor: [1, -1], t: 'Из 2-й строки тоже (−1).' }, { factor: [2, -1], t: 'И из 3-й. Итого (−1)·(−1)·(−1) = (−1)³ = −1.' }, { fin3: 1, t: `Внутри — исходный определитель (${H(det(A))}). <b>Вывод:</b> для 3×3 смена всех знаков меняет знак определителя; для 2×2 и 4×4 — нет, ведь (−1)² = (−1)⁴ = 1.` }], { t0: 'Сменить знак у всех элементов = умножить каждую строку на (−1). По свойству 4 выносим (−1) из каждой строки.' }) }; },
+  c11b: () => { const A = M('1 -2 3;4 0 6;-7 8 9'); return { kind: 'try', tag: 'Реши сам', title: '|Aᵀ| через свойства', src: 'практика 1', q: `A = ${mm(A)}. Найди |A<sup>T</sup>|. Попробуй вынести общие множители.`, ans: { n: 204, label: '|A<sup>T</sup>| =' }, hint: 'По свойству 1 |A<sup>T</sup>| = |A|. Для удобства: из 3-й строки A<sup>T</sup> выносится 3, из 2-й — 2, потом из 2-го столбца — ещё 2.', steps: () => genOps(mT(A), [{ factor: [2, 3] }, { factor: [1, 2] }, { factor: [1, 2], c: 1 }, { fin3: 1 }], { lab: '|Aᵀ|', t0: 'Это A<sup>T</sup>. Сразу можно сказать: |A<sup>T</sup>| = |A| (свойство 1). Но посчитаем с выносом множителей — числа станут маленькими.' }) }; },
+  c12a: () => ({ title: 'Понижение порядка', src: 'лекция, пример 7', q: `Вычисли ${mm(M('-1 -2 1 4;1 3 0 6;2 -2 1 4;3 1 -2 -1'), '|')}.`, steps: () => genOps(M('-1 -2 1 4;1 3 0 6;2 -2 1 4;3 1 -2 -1'), [{ add: [0, 2, -1], t: 'У 1-й и 3-й строки последние три числа одинаковые. Вычтем из 1-й строки 3-ю — получим три нуля!' }, { expand: { r: 0 } }, { add: [2, 0, -2], c: 1, t: 'В 1-й строке уже есть ноль. Сделаем ещё один: к 3-му столбцу прибавим 1-й, умноженный на (−2): 6 − 2·3 = 0.' }, { expand: { r: 0 } }, { fin2: 1 }], { t0: 'Ищем способ быстро получить нули в одной строке.' }) }),
+  c12b: () => ({ title: 'Приведение к треугольному виду', src: 'лекция, пример 8', q: `Вычисли ${mm(M('3 1 2 2;1 -1 2 3;4 2 2 -2;-1 2 2 -3'), '|')}.`, steps: () => genOps(M('3 1 2 2;1 -1 2 3;4 2 2 -2;-1 2 2 -3'), [{ swap: [0, 1], t: 'Хотим 1 в левом верхнем углу — меняем 1-ю и 2-ю строки (знак меняется).' }, { add: [1, 0, -3] }, { add: [2, 0, -4] }, { add: [3, 0, 1] }, { swap: [1, 3], t: 'Во 2-м столбце удобнее «1» из 4-й строки — меняем 2-ю и 4-ю строки (снова «−», итого «+»).' }, { factor: [2, 2] }, { add: [2, 1, -3] }, { add: [3, 1, -4] }, { add: [3, 2, q(-4).div(3)] }, { tri: 1 }]) }),
+  c12c: () => { const A = M('6 0 -1 1;2 -2 0 1;1 1 -3 3;4 1 -1 2'); return { kind: 'try', tag: 'Реши сам', title: 'Определитель 4×4', src: 'ДЗ из тетради, №3', q: `Вычисли ${mm(A, '|')} приведением к треугольному виду. <small class="muted">Если в твоём условии в 1-й строке −7 вместо −1, ответ будет 197 — см. «Проверка тетради».</small>`, ans: { n: 47, label: 'Δ =' }, hint: 'Начни с R1 ↔ R3: тогда в углу будет 1. Дроби во втором столбце — это нормально.', steps: () => genOps(A, autoTriOps(A)) }; },
+  c13a: () => ({ title: 'Обратная 2×2 — быстрое правило', q: `Найди A<sup>−1</sup>, если A = ${mm(M('3 4;1 2'))}.`, steps: () => genInverse2(M('3 4;1 2')) }),
+  c13b: () => ({ title: 'Обратная 3×3 по алгоритму', src: 'лекция, пример 18', q: `Найди A<sup>−1</sup>, если A = ${mm(T_.e18)}.`, steps: () => genInverse(T_.e18) }),
+  c13c: () => { const A = M('1 2 3;0 1 4;5 6 0'); return { kind: 'try', tag: 'Реши сам', title: 'Обратная 3×3', q: `Найди A<sup>−1</sup>, если A = ${mm(A)}.`, ans: { m: inv(A), pre: 'A<sup>−1</sup> =' }, hint: '|A| = 1 — дробей не будет! Не забудь транспонировать таблицу дополнений.', steps: () => genInverse(A) }; },
+  c14a: () => ({ title: 'AX = B', q: `Реши уравнение ${mm(T_.eqA)}·X = ${mm(T_.eqB)}.`, steps: () => chain([{ ch: 'Шаг 1 · A⁻¹', steps: genInverse2(T_.eqA) }, { ch: 'Шаг 2 · X = A⁻¹·B', steps: genMul(inv(T_.eqA), T_.eqB, { na: 'A<sup>−1</sup>', nb: 'B', nc: 'X', fin: `X = ${mm(mmul(inv(T_.eqA), T_.eqB))}. Проверка: A·X = ${mm(mmul(T_.eqA, mmul(inv(T_.eqA), T_.eqB)))} = B ✓` }) }]) }),
+  c14b: () => ({ kind: 'try', tag: 'Реши сам', title: 'XA = B', q: `Реши уравнение X·${mm(T_.eqA)} = ${mm(T_.eqB)}. <small class="muted">Те же матрицы, но X слева!</small>`, ans: { m: mmul(T_.eqB, inv(T_.eqA)), pre: 'X =' }, hint: 'X = B·A<sup>−1</sup> (обратная — справа). A<sup>−1</sup> уже найдена в примере выше.', steps: () => chain([{ ch: 'Шаг 1 · A⁻¹', steps: genInverse2(T_.eqA) }, { ch: 'Шаг 2 · X = B·A⁻¹', steps: genMul(T_.eqB, inv(T_.eqA), { na: 'B', nb: 'A<sup>−1</sup>', nc: 'X', fin: 'Сравни с примером выше: ответ другой, потому что A⁻¹ стоит справа.' }) }]) })
+});
+/* ---------- домашка ---------- */
+const HW = { A1: M('1 4 7;2 5 -8;-3 6 9'), B1: M('-2 1 -1;1 0 2;4 -1 0'), A2: M('1 3;-1 1;2 5'), B2: M('2 -6 1;1 3 -1'), C2: M('-1;2;4') };
+Object.assign(CARDS, {
+  hw1: () => { const { A1: A, B1: B } = HW, B3 = mscale(3, B), Sm = madd(A, B3); return { kind: 'hw', tag: 'ДЗ №1', title: '(A + 3B)²', q: `A = ${mm(A)}, B = ${mm(B)}. Найди (A + 3B)².`, ans: { m: mmul(Sm, Sm), pre: '(A+3B)² =' }, hint: 'Порядок: 3B → A + 3B → умножить результат сам на себя (строка × столбец!). Не возводи элементы в квадрат.', steps: () => chain([{ ch: 'Этап 1 · 3B', steps: genScalar(3, B, { na: 'B' }) }, { ch: 'Этап 2 · A + 3B', steps: genAdd(A, B3, { na: 'A', nb: '3B', nc: 'A+3B' }) }, { ch: 'Этап 3 · (A+3B)·(A+3B)', steps: genMul(Sm, Sm, { na: 'S', nb: 'S', nc: 'S²', fin: `(A + 3B)² = ${mm(mmul(Sm, Sm))} — совпадает с ответом в тетради ✓ <small>(S = A + 3B)</small>` }) }]) }; },
+  hw2: () => { const { A2: A, B2: B, C2: Cm } = HW, AB = mmul(A, B), BC = mmul(B, Cm); return { kind: 'hw', tag: 'ДЗ №2', title: '(AB)·C и A·(BC)', q: `A = ${mm(A)}, B = ${mm(B)}, C = ${mm(Cm)}. Найди (AB)·C и A·(BC).`, ansLabel: 'Ответ (оба выражения равны)', ans: { m: mmul(AB, Cm), pre: '(AB)C = A(BC) =' }, hint: 'Путь через BC короче: BC — это (2×3)·(3×1) = 2×1, потом A·(BC) = (3×2)·(2×1).', steps: () => chain([{ ch: 'Путь 1 · AB', steps: genMul(A, B, { nc: 'AB' }) }, { ch: 'Путь 1 · (AB)·C', steps: genMul(AB, Cm, { na: 'AB', nb: 'C', nc: '(AB)C' }) }, { ch: 'Путь 2 · BC', steps: genMul(B, Cm, { na: 'B', nb: 'C', nc: 'BC' }) }, { ch: 'Путь 2 · A·(BC)', steps: genMul(A, BC, { na: 'A', nb: 'BC', nc: 'A(BC)', fin: `Оба пути дали ${mm(mmul(A, BC))} — это и есть <b>ассоциативность</b>: (AB)C = A(BC). Совпадает с тетрадью ✓` }) }]) }; },
+  hw3a: () => ({ kind: 'hw', tag: 'ДЗ №3а', title: 'A + B', q: `A = ${mm(T_.hw3A)}, B = ${mm(T_.hw3B)}. Найди A + B.`, ans: { m: madd(T_.hw3A, T_.hw3B), pre: 'A + B =' }, steps: () => genAdd(T_.hw3A, T_.hw3B) }),
+  hw3b: () => ({ kind: 'hw', tag: 'ДЗ №3б', title: '2A', q: `A = ${mm(T_.hw3A)}. Найди 2A.`, ans: { m: mscale(2, T_.hw3A), pre: '2A =' }, steps: () => genScalar(2, T_.hw3A) }),
+  hw3c: () => ({ kind: 'hw', tag: 'ДЗ №3в', title: 'A − 3B', q: `A = ${mm(T_.hw3A)}, B = ${mm(T_.hw3B)}. Найди A − 3B.`, ans: { m: msub(T_.hw3A, mscale(3, T_.hw3B)), pre: 'A − 3B =' }, hint: 'Сначала 3B (каждый элемент B × 3), потом A − 3B. Следи за знаками: 5 − (−12) = 17.', steps: () => genCombo(T_.hw3A, T_.hw3B, 1, -3) })
+});
+/* ---------- практика ---------- */
+function textSteps(list) { return list.map(([f, t]) => ({ b: [], f, t })); }
+const PRAC = [
+  () => { const A = M('2 -1 0 7;3 5 -4 1'); return { title: 'Размер и элемент', q: `A = ${mm(A)}. Сколько строк, столбцов и чему равен a<sub>23</sub>?`, ans: { list: [2, 4, -4], labels: ['строк:', 'столбцов:', 'a<sub>23</sub> ='] }, steps: () => genAddress(A, 'A', [[1, 2]]) }; },
+  () => { const A = M('3 -2;1 4'), B = M('-5 2;0 -1'); return { title: 'Сумма', q: `Найди A + B, если A = ${mm(A)}, B = ${mm(B)}.`, ans: { m: madd(A, B) }, steps: () => genAdd(A, B) }; },
+  () => { const A = M('1 0 -2;3 -1 4'), B = M('4 -3 1;2 2 -5'); return { title: '2A − B', q: `Найди 2A − B, если A = ${mm(A)}, B = ${mm(B)}.`, ans: { m: msub(mscale(2, A), B) }, steps: () => genCombo(A, B, 2, -1) }; },
+  () => { const A = M('2 -3 5;0 7 -1'); return { title: 'Транспонирование', q: `Найди A<sup>T</sup>, если A = ${mm(A)}.`, ans: { m: mT(A), pre: 'A<sup>T</sup> =' }, steps: () => genTranspose(A) }; },
+  () => { const A = M('2 -1;3 4'), B = M('1 5;-2 0'); return { title: 'Произведение 2×2', q: `Найди A·B, если A = ${mm(A)}, B = ${mm(B)}.`, ans: { m: mmul(A, B) }, steps: () => genMul(A, B) }; },
+  () => { const A = M('1 2 -1;0 3 2'), B = M('2 1;-1 0;3 4'); return { title: '(2×3)·(3×2)', q: `Найди A·B, если A = ${mm(A)}, B = ${mm(B)}.`, ans: { m: mmul(A, B) }, hint: 'Ответ будет 2×2.', steps: () => genMul(A, B) }; },
+  () => { const A = M('1 2;3 4;5 6'), B = M('1 0;2 1;0 3'); return { title: 'Можно ли умножить?', q: `A = ${mm(A)}, B = ${mm(B)}. Чему равно A·B?`, ans: { choice: ['матрица 3×3', 'матрица 2×2', 'матрица 3×2', 'не существует'], right: 3 }, steps: () => genMul(A, B) }; },
+  () => { const A = M('2;-1'), B = M('3 0 4'); return { title: 'Столбец × строка', q: `Найди A·B, если A = ${mm(A)}, B = ${mm(B)}.`, ans: { m: mmul(A, B) }, hint: '(2×1)·(1×3) = 2×3. Каждое число — одно произведение.', steps: () => genMul(A, B) }; },
+  () => { const A = M('2 1;-3 0'); return { title: 'Квадрат матрицы', q: `Найди A², если A = ${mm(A)}.`, ans: { m: mmul(A, A), pre: 'A² =' }, hint: 'A² = A·A по правилу «строка × столбец», а не квадраты элементов!', steps: () => genMul(A, A, { nc: 'A²' }) }; },
+  () => { const A = M('-4 7;3 -6'); return { title: 'Определитель 2×2', q: `Вычисли ${mm(A, '|')}.`, ans: { n: det(A), label: 'Δ =' }, steps: () => genDet2(A) }; },
+  () => { const A = M('3 -2 1;2 0 4;-1 5 2'); return { title: 'Треугольники', q: `Вычисли ${mm(A, '|')} по правилу треугольников.`, ans: { n: det(A), label: 'Δ =' }, steps: () => genSarrus(A) }; },
+  () => { const A = M('2 0 3;1 0 -4;5 6 1'); return { title: 'Выгодный столбец', q: `Вычисли ${mm(A, '|')}. Подумай, по какому столбцу раскладывать выгоднее всего.`, ans: { n: det(A), label: 'Δ =' }, hint: 'Во 2-м столбце два нуля.', steps: () => genExpand(A, { c: 1 }) }; },
+  () => { const A = M('1 3 -2;4 0 5;-1 2 6'); return { title: 'Алгебраическое дополнение', q: `Для ${mm(A, '|')} найди M<sub>23</sub> и A<sub>23</sub>.`, ans: { list: [det(minor(A, 1, 2)), cof(A, 1, 2)], labels: ['M<sub>23</sub> =', 'A<sub>23</sub> ='] }, steps: () => genCofactor(A, 1, 2) }; },
+  () => ({ title: 'Уравнение 2×2', q: `Реши уравнение ${mm(M('x 2;3 x-1'), '|')} = 0.`, ans: { list: [3, -2], labels: ['x<sub>1</sub> =', 'x<sub>2</sub> ='], unordered: true }, steps: () => genDet2(M('x 2;3 x-1'), { sym: { p1: 'x² − x', p2: '6', res: `x² − x − 6 = 0 &nbsp;→&nbsp; D = 1 + 24 = 25 &nbsp;→&nbsp; x = (1 ± 5)/2 &nbsp;→&nbsp; ${C('k3', 'x₁ = 3, x₂ = −2')}` }, fin: 'Приравниваем определитель к нулю и решаем квадратное уравнение.' }) }),
+  () => { const A = M('1 0 x;1 x-1 2;2 1 -1'); return { title: 'Уравнение 3×3 (из тетради)', src: 'практика 1', q: `Реши уравнение ${mm(A, '|')} = −5.`, ans: { list: [-1, 2], labels: ['x<sub>1</sub> =', 'x<sub>2</sub> ='], unordered: true }, steps: () => genSarrus(A, { sym: { p: ['1 − x', '0', 'x'], m: ['2x² − 2x', '0', '2'], fin: [`Δ = (1 − x + 0 + x) − (2x² − 2x + 0 + 2) = 1 − 2x² + 2x − 2 = ${C('k4', '−2x² + 2x − 1')}`, `−2x² + 2x − 1 = −5 &nbsp;→&nbsp; −2x² + 2x + 4 = 0 &nbsp;→&nbsp; x² − x − 2 = 0`, `(x − 2)(x + 1) = 0 &nbsp;→&nbsp; ${C('k3', 'x₁ = −1, x₂ = 2')}`], fint: ['Складываем плюсы, вычитаем минусы.', 'Переносим −5 влево и делим на −2.', 'Корни: −1 и 2. (Если бы справа было +5, получилось бы x² − x + 3 = 0 — без действительных корней.)'] } }) }; },
+  () => { const A = M('2 0 1 3;1 0 -1 2;3 1 2 0;4 0 2 1'); return { title: 'Определитель 4×4', q: `Вычисли ${mm(A, '|')}.`, ans: { n: det(A), label: 'Δ =' }, hint: 'Посмотри на 2-й столбец: там всего одно ненулевое число.', steps: () => genOps(A, [{ expand: { c: 1 } }, { fin3: 1 }]) }; },
+  () => ({ title: 'Свойства: det(2Aᵀ)', q: 'A — матрица 3×3, |A| = 3. Найди |2A<sup>T</sup>|.', ans: { n: 24, label: '|2A<sup>T</sup>| =' }, hint: 'Двойка выносится из каждой из трёх строк.', steps: () => textSteps([[`|A<sup>T</sup>| = |A| = 3`, 'Транспонирование не меняет определитель (свойство 1).'], [`|2A<sup>T</sup>| = 2·2·2·|A<sup>T</sup>| = 2³·|A<sup>T</sup>|`, 'Умножение матрицы на 2 — это ×2 в <b>каждой</b> из 3 строк. Из каждой строки выносим 2 (свойство 4).'], [`|2A<sup>T</sup>| = 8·3 = ${C('k4', '24')}`, 'Типичная ошибка — ответ 6 (забыли, что множитель выносится из каждой строки).']]) }),
+  () => { const A = M('5 3;3 2'); return { title: 'Обратная 2×2', q: `Найди A<sup>−1</sup>, если A = ${mm(A)}.`, ans: { m: inv(A), pre: 'A<sup>−1</sup> =' }, steps: () => genInverse2(A) }; },
+  () => { const A = M('2 0 1;1 1 0;0 1 1'); return { title: 'Обратная 3×3 (с дробями)', q: `Найди A<sup>−1</sup>, если A = ${mm(A)}. <small class="muted">Дроби вводи как 1/3, −2/3.</small>`, ans: { m: inv(A), pre: 'A<sup>−1</sup> =' }, steps: () => genInverse(A) }; },
+  () => { const A = M('1 2;3 5'), B = M('3;8'); return { title: 'Матричное уравнение', q: `Реши ${mm(A)}·X = ${mm(B)}.`, ans: { m: mmul(inv(A), B), pre: 'X =' }, steps: () => chain([{ ch: 'Шаг 1 · A⁻¹', steps: genInverse2(A) }, { ch: 'Шаг 2 · X = A⁻¹B', steps: genMul(inv(A), B, { na: 'A<sup>−1</sup>', nb: 'B', nc: 'X' }) }]) }; }
+];
+/* ---------- особые блоки ---------- */
+function mmc(A, fn, br) { return `<span class="mm${br === '|' ? ' b' : ''}" style="grid-template-columns:repeat(${A[0].length},auto)">${A.map((r, i) => r.map((x, j) => `<span class="${fn ? fn(i, j) : ''}">${H(x)}</span>`).join('')).join('')}</span>`; }
+function buildTypes() {
+  const host = $('#types'); if (!host) return;
+  const T3 = [
+    ['Квадратная', 'n×n. <span class="k3">Главная диагональ</span> — из левого верхнего угла вниз, <span class="k5">побочная</span> — из правого верхнего.', mmc(M('4 1 7;2 5 0;3 8 6'), (i, j) => (i === j ? 'dg' : i + j === 2 ? 'ad' : ''))],
+    ['Прямоугольная', 'Строк ≠ столбцов, например 2×3.', mmc(M('1 0 -2;4 3 5'))],
+    ['Матрица-строка', 'Одна строка: размер 1×n.', mmc(M('3 -1 4 2'))],
+    ['Матрица-столбец', 'Один столбец: размер m×1.', mmc(M('2;-5;1'))],
+    ['Нулевая O', 'Все элементы — нули. Как число 0: A + O = A.', mmc(M('0 0 0;0 0 0'), () => 'zz')],
+    ['Единичная E', 'Квадратная: единицы на главной диагонали, остальное 0. Как число 1: A·E = A.', mmc(M('1 0 0;0 1 0;0 0 1'), (i, j) => (i === j ? 'dg' : 'zz'))],
+    ['Диагональная', 'Ненулевые числа только на главной диагонали.', mmc(M('3 0 0;0 -2 0;0 0 5'), (i, j) => (i === j ? 'dg' : 'zz'))],
+    ['Треугольная', 'Под (или над) главной диагональю — нули. Её определитель = произведение диагонали.', mmc(M('2 5 1;0 3 7;0 0 -1'), (i, j) => (i === j ? 'dg' : i > j ? 'zz' : ''))],
+    ['Симметричная', 'Не меняется при транспонировании: A<sup>T</sup> = A (отражение относительно диагонали).', mmc(M('1 4 5;4 2 6;5 6 3'), (i, j) => (i === j ? 'dg' : ''))]
+  ];
+  host.innerHTML = T3.map(([n, d, m]) => `<div class="type">${m}<div class="nm">${n}</div><div class="ds">${d}</div></div>`).join('');
+}
+function triPic(pts, color, sign) {
+  const p = ([i, j]) => [18 + j * 32, 18 + i * 32];
+  let s = `<svg viewBox="0 0 100 100" width="92" height="92">`;
+  for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) { const on = pts.some(([a, b]) => a === i && b === j); s += `<circle cx="${18 + j * 32}" cy="${18 + i * 32}" r="${on ? 7 : 4.5}" fill="${on ? color : 'rgba(255,255,255,.18)'}"/>`; }
+  const P3 = pts.map(p);
+  s += `<path d="M${P3.map(x => x.join(' ')).join(' L')}${pts[0][0] === pts[0][1] || (pts[0][0] === 0 && pts[0][1] === 2 && pts[1][0] === 1 && pts[1][1] === 1) ? '' : ' Z'}" fill="${color}" fill-opacity=".1" stroke="${color}" stroke-width="2.5" stroke-linejoin="round" opacity=".85"/></svg>`;
+  return `<div style="display:inline-flex;flex-direction:column;align-items:center;gap:2px">${s}<span class="mono ${sign === '+' ? 'k3' : 'kr'}" style="font-size:12px">${sign}</span></div>`;
+}
+function buildTriPics() {
+  const host = $('#triPics'); if (!host) return;
+  host.innerHTML = `<div class="card" style="margin:0;text-align:center"><b class="k3">Со знаком «+»</b><div style="display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin-top:8px">${SAR_P.map(p => triPic(p, '#57e3a4', '+')).join('')}</div><small class="muted">главная диагональ и два треугольника «вдоль» неё</small></div>` +
+    `<div class="card" style="margin:0;text-align:center"><b class="kr">Со знаком «−»</b><div style="display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin-top:8px">${SAR_M.map(p => triPic(p, '#ff5f78', '−')).join('')}</div><small class="muted">побочная диагональ и два треугольника вдоль неё</small></div>`;
+}
+function buildChess() {
+  const host = $('#chessPic'); if (!host) return;
+  const g = el('div', 'chess'); g.style.gridTemplateColumns = 'repeat(4,34px)';
+  const info = el('div', 'muted', 'Наведи на клетку'); info.style.cssText = 'font-size:13.5px;margin-top:8px;min-height:22px';
+  for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) {
+    const s = el('span', (i + j) % 2 ? 'mi' : 'pl', (i + j) % 2 ? '−' : '+');
+    s.onmouseenter = s.onclick = () => { $$('span', g).forEach(x => x.classList.remove('sel')); s.classList.add('sel'); info.innerHTML = `место (${i + 1}, ${j + 1}): ${i + 1} + ${j + 1} = ${i + j + 2} → ${(i + j) % 2 ? '<b class="kr">нечётное, «−»</b>' : '<b class="k3">чётное, «+»</b>'}`; };
+    g.append(s);
+  }
+  host.append(g, info);
+}
+function wShop(host) {
+  wMulSand(host, { A: M('2 1 3;0 4 1'), B: M('120 100;40 60;80 70'), rlA: ['Аня', 'Боря'], clA: ['кофе', 'булка', 'сок'], rlB: ['кофе', 'булка', 'сок'], clB: ['маг. 1', 'маг. 2'], title: 'Покупки × цены = сколько заплатит каждый', sub: 'Слева — сколько чего купил каждый (строки — люди). В середине — цены (столбцы — магазины). Можно менять числа.', capR: 'итог, ₽', explain: (i, j, v) => `<b>${['Аня', 'Боря'][i]}</b> в <b>магазине ${j + 1}</b> заплатит <b class="k3">${H(v)} ₽</b>` });
+}
+function wExpandSwitch(host) {
+  const A = M('3 4 -5;8 7 -2;2 -1 8');
+  const box = el('div', 'ex'); host.append(box);
+  box.innerHTML = `<div class="ex-head"><span class="ex-tag">Пример</span><span class="ex-title">Раскладывай по чему хочешь — ответ один</span><span class="ex-src">практика 1</span></div><div class="ex-q">Вычисли ${mm(A, '|')}. Выбери строку или столбец для разложения (в тетради раскладывали по 2-му столбцу):</div>`;
+  const chips = el('div', 'chips'); chips.style.padding = '0 20px';
+  const area = el('div'); box.append(chips, area);
+  const opts = [['1-я строка', { r: 0 }], ['2-я строка', { r: 1 }], ['3-я строка', { r: 2 }], ['1-й столбец', { c: 0 }], ['2-й столбец', { c: 1 }], ['3-й столбец', { c: 2 }]];
+  const build = line => { area.innerHTML = ''; new Walk(area, genExpand(A, line, { fin: 'Ответ 0. Попробуй другую строку/столбец кнопками сверху — получится снова 0. Ноль не случаен: 3-я строка = 2-я − 2·(1-я): (8, 7, −2) − 2·(3, 4, −5) = (2, −1, 8). Если из R3 вычесть R2 и прибавить 2·R1 (свойство 6), получится нулевая строка → Δ = 0 (свойство 5).' })); };
+  opts.forEach(([t, line], k) => { const c = el('button', 'chip' + (k === 4 ? ' on' : ''), t); c.onclick = () => { [...chips.children].forEach(x => x.classList.remove('on')); c.classList.add('on'); build(line); }; chips.append(c); });
+  build({ c: 1 });
+}
+/* ---------- инициализация ---------- */
+const W = { explorer: wExplorer, mirror: wMirror, size: wSize, shop: wShop, sand: h => wMulSand(h), quiz: wQuiz, geo: wGeo, minor: wMinor, expandSwitch: wExpandSwitch, lab: wPropLab, trainer: wTrainer };
+const SEC_IDS = {}; // секция → id решаемых задач
+function initAll() {
+  hydrateMM();
+  buildTypes(); buildTriPics(); buildChess(); heroAnim();
+  $$('[data-w]').forEach(ph => { const f = W[ph.dataset.w]; if (f) try { f(ph); } catch (e) { console.error(e); ph.textContent = 'Ошибка виджета: ' + e.message; } });
+  // карточки
+  $$('[data-card]').forEach(ph => {
+    const f = CARDS[ph.dataset.card]; if (!f) return;
+    const o = f(); o.id = ph.dataset.card;
+    const sec = ph.closest('section'); if (o.kind && o.kind !== 'ex' && sec) (SEC_IDS[sec.id] = SEC_IDS[sec.id] || []).push(o.id);
+    try { Card(ph, o); } catch (e) { console.error(e); ph.textContent = 'Ошибка: ' + e.message; }
+  });
+  // практика
+  const pl = $('#pracList');
+  PRAC.forEach((f, k) => { const o = f(); o.kind = 'task'; o.tag = 'Задача ' + (k + 1); o.id = 'pr-' + (k + 1); (SEC_IDS['s-prac'] = SEC_IDS['s-prac'] || []).push(o.id); const ph = el('div'); pl.append(ph); try { Card(ph, o); } catch (e) { console.error(e); ph.textContent = 'Ошибка: ' + e.message; } });
+  buildToc(); updateProgress(); onSolvedHooks.push(() => { updateProgress(); toast('✓ Задача засчитана'); });
+  const rp = $('#resetProg'); if (rp) rp.onclick = e => { e.preventDefault(); if (confirm('Сбросить отметки о решённых задачах?')) { store.solved = {}; save(); location.reload(); } };
+}
+function buildToc() {
+  const list = $('#tocList'), map = $('#map'); let grp = '';
+  $$('section[data-toc]').forEach(s => {
+    if (s.dataset.grp !== grp) { grp = s.dataset.grp; list.append(el('div', 'grp', grp)); }
+    const a = el('a', '', `<span class="n"><span>${s.dataset.no}</span></span>${s.dataset.toc}`); a.href = '#' + s.id; a.dataset.sec = s.id;
+    a.onclick = () => { $('#toc').classList.remove('open'); $('#scrim').classList.remove('on'); };
+    list.append(a);
+    if (map && s.id !== 's0') { const sub = $('.sec-sub', s); const m = el('a', '', `<div class="no">${String(s.dataset.no).padStart(2, '0')}</div><div class="tt">${s.dataset.toc}</div><div class="ds">${sub ? sub.innerHTML : ''}</div>`); m.href = '#' + s.id; map.append(m); }
+  });
+  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) $$('#tocList a').forEach(a => a.classList.toggle('on', a.dataset.sec === e.target.id)); }), { rootMargin: '-40% 0px -55% 0px' });
+  $$('section[data-toc]').forEach(s => io.observe(s));
+  $('#tocBtn').onclick = () => { $('#toc').classList.toggle('open'); $('#scrim').classList.toggle('on'); };
+  $('#scrim').onclick = () => { $('#toc').classList.remove('open'); $('#scrim').classList.remove('on'); };
+  addEventListener('scroll', () => { const h = document.documentElement; $('#bar').style.width = (h.scrollTop / (h.scrollHeight - h.clientHeight) * 100) + '%'; }, { passive: true });
+}
+function updateProgress() {
+  const all = Object.values(SEC_IDS).flat(), done = all.filter(id => store.solved[id]).length;
+  $('#tprog').innerHTML = `Решено задач: <b>${done}</b> из ${all.length}`;
+  $('#tbar').style.width = (all.length ? done / all.length * 100 : 0) + '%';
+  $$('#tocList a').forEach(a => { const ids = SEC_IDS[a.dataset.sec]; a.classList.toggle('done', !!ids && ids.length > 0 && ids.every(id => store.solved[id])); });
+  const pr = SEC_IDS['s-prac'] || [], pd = pr.filter(id => store.solved[id]).length;
+  if ($('#pracScore')) { $('#pracScore').textContent = `${pd} / ${pr.length}`; $('#pracBar').style.width = (pd / pr.length * 100) + '%'; }
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initAll); else initAll();
+</script></body></html>
